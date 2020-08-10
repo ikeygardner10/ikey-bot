@@ -11,7 +11,6 @@ Feel free to contact me with any questions, or issues.
 
 ### Links
 
-- [Home Page](https://ikeygardner10.github.io/)
 - [Commands](https://ikeygardner10.github.io/)
 - [Bot Invite]()
 - [Email](mailto:ikeygardner10@gmail.com)
