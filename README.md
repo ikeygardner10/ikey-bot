@@ -6,6 +6,8 @@ Suggestions for commands can be put in the support server.
 Commands can be found on the website, along with other links.
 Feel free to contact me with any questions, or issues.
 
+https://discordapp.com/api/guilds/413532909400752139/widget.json
+
 ### Links
 
 - [Home Page](https://ikeygardner10.github.io/)
