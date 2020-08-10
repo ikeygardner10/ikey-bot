@@ -16,10 +16,6 @@ const client = new Client({
 const config = require('./data/owner/config.json');
 client.config = config;
 
-const Keyv = require('keyv');
-const prefixes = new Keyv('sqlite://./data/guild/prefixes.sqlite');
-client.prefixes = prefixes;
-
 const mysql = require('mysql2');
 const conPool = mysql.createPool({
 	connectionLimit: 5,

@@ -12,7 +12,7 @@ const permissionsObject = {
 };
 const checkPrefix = 'SELECT `prefix` FROM `guildsettings` WHERE `guildID`= ?';
 const updatePrefix = 'UPDATE `guildsettings` SET `prefix`= ? WHERE `guildID`= ?';
-const addGuildSettings = 'INSERT INTO `guildsettings` (`guildID`, `prefix`, `maxFamilySize`, `allowIncest`, `tagDisable`, `nsfwDisable`) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `prefix`= VALUES (`prefix`), `allowIncest`= VALUES (`allowIncest`), `tagDisable`= VALUES (`tagDisable`), `nsfwDisable`= VALUES (`nsfwDisable`)';
+const addGuildSettings = 'INSERT INTO `guildsettings` (`guildID`, `prefix`, `maxFamilySize`, `allowIncest`) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE `prefix`= VALUES (`prefix`)';
 const checkChannel = 'SELECT `channelID` FROM `disabledchannels` WHERE `guildID`= ? AND `channelID`= ?';
 
 module.exports = async (client, message) => {
@@ -22,8 +22,6 @@ module.exports = async (client, message) => {
 
 	// If someone mentions the bot, return
 	if(message.mentions.users.first() && message.mentions.users.first().id === client.user.id) return;
-
-	if(message.guild.id !== '729507309591461971') return;
 
 	const SQLpool = client.conPool.promise();
 
@@ -50,7 +48,7 @@ module.exports = async (client, message) => {
 			return message.channel.send(`Your server prefix is \`${guildPrefix[0].prefix}\`\nUse \`${config.defaultPrefix}prefixreset\` to reset to \`${config.defaultPrefix}\``);
 		}
 	} else {
-		await SQLpool.execute(addGuildSettings, [message.guild.id, config.defaultPrefix, 250, false, false, false])
+		await SQLpool.execute(addGuildSettings, [message.guild.id, config.defaultPrefix, 250, false])
 			.then(() => prefix = `${config.defaultPrefix}`)
 			.catch((error) => {
 				console.error(`[MESSAGE] ${error.stack}`);

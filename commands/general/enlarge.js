@@ -1,5 +1,5 @@
 const utf8 = require('utf8');
-const emojiList = require('../../data/full-emoji-list.json');
+const emojiList = require('../../data/temp/full-emoji-list.json');
 
 module.exports = {
 	config: {
