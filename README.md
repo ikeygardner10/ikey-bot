@@ -6,7 +6,7 @@ Suggestions for commands can be put in the support server.
 Commands can be found on the website, along with other links.
 Feel free to contact me with any questions, or issues.
 
-https://discordapp.com/api/guilds/413532909400752139/widget.json
+<iframe src="https://discordapp.com/widget?id=413532909400752139&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
 
 ### Links
 
