@@ -19,4 +19,4 @@ Feel free to contact me with any questions, or issues.
 - [Node.js v12](https://nodejs.org/en/)
 - [MySQL](https://www.mysql.com/)
 - Help from: [Discord.js Support](https://discord.com/invite/bRCvFy9/)
-- Lots of other peoples modules: [Full List]()
+- Lots of other peoples modules: [Full List](https://github.com/ikeygardner10/ikey-bot/blob/master/data/temp/nodemodules.md)
