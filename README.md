@@ -6,13 +6,13 @@ Suggestions for commands can be put in the support server.
 Commands can be found on the website, along with other links.
 Feel free to contact me with any questions, or issues.
 
-<iframe src="https://discordapp.com/widget?id=413532909400752139&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
+![Honey, I'm Home](https://discordapp.com/api/guilds/[SERVER ID]/widget.png?style=banner2)
 
 ### Links
 
 - [Home Page](https://ikeygardner10.github.io/)
 - [Commands](https://ikeygardner10.github.io/)
-- [Support Server](https://discord.jsGQh6XEk/)
+- [Bot Invite]()
 - [Email](mailto:ikeygardner10@gmail.com)
 - [Donate](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CXU2L6XUT2YWN&source=url)
 
