@@ -22,3 +22,8 @@ Feel free to contact me with any questions, or issues.
 - [MySQL](https://www.mysql.com/)
 - Help from: [Discord.js Support](https://discord.com/invite/bRCvFy9/)
 - Lots of other peoples modules: [Full List](https://github.com/ikeygardner10/ikey-bot/blob/master/data/temp/nodemodules.md)
+
+
+### DISCLAIMER
+Please feel reuse code as you need, though I don't recommend it if you don't understand what it does (or better, WHY it does).
+I took pieces from many projects, mostly ideas, but sometimes code for the parts I couldn't write orginally. I regretted it.
