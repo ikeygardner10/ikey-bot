@@ -1,12 +1,13 @@
 # Ikey Bot
 
-### General purpose & user interaction bot
+## General purpose & user interaction bot
 
 Suggestions for commands can be put in the support server.
 Commands can be found on the website, along with other links.
 Feel free to contact me with any questions, or issues.
 
 [![Honey, I'm Home](https://discordapp.com/api/guilds/413532909400752139/widget.png?style=banner2)](https://discord.gg/weX9DR)
+
 
 ### Links
 
@@ -22,6 +23,12 @@ Feel free to contact me with any questions, or issues.
 - [MySQL](https://www.mysql.com/)
 - Help from: [Discord.js Support](https://discord.com/invite/bRCvFy9/)
 - Lots of other peoples modules: [Full List](https://github.com/ikeygardner10/ikey-bot/blob/master/data/temp/nodemodules.md)
+
+### Reviews
+![Review1](https://imgur.com/wycdTdJ.png)
+![Review2](https://imgur.com/aedb7J2.png)
+![Review3]()
+![Review4]()
 
 
 ### DISCLAIMER
