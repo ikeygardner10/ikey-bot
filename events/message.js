@@ -1,5 +1,5 @@
 /* eslint-disable quotes */
-const config = require('../jsonFiles/config.json'); let prefix;
+const config = require('../data/owner/config.json'); let prefix;
 const active = new Map(); const ops = { active: active };
 const { Collection } = require('discord.js'); const cooldowns = new Collection();
 const permissionsObject = {
@@ -22,6 +22,8 @@ module.exports = async (client, message) => {
 
 	// If someone mentions the bot, return
 	if(message.mentions.users.first() && message.mentions.users.first().id === client.user.id) return;
+
+	if(message.guild.id !== '729507309591461971') return;
 
 	const SQLpool = client.conPool.promise();
 

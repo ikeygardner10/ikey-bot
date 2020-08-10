@@ -4,19 +4,26 @@
   "description": "The final, updated version of IkeyBot.",
   "main": "index.js",
   "scripts": {
-    "test": "xo"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ikeygardner10/IkeyBot.git"
+    "url": "git+https://github.com/ikeygardner10/ikey-bot.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "ikey",
+    "discord",
+    "discord.js",
+    "bot",
+    "nodejs"
+  ],
+  "author": "ikeygardner10",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/ikeygardner10/IkeyBot/issues"
+    "url": "https://github.com/ikeygardner10/ikey-bot/issues"
   },
-  "homepage": "https://github.com/ikeygardner10/IkeyBot#readme",
+  "homepage": "https://github.com/ikeygardner10/ikey-bot#readme",
   "dependencies": {
     "@keyv/sqlite": "^2.0.2",
     "better-sqlite3": "^7.1.0",
@@ -34,8 +41,7 @@
     "nodemon": "^2.0.4",
     "request": "^2.88.2",
     "shortid": "^2.2.15",
-    "utf8": "^3.0.0",
-    "wtf-8": "^1.0.1"
+    "utf8": "^3.0.0"
   },
   "devDependencies": {}
 }

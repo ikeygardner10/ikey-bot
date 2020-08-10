@@ -13,7 +13,7 @@ const client = new Client({
 	cloneLevel: 'deep',
 });
 
-const config = require('./jsonFiles/config.json');
+const config = require('./data/owner/config.json');
 client.config = config;
 
 const Keyv = require('keyv');
@@ -27,7 +27,7 @@ const conPool = mysql.createPool({
 	host: 'localhost',
 	user: 'ikeybot',
 	password: config.mySQLpw,
-	database: 'test',
+	database: 'ikeybot',
 	charset: 'utf8mb4',
 	Promise: bluebird,
 });
