@@ -1,0 +1,210 @@
+/* eslint-disable no-undef */
+/* eslint-disable no-unused-vars */
+/* eslint-disable prefer-const */
+const fs = require('fs');
+const request = require('request');
+const utf8 = require('utf8');
+
+module.exports = {
+	config: {
+		name: 'createtag',
+		aliases: ['ct', 'ctag'],
+		usage: '<tag name> <tag content> <image>',
+		cooldown: 8,
+		category: 'tag',
+		permissions: 'None',
+		args: true,
+		description: 'Create a tag, global or server',
+	},
+	execute: async (client, message, args) => {
+
+		try {
+
+			const [tagname, ...restArgs] = args;
+			let attachment = message.attachments;
+			const tagcontent = restArgs.join(' ');
+
+			if(!tagname) return message.channel.send(':mag: No tag name');
+			if(!tagcontent && !attachment.first()) return message.channel.send(':mag: No tag content');
+
+			if(tagname.length > 30) return message.channel.send('Tag name cannot exceed 30 characters');
+			if(tagcontent.length > 1950) return message.channel.send('Tag content cannot exceed 1950 characters');
+
+			let ntn = utf8.encode(tagname);
+			ntn = utf8.decode(ntn);
+			ntn = ntn.replace(/@everyone/g, '@\u200beveryone');
+			ntn = ntn.replace(/@here/g, '@\u200bhere');
+			ntn = ntn.replace(/<@&(.*?)>/g, '@\u200brole');
+			ntn = ntn.replace(/'/g, '\'\'');
+			ntn = ntn.replace(/"/g, '\'\'');
+			let ntc = utf8.encode(tagcontent);
+			ntc = utf8.decode(ntc);
+			ntc = ntc.replace(/@everyone/g, '@\u200beveryone');
+			ntc = ntc.replace('@here', '@\u200bhere');
+			ntc = ntc.replace(/<@&(.*?)>/g, '@\u200brole');
+			ntc = ntc.replace(/'/g, '\'\'');
+			ntc = ntc.replace(/"/g, '\'\'');
+
+			const cgt = 'SELECT tag FROM tags WHERE tag=? AND guildID IS NULL';
+			const cst = 'SELECT tag FROM tags WHERE tag=? AND guildID=?';
+			let agt = `INSERT INTO tags (tag, content, userID, guildCreated) VALUES ('${ntn}', '${ntc}', '${message.author.id}', '${message.guild.id}')`;
+			let ast = `INSERT INTO tags (tag, content, userID, guildID) VALUES ('${ntn}', '${ntc}', '${message.author.id}', '${message.guild.id}')`;
+
+			if(attachment.size > 0) {
+				if(attachment.size > 1) return message.channel.send(':paperclip: Invalid attachment (MAX. 1 IMG)');
+				if(attachment.first().size > 8388608) return message.channel.send(':paperclip: Invalid attachment (MAX. 8MB IMG SIZE)');
+				if(attachment.first().name.length > 500) return message.channel.send(':paperclip: Invalid attachment (MAX. 500 CHAR IMG NAME )');
+
+				attachment = message.attachments.first().name;
+				const extension = attachment.substring(attachment.lastIndexOf('.'), attachment.length);
+
+				let filepath = './images/Tags/';
+				const imagename = `${ntn}+${attachment}`;
+				switch(extension) {
+				case '.png': case '.gif': case '.jpg': case '.jpeg':
+					agt = `INSERT INTO tags (tag, content, imageURL, userID, guildCreated) VALUES ('${ntn}', '${ntc}', './images/Tags/Global/${imagename}', '${message.author.id}', '${message.guild.id}')`;
+					ast = `INSERT INTO tags (tag, content, imageURL, userID, guildID) VALUES ('${ntn}', '${ntc}', './images/Tags/Server/${imagename}', '${message.author.id}', '${message.guild.id}')`;
+					break;
+				default: return message.channel.send(':paperclip: Invalid attachment (PNG/GIF/JPG ONLY)');
+				}
+			}
+
+			client.con.getConnection(async (err, connection) => {
+				console.info('[CREATE TAG] Connected to database');
+				if(err) {
+					connection.release();
+					console.info('[CREATE TAG] Disconnected from database');
+					console.error('[CREATE TAG] An error occured:');
+					console.error(`[CREATE TAG] ${err.stack}`);
+					return message.channel.send(`**:exclamation: An error occured:**\n\`\`\`${err}\`\`\``);
+				}
+
+				const imageDownload = async (url) => {
+					attachment = message.attachments.first().name;
+					const imagename = `${ntn}+${attachment}`;
+					const imagepath = `${filepath}${imagename}`;
+					console.info(`[CREATE TAG] Downloading image: ${imagename}`);
+					request.get(url)
+						.on('error', console.error)
+						.pipe(fs.createWriteStream(`${imagepath}`));
+					console.success(`[CREATE TAG] Image downloaded: ${imagename}`);
+				};
+
+				const checkGlobalTag = async () => {
+					return new Promise((resolve, reject) => {
+						console.info(`[CREATE TAG] Checking for existing global tag: ${ntn}`);
+						connection.query(cgt, [ntn], async (err, rows) => {
+							if(err) {
+								console.error('[CREATE TAG] An error occured:');
+								console.error(`[CREATE TAG] ${err.stack}`);
+								reject({ message: `**:exclamation: An error occured:**\n\`\`\`${err}\`\`\`` });
+							}
+							if(rows[0] === undefined) {
+								addGlobalTag()
+									.then((success) => {
+										console.success(`[CREATE TAG] Global tag successfully added: ${ntn}`);
+										resolve({ message: success.message });
+									})
+									.catch((fail) => {
+										reject({ message: fail.message });
+									});
+							} else if (rows[0] !== undefined) {
+								console.info(`[CREATE TAG] Existing global tag found: ${ntn}`);
+								checkServerTag()
+									.then((success) => {
+										console.success(`[CREATE TAG] Server tag successfully added: ${ntn}`);
+										resolve({ message: success.message });
+									}).catch((fail) => {
+										reject({ message: fail.message });
+									});
+							} else {
+								console.error(rows[0]);
+								console.error(`[CREATE TAG] No tag created: ${ntn}`);
+								reject({ message: `:lock: Couldn't create tag **${ntn}**.` });
+							}
+						});
+					});
+				};
+
+				const checkServerTag = async () => {
+					return new Promise((resolve, reject) => {
+						console.info(`[CREATE TAG] Checking for existing server tag: ${ntn}`);
+						connection.query(cst, [ntn, message.guild.id], async (err, rows) => {
+							if(err) {
+								console.error('[CREATE TAG] An error occured:');
+								console.error(`[CREATE TAG] ${err.stack}`);
+								reject({ message: `**:exclamation: An error occured:**\n\`\`\`${err}\`\`\`` });
+							}
+							if(rows[0] === undefined) {
+								addServerTag()
+									.then((success) => {
+										resolve({ message: success.message });
+									})
+									.catch((fail) => {
+										reject({ message: fail.message });
+									});
+							} else {
+								console.info(`[CREATE TAG] Existing server tag found: ${ntn}`);
+								console.error(`[CREATE TAG] No tag created: ${ntn}`);
+								reject({ message: `:lock: Tag **${ntn}** already in use.` });
+							}
+						});
+					});
+				};
+
+				const addGlobalTag = async () => {
+					return new Promise((resolve, reject) => {
+						console.info(`[CREATE TAG] No global tag found: ${ntn}`);
+						console.info(`[CREATE TAG] Adding global tag: ${ntn}`);
+						if(message.attachments.first()) {
+							filepath = './images/Tags/Global/';
+							imageDownload(message.attachments.first().url);
+						}
+						connection.query(agt, [ntn, ntc, message.author.id, message.guild.id], async (err) => {
+							if(err) {
+								console.error('[CREATE TAG] An error occured:');
+								console.error(`[CREATE TAG] ${err.stack}`);
+								reject({ message: `**:exclamation: An error occured:**\n\`\`\`${err}\`\`\`` });
+							}
+							resolve({ message: `:scroll: Global tag **${ntn}** created` });
+						});
+					});
+				};
+
+				const addServerTag = async () => {
+					return new Promise((resolve, reject) => {
+						console.info(`[CREATE TAG] No server tag found: ${ntn}`);
+						console.info(`[CREATE TAG] Adding server tag: ${ntn}`);
+						if(message.attachments.first()) {
+							filepath = './images/Tags/Server/';
+							imageDownload(message.attachments.first().url);
+						}
+						connection.query(ast, [ntn, ntc, message.author.id, message.guild.id], async (err) => {
+							if(err) {
+								console.error('[CREATE TAG] An error occured:');
+								console.error(`[CREATE TAG] ${err.stack}`);
+								reject({ message: `**:exclamation: An error occured:**\n\`\`\`${err}\`\`\`` });
+							}
+							resolve({ message: `:scroll: Server tag **${ntn}** created` });
+						});
+					});
+				};
+
+				return checkGlobalTag()
+					.then((success) => {
+						connection.release();
+						console.info('[VIEW TAG] Disconnected from database');
+						return message.channel.send(success.message);
+					}).catch((fail) => {
+						connection.release();
+						console.info('[VIEW TAG] Disconnected from database');
+						return message.channel.send(fail.message);
+					});
+			});
+
+		} catch(error) {
+			console.error(error.stack);
+			return message.channel.send(`**:exclamation:**  An error occured:**\n\`\`\`${error}\`\`\``);
+		}
+	},
+};

@@ -1,0 +1,59 @@
+{
+    "ONGOING DB STRUCUTRE": {
+        "engine": "InnoDB",
+        "charset": "utfmb4",
+        "tables": {
+            "counts": {
+                "id": "int - not null / unique / auto inc",
+                "trackedID": "bigint - not null / unique", // this is a global ID, all counts are global THIS IS NOT NEEDED! HAVE TWO PRIMARY KEYS AS USER AND MEMBER
+                "userID": "bigint - primary key / not null",
+                "memberID": "bigint - primary key / not null",
+                "messageCount": "int - not null"
+            },
+            "guilds": {
+                "id": "int - not null / unique / auto inc",
+                "guildID": "bigint - primary key / not null / unique",
+                "name": "varchar(100) - not null",
+                "joined": "boolean - not null",
+                "ownerID": "bigint - not null",
+                "ownerName": "varchar(32) - not null",
+                "members": "int - not null",
+                "region": "varchar(12)",
+                "createdAt": "varchar(70)"
+            },
+            "tags": {
+                "id": "int - primary key / not null / unique / auto inc",
+                "tag": "varchar(30) - not null",
+                "content": "varchar(1950) - defaults to null",
+                "imageURL": "varchar(25) - defaults to null",
+                "userID": "bigint - not null",
+                "guildID": "bigint - defaults to null",
+                "guildCreated": "bigint - defaults to null"
+            },
+            "marriage": {
+                "id": "int - not null / unique / auto inc",
+                "userID": "bigint - primary key / not null",
+                "partnerID": "bigint - not null",
+                "marriageID": "int - not null", // semi-unique, two users will match per guildID max (delete divorced pairs)
+                "guildID": "bigint - primary key / not null",
+                "createdAt": "timestamp"
+            },
+            "parents": {
+                "id": "int - not null / unique / auto inc",
+                "childID": "bigint - primary key / not null / unique",
+                "parentID": "bigint - not null",
+                "guildID": "bigint - primary key / not null",
+                "createdAt": "timestamp"
+            },
+            "guildsettings": {
+                "id": "int - not null/ unique / auto inc",
+                "guildID": "bigint - primary key / not null / unique",
+                "prefix": "varchar(1) defaults to $",
+                "allowIncest": "boolean - not null / defaults to false",
+                "maxFamilySize": "int - not null / defaults to 250",
+                "tagDisable": "boolean - not null / defaults to false",
+                "nsfwDisable": "boolean - not null / defaults to false"
+            }
+        }
+    }
+}

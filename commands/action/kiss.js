@@ -1,0 +1,62 @@
+const { MessageEmbed } = require('discord.js');
+
+module.exports = {
+	config: {
+		name: 'kiss',
+		noalias: 'No Aliases',
+		aliases: [],
+		usage: '<@user>',
+		cooldown: 5,
+		category: 'action',
+		permissions: '',
+		args: true,
+		nsfw: false,
+		description: 'Kiss a user',
+	},
+	execute: async (client, message) => {
+
+		const member = message.mentions.members.first(); if(!member) return('`Invalid (NO USER)`');
+		const kissArray = client.imageArrays.kiss; const file = kissArray[(Math.floor(Math.random() * kissArray.length))];
+		let messageCount = 1;
+
+		const check = 'SELECT `messageCount` FROM `kisscount` WHERE `userID`= ? AND `memberID`= ?';
+		const addUpdate = 'INSERT INTO `kisscount` (`userID`, `memberID`, `messageCount`) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE `messageCount`= `messageCount`+1';
+
+		const kEmbed = new MessageEmbed()
+			.setTimestamp()
+			.setColor(0xFFFFFA);
+
+		switch(member.id) {
+		case message.author.id:
+			kEmbed.setDescription(`${message.author}... :clown:`);
+			kEmbed.attachFiles('./images/self/kiss.gif');
+			kEmbed.setImage('attachment://kiss.gif');
+			break;
+		default:
+			kEmbed.setDescription(`${message.author} kissed ${member}`);
+			kEmbed.attachFiles(`./images/kiss/${file}`);
+			kEmbed.setImage(`attachment://${file}`);
+		}
+
+		try {
+			const SQLpool = client.conPool.promise();
+			const [rows] = await SQLpool.query(check, [message.author.id, member.id]);
+			if(rows[0] !== undefined) {
+				messageCount = rows[0].messageCount + 1;
+				kEmbed.setFooter(`[${messageCount} times]`, client.user.avatarURL());
+				message.channel.send(kEmbed);
+				return SQLpool.execute(addUpdate, [message.author.id, member.id, 1])
+					.then(() => console.success('[KISS CMD] messageCount record updated'))
+					.catch((error) => console.error(`[KISS CMD] ${error.stack}`));
+			} else {
+				kEmbed.setFooter(`[${messageCount} times]`, client.user.avatarURL());
+				message.channel.send(kEmbed);
+				return SQLpool.execute(addUpdate, [message.author.id, member.id, 1])
+					.then(() => console.success('[KISS CMD] messageCount record added'))
+					.catch((error) => console.error(`[KISS CMD] ${error.stack}`));
+			}
+		} catch(error) {
+			console.error(`[KISS CMD] ${error.stack}`);
+			return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+		}
+	} };

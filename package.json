@@ -1,0 +1,40 @@
+{
+  "name": "IkeyBot",
+  "version": "1.0.0",
+  "description": "The final, updated version of IkeyBot.",
+  "main": "index.js",
+  "scripts": {
+    "test": "xo"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ikeygardner10/IkeyBot.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ikeygardner10/IkeyBot/issues"
+  },
+  "homepage": "https://github.com/ikeygardner10/IkeyBot#readme",
+  "dependencies": {
+    "@keyv/sqlite": "^2.0.2",
+    "better-sqlite3": "^7.1.0",
+    "bluebird": "^3.7.2",
+    "chalk": "^4.1.0",
+    "discord-blackhole.logger": "^1.1.6",
+    "discord.js": "^12.2.0",
+    "enmap": "^5.3.1",
+    "eslint": "^7.3.0",
+    "lodash": "^4.17.19",
+    "moment": "^2.27.0",
+    "ms": "^2.1.2",
+    "mysql": "^2.18.1",
+    "mysql2": "^2.1.0",
+    "request": "^2.88.2",
+    "shortid": "^2.2.15",
+    "utf8": "^3.0.0",
+    "wtf-8": "^1.0.1"
+  },
+  "devDependencies": {}
+}

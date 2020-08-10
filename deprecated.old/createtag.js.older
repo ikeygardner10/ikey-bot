@@ -1,0 +1,209 @@
+/* eslint-disable quotes */
+// Grab required modules
+const fs = require('fs');
+const request = require('request');
+
+module.exports = {
+	// Export command config
+	config: {
+		name: 'createtag',
+		aliases: ['ct', 'ctag'],
+		usage: '+createtag <tag name> <tag content> <image attachment>',
+		category: 'tag',
+		permissions: 'None',
+		description: 'Create a tag, global or server',
+	},
+	// Run rest of command
+	run: async (client, message, args) => {
+
+		try {
+
+			// Define args[0] as tagname, define leftover args joined by space.
+			const [tagname, ...restArgs] = args;
+			const tagcontent = restArgs.join(' ');
+
+			// Check for tagname, tagcontent (text + attachments), tagname length and tagcontent length.
+			if(!tagname) return message.channel.send('Tag requires a name.');
+			if(!tagcontent && !message.attachments.first()) return message.channel.send('No tag content.');
+			if(tagname.length > 30) return message.channel.send('Tag name cannot exceed 30 characters.');
+			if(tagcontent.length > 1950) return message.channel.send('Tag cannot exceed 1950 characters.');
+
+			// String replace/regexp tagname & tagcontent, double single quotes, whitespace @everyone/@here/@role
+			let ntn = tagname.replace(/@everyone/g, '@\u200beveryone');
+			ntn = ntn.replace(/@here/g, '@\u200bhere');
+			ntn = ntn.replace(/<@&(.*?)>/g, '@\u200brole');
+			ntn = ntn.replace(/'/g, "''");
+			ntn = ntn.replace(/"/g, "''");
+			let ntc = tagcontent.replace(/@everyone/g, '@\u200beveryone');
+			ntc = ntc.replace('@here', '@\u200bhere');
+			ntc = ntc.replace(/<@&(.*?)>/g, '@\u200brole');
+			ntc = ntc.replace(/'/g, "''");
+			ntc = ntc.replace(/"/g, "''");
+
+			// Define MySQL queries
+			const cgt = 'SELECT tag FROM tags WHERE tag= ? AND guildID IS NULL';
+			const cst = 'SELECT tag FROM tags WHERE tag= ? AND guildID= ?';
+			let agt = `INSERT INTO tags (tag, content, userID, guildCreated) VALUES ('${ntn}', '${ntc}', '${message.author.id}', '${message.guild.id}')`;
+			let ast = `INSERT INTO tags (tag, content, userID, guildID) VALUES ('${ntn}', '${ntc}', '${message.author.id}', '${message.guild.id}')`;
+
+			// Start function, connect to database
+			client.con.getConnection(function(error, connection) {
+				console.log('[ADD TAG] Connected to database.');
+
+				// Define addTag function
+				const addTag = function() {
+
+					// Return new promise to then resolve or reject later
+					return new Promise((resolve, reject) => {
+
+						// Query the database for global tag, then start function
+						connection.query(cgt, [ntn], function(error, rows) {
+							// Log error, and send error message to channel
+							if(error) {
+								console.error(error.stack);
+								connection.release();
+								return message.channel.send(`**:exclamation: An error occured:**\n\`\`\`${err}\`\`\``);
+							}
+
+							// If no rows found matching newtagname with NULL guildCreated
+							if(rows[0] === undefined) {
+
+								// If message has attachment
+								if(message.attachments.first()) {
+									// Check attachment count, then attachment size, return if error
+									// Define some extra stuff
+									if(message.attachments.size > 1) return message.channel.send(':paperclip: Invalid attachment (MAXIMUM 1 IMAGE).');
+									if(message.attachments.first().size > 8388608) return message.channel.send(':paperclip: Invalid attachment (MAXIMUM SIZE 8MB).');
+									const gattachment = message.attachments.first().name;
+									const gextension = gattachment.substring(gattachment.lastIndexOf('.'), gattachment.length);
+									const gfilepath = './images/Tags/Global/';
+									const gimagepath = `${gfilepath}${ntn}${gextension}`;
+									// Function for downloading global tag images
+									const globaldownload = function(url) {
+										console.log(`[ADD TAG] Downloading global image ${url}.`);
+										request.get(url)
+											.on('error', console.error)
+											.pipe(fs.createWriteStream(`${gfilepath}${ntn}${gextension}`));
+									};
+									// Switch.case to check for valid extension
+									switch(gextension) {
+									case '.png': case '.gif': case '.jpg': case '.jpeg':
+										// Check for existing file
+										if(fs.existsSync(gimagepath)) {
+											console.log(`[ADD TAG] Global image ${gattachment} already exists, not downloaded.`);
+											return message.channel.send(`:lock: Tag **${ntn}** already in use.`);
+										}
+										// Run download function, set SQL statement
+										globaldownload(message.attachments.first().url);
+										agt = `INSERT INTO tags (tag, content, imageURL, userID, guildCreated) VALUES ('${ntn}', '${ntc}', '${gimagepath}', '${message.author.id}', '${message.guild.id}')`;
+										break;
+									// Default to invalid attachment error message
+									default:
+										message.channel.send(':paperclip: Invalid attachment (PNG/GIF/JPG ONLY).');
+										break;
+									}
+								}
+
+								// Promise resolve, create new function, query MySQL database, insert global tag.
+								resolve({ log: `[ADD TAG] Global tag added: ${ntn}, added by ${message.author.username}`, message: `:scroll: Global tag **${ntn}** created.` },
+									connection.query(agt, function(error, result) {
+										// If err, log to console, return error message
+										if(error) {
+											console.error(error.stack);
+											connection.release();
+											return message.channel.send(`**:exclamation: An error occured:**\n\`\`\`${err}\`\`\``);
+										}
+										console.log(`[ADD TAG] 1 record created, global tag, created by: ${message.author.username}, ID: ${result.insertId}`);
+										connection.release();
+										console.log('[ADD TAG] Disconnected from database.');
+									}));
+							}
+							// Else query server, check for servertag
+							else {
+								connection.query(cst, [ntn, message.guild.id], function(error, rowz) {
+									// If err, log to console, return error message
+									if(error) {
+										console.error(error.stack);
+										return message.channel.send(`**:exclamation: An error occured:**\n\`\`\`${err}\`\`\``);
+									}
+									// If no rows found with newtagname matching guildID
+									if(rowz[0] === undefined) {
+										// If message has attachment
+										if(message.attachments.first()) {
+											// Check attachment count, then attachment size, return if error
+											// Define some extra stuff
+											if(message.attachments.size > 1) return message.channel.send(':paperclip: Invalid attachment (MAXIMUM 1 IMAGE).');
+											if(message.attachments.first().size > 8388608) return message.channel.send(':paperclip: Invalid attachment (MAXIMUM SIZE 8MB).');
+											const sattachment = message.attachments.first().name;
+											const sextension = sattachment.substring(sattachment.lastIndexOf('.'), sattachment.length);
+											const sfilepath = './images/Tags/Server/';
+											const simagepath = `${sfilepath}${ntn}${sextension}`;
+											// Function for downloading server tag images
+											const serverdownload = function(url) {
+												console.log(`[ADD TAG] Downloading server image ${url}.`);
+												request.get(url)
+													.on('error', console.error)
+													.pipe(fs.createWriteStream(`${sfilepath}${ntn}${sextension}`));
+											};
+											// Switch.case to check for valid extension
+											switch(sextension) {
+											case '.png': case '.gif': case '.jpg': case '.jpeg':
+												// Check for existing file
+												if(fs.existsSync(simagepath)) {
+													console.log(`[ADD TAG] Server image ${sattachment} already exists, not downloaded.`);
+													return message.channel.send(`:lock: Server tag **${ntn}** already in use.`);
+												}
+												// Run download function, set SQL statement
+												serverdownload(message.attachments.first().url);
+												ast = `INSERT INTO tags (tag, content, imageURL, userID, guildID) VALUES ('${ntn}', '${ntc}', '${simagepath}', '${message.author.id}', '${message.guild.id}')`;
+												break;
+											// Default to invalid attachment error message
+											default:
+												message.channel.send(':paperclip: Invalid attachment (PNG/GIF/JPG ONLY).');
+												break;
+											}
+										}
+										// Promise resolve, create new function, query MySQL database, insert server tag.
+										resolve({ log: `[ADD TAG] Server tag added: ${ntn}, added by: ${message.author.username}`, message: `:scroll: Server tag **${ntn}** created.` },
+											connection.query(ast, function(error, result) {
+												// If err, log to console, return error message
+												if(error) {
+													console.error(error.stack);
+													return message.channel.send(`**:exclamation: An error occured:**\n\`\`\`${err}\`\`\``);
+												}
+												console.log(`[ADD TAG] 1 record created, server tag, created by: ${message.author.username} ID: ${result.insertId}`);
+												connection.release();
+												console.log('[ADD TAG] Disconnected from database.');
+											}));
+									}
+									// Else if both global and server tag are taken, promise reject, log, release connection
+									else {
+										reject({ log: `[ADD TAG] Tag ${ntn} failed to add.`, message: `:lock: Tag **${ntn}** already in use.` },
+											connection.release(),
+											console.log('[ADD TAG] Diconnected from database.'));
+									}
+								});
+							}
+						});
+					});
+				};
+				// Run addTag function defined above, then resolve, console log, send success message
+				// Catch reject, if both global and server tag are taken, send reject message, console log
+				return addTag()
+					.then((success) => {
+						console.log(success.log);
+						return message.channel.send(success.message);
+					}).catch((fail) => {
+						console.error(fail.log);
+						return message.channel.send(fail.message);
+					});
+			});
+
+		}
+		// Catch error, log to console, return error message
+		catch(error) {
+			console.error(error.stack);
+			return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+		}
+	},
+};
