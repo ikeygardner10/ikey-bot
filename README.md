@@ -27,8 +27,8 @@ Feel free to contact me with any questions, or issues.
 ### Reviews
 ![Review1](https://imgur.com/wycdTdJ.png)
 ![Review2](https://imgur.com/aedb7J2.png)
-![Review3]()
-![Review4]()
+![Review3](https://imgur.com/MQHDPJs.png)
+![Review4](https://imgur.com/Clhi0XS.png)
 
 
 ### DISCLAIMER
