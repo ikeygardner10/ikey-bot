@@ -6,7 +6,7 @@ Suggestions for commands can be put in the support server.
 Commands can be found on the website, along with other links.
 Feel free to contact me with any questions, or issues.
 
-![Honey, I'm Home](https://discordapp.com/api/guilds/[SERVER ID]/widget.png?style=banner2)
+[Honey, I'm Home](https://discordapp.com/api/guilds/[SERVER ID]/widget.png?style=banner2)
 
 ### Links
 
