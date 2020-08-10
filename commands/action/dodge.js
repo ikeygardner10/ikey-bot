@@ -19,7 +19,7 @@ module.exports = {
 
 		const dEmbed = new MessageEmbed()
 			.setColor(0xFFFFFA)
-			.setFooter('Ikey Bot', client.user.avatarURL());
+			.setFooter(`${client.user.username}`, client.user.avatarURL());
 
 		try {
 			if(dodge < 0.5) {

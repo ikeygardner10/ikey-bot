@@ -1,7 +1,8 @@
 >## **Required NPM modules**
 
 
-##### [discord.js @ v12.2.0](https://www.npmjs.com/package/discord.js?source=post_page-----7b5fe27cb6fa----------------------)
+##### [discord.js @ v12.2.0](https://www.npmjs.com/package/discord.js)
+##### [nodemon @ 2.0.4](https://www.npmjs.com/package/nodemon)
 ##### [better-sqlite3 @ 7.1.0](https://www.npmjs.com/package/better-sqlite3)
 ##### [bluebird @ 3.7.2](https://www.npmjs.com/package/bluebird)
 ##### [chalk @ 4.1.0](https://www.npmjs.com/package/chalk)
