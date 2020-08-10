@@ -25,5 +25,5 @@ Feel free to contact me with any questions, or issues.
 
 
 ### DISCLAIMER
-Please feel reuse code as you need, though I don't recommend it if you don't understand what it does (or better, WHY it does).
+Please feel free to reuse code as you need, though I don't recommend it if you don't understand what it does (or better, WHY it does).
 I took pieces from many projects, mostly ideas, but sometimes code for the parts I couldn't write orginally. I regretted it.
