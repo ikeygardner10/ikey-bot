@@ -26,7 +26,7 @@ module.exports = {
 				const dodgesuccessArray = client.imageArrays.dodgesuccess;
 				const file = dodgesuccessArray[(Math.floor(Math.random() * dodgesuccessArray.length))];
 				dEmbed.setDescription(`${message.author} successfully dodged the attack!`);
-				dEmbed.attachFiles(`./images/dodgeduccess/${file}`);
+				dEmbed.attachFiles(`./images/dodgesuccess/${file}`);
 				dEmbed.setImage(`attachment://${file}`);
 				return message.channel.send(dEmbed);
 			} else if(dodge > 0.5) {

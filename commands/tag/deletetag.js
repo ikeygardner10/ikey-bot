@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
 /* eslint-disable prefer-const */
-const fs = require('fs');
+const fs = require('fs-extra');
 const { promisify } = require('util');
 const txtFormatter = require('../../functions/txtFormatter.js');
 
@@ -20,7 +20,7 @@ module.exports = {
 
 		const config = client.config; const tag = args[0];
 		if(!tag) return message.channel.send('`Invalid tag (NO TAG NAME)`'); if(tag.length > 30) return message.channel.send('`Invalid tag (MAX. 30 CHAR TAG NAME)`');
-		const ntn = txtFormatter(tag); const fileDelete = promisify(fs.unlink);
+		const ntn = txtFormatter(tag); const fileDelete = fs.unlink;
 
 		const checkGlobal = 'SELECT * FROM `tags` WHERE BINARY `tag`=? AND `guildID` IS NULL';
 		const checkServer = 'SELECT * FROM `tags` WHERE BINARY `tag`=? AND `guildID`=?';

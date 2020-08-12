@@ -50,17 +50,17 @@ module.exports = {
 				.setAuthor(`${client.user.username} Help`, client.user.avatarURL())
 				.setThumbnail(client.user.avatarURL({ format: 'png', dynamic: true, size: 512 }))
 				.setDescription(`**Server Prefix: ${prefix[0].prefix || config.defaultPrefix}**\n**Global Prefix: ${config.defaultPrefix}**\n**Support Server:** [${await client.guilds.cache.get('413532909400752139').name || 'Link'}](https://discord.gg/GQh6XEk)`)
-				.addField('**Links**', '[All Commands](https://ikeygardner10.github.io)\n[Bot Discord](https://discordapp.com/invite/GQh6XEk)\n[Invite To Your Server](https://discord.com/api/oauth2/authorize?client_id=683806572119326724&permissions=8&scope=bot)\n[Donate](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CXU2L6XUT2YWN&source=url)')
+				.addField('**Links**', '[All Commands](https://ikeygardner10.github.io)\n[Support Server](https://discordapp.com/invite/GQh6XEk)\n[Invite To Your Server](https://discord.com/api/oauth2/authorize?client_id=683806572119326724&permissions=8&scope=bot)\n[Donate](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CXU2L6XUT2YWN&source=url)')
 				.setFooter(`${client.user.username}`, client.user.avatarURL())
 				.setColor('0xFFFFFA')
 				.setTimestamp();
 
 			try {
 				await message.author.send(dmEmbed);
-				return message.reply('check your DMs.');
+				return message.channel.send('`Incoming DM`');
 			} catch(error) {
 				console.error(`[HELP CMD] ${error.stack}`);
-				return message.channel.send('Could not send DM, do you have messages open?');
+				return message.channel.send('`Invalid (DO YOU HAVE DMS OPEN?)`');
 			}
 		}
 	} };

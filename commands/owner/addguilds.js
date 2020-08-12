@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable prefer-const */
 const txtFormatter = require('../../functions/txtFormatter.js');
-const fs = require('fs');
+const fs = require('fs-extra');
 
 module.exports = {
 	config: {

@@ -33,11 +33,13 @@ module.exports = {
 		if(!mutetime) return message.channel.send('Specify a time.');
 		if(typeof ms(mutetime) !== 'number') return message.channel.send('Not a valid time');
 
-		const authorrole = message.member.roles.highest; const memberrole = member.roles.highest;
-		const botrole = message.guild.me.roles.highest;
-		if(member.hasPermission(['ADMINISTRATOR', 'BAN_MEMBERS', 'MANAGE_SERVER', 'MUTE_MEMBERS'])) return message.channel.send('`Invalid Permission (USER HAS ADMIN/MOD PERMISSIONS)`');
-		if(authorrole.position < memberrole.position || authorrole.position === memberrole.position) return message.channel.send('`Invalid Permission (USERS ROLE HIGHER/EQUAL TO YOURS)`');
-		if(memberrole.position > botrole.position || memberrole.position === botrole.position) return message.channel.send('`Invalid Permission (USERS ROLE HIGHER/EQUAL TO MINE)`');
+		if(message.author.id !== client.config.ownerID) {
+			const authorrole = message.member.roles.highest; const memberrole = member.roles.highest;
+			const botrole = message.guild.me.roles.highest;
+			if(member.hasPermission(['ADMINISTRATOR', 'BAN_MEMBERS', 'MANAGE_SERVER', 'MUTE_MEMBERS'])) return message.channel.send('`Invalid Permission (USER HAS ADMIN/MOD PERMISSIONS)`');
+			if(authorrole.position < memberrole.position || authorrole.position === memberrole.position) return message.channel.send('`Invalid Permission (USERS ROLE HIGHER/EQUAL TO YOURS)`');
+			if(memberrole.position > botrole.position || memberrole.position === botrole.position) return message.channel.send('`Invalid Permission (USERS ROLE HIGHER/EQUAL TO MINE)`');
+		}
 		if(member.roles.cache.has(muterole.id)) return message.channel.send('`Invalid (USER ALREADY MUTED)`');
 
 		const mEmbed = new MessageEmbed()

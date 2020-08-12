@@ -25,10 +25,10 @@ module.exports = {
 		const ntn = txtFormatter(tag); const ntc = txtFormatter(content);
 		let fileName; const filePath = './images/tags/'; let URI;
 
-		const checkGlobal = 'SELECT `tag` FROM `tags` WHERE BINARY `tag`=? AND `guildID` IS NULL';
-		const checkServer = 'SELECT `tag` FROM `tags` WHERE BINARY `tag`=? AND `guildID`=?';
-		let addGlobal = 'INSERT INTO `tags` (`tag`, `content`, `userID`, `guildCreated`) VALUES (?, ?, ?, ?)'; let globalData = [ntn, ntc, message.author.id, message.guild.id];
-		let addServer = 'INSERT INTO `tags` (`tag`, `content`, `userID`, `guildID`) VALUES (?, ?, ?, ?)'; let serverData = [ntn, ntc, message.author.id, message.guild.id];
+		const checkGlobal = 'SELECT `tag` FROM `tags` WHERE BINARY `tag`=? AND `guildID` IS NULL;';
+		const checkServer = 'SELECT `tag` FROM `tags` WHERE BINARY `tag`=? AND `guildID`=?;';
+		let addGlobal = 'INSERT INTO `tags` (`tag`, `content`, `userID`, `guildCreated`) VALUES (?, ?, ?, ?);'; let globalData = [ntn, ntc, message.author.id, message.guild.id];
+		let addServer = 'INSERT INTO `tags` (`tag`, `content`, `userID`, `guildID`) VALUES (?, ?, ?, ?);'; let serverData = [ntn, ntc, message.author.id, message.guild.id];
 
 		if(attachment.size > 0) {
 			if(attachment.size > 1) return message.channel.send('`Invalid attachment (MAX. 1)`');

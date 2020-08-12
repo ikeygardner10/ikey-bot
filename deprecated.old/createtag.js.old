@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
 /* eslint-disable prefer-const */
-const fs = require('fs');
+const fs = require('fs-extra');
 const request = require('request');
 const utf8 = require('utf8');
 

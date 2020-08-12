@@ -19,7 +19,7 @@ module.exports = {
 		let messageCount = 1;
 
 		const check = 'SELECT `messageCount` FROM `patcount` WHERE `userID`= ? AND `memberID`= ?';
-		const addUpdate = 'INSERT INTO `patcount` (`userID`, `memberID`, `messageCount`) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE `messageCount`= `messageCount`+1';
+		const addUpdate = 'INSERT INTO `patcount` (`userID`, `memberID`, `messageCount`) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE `messageCount`= `messageCount`+1';
 
 		const pEmbed = new MessageEmbed()
 			.setTimestamp()

@@ -1,14 +1,12 @@
 /* eslint-disable no-unused-vars */
 const { Discord, Client, Intents, MessageEmbed, Collection } = require('discord.js');
-const fs = require('fs');
+const fs = require('fs-extra');
 const Enmap = require('enmap');
 const bluebird = require('bluebird');
 global.Promise = require('bluebird');
 const client = new Client({
 	ws: { intents: Intents.ALL },
 	disableMentions: 'none',
-	fetchAllMembers: true,
-	autoFetch: true,
 	sync: true,
 	cloneLevel: 'deep',
 });
@@ -18,7 +16,7 @@ client.config = config;
 
 const mysql = require('mysql2');
 const conPool = mysql.createPool({
-	connectionLimit: 5,
+	connectionLimit: 10,
 	multipleStatements: true,
 	host: 'localhost',
 	user: 'ikeybot',
@@ -78,6 +76,7 @@ fs.readdir('./commands/', (error, folders) => {
 
 process.on('unhandledRejection', error => {
 	console.error(`[CLIENT] ${error.stack}`);
+	client.users.cache.get('341086875232108545').send(`**unhandledPromiseRejection error**\n${error.stack}`);
 });
 
 client.login(config.botToken);

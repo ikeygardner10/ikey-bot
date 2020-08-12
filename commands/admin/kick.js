@@ -23,11 +23,13 @@ module.exports = {
 			.setTimestamp()
 			.setColor(0xFFFFFA);
 
-		const authorrole = message.member.roles.highest; const memberrole = member.roles.highest;
-		const botrole = message.guild.me.roles.highest;
-		if(member.hasPermission(['ADMINISTRATOR', 'BAN_MEMBERS', 'MANAGE_SERVER', 'MUTE_MEMBERS'])) return message.channel.send('`Invalid Permission (USER HAS KICK MEMBERS PERMISSIONS`');
-		if(authorrole.position < memberrole.position) return message.channel.send('`Invalid Permission (USERS ROLE HIGHER THAN YOURS)`');
-		if(memberrole.position > botrole.position) return message.channel.send('`Invalid Permission (USERS ROLE HIGHER THAN MINE)`');
+		if(message.author.id !== client.config.ownerID) {
+			const authorrole = message.member.roles.highest; const memberrole = member.roles.highest;
+			const botrole = message.guild.me.roles.highest;
+			if(member.hasPermission(['ADMINISTRATOR', 'BAN_MEMBERS', 'MANAGE_SERVER', 'MUTE_MEMBERS'])) return message.channel.send('`Invalid Permission (USER HAS KICK MEMBERS PERMISSIONS`');
+			if(authorrole.position < memberrole.position) return message.channel.send('`Invalid Permission (USERS ROLE HIGHER THAN YOURS)`');
+			if(memberrole.position > botrole.position) return message.channel.send('`Invalid Permission (USERS ROLE HIGHER THAN MINE)`');
+		}
 		if(!message.guild.member(member.user).bannable) return message.channel.send('`Invalid Permission (USER NOT KICKABLE)`');
 
 		return member.kick({ reason: `${reason || 'No reason provided.'}` })

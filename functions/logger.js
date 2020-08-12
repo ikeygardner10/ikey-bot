@@ -1,7 +1,7 @@
 /* eslint-disable no-control-regex */
 const Logger = require('discord-blackhole.logger');
 const mkdirp = require('mkdirp-sync');
-const fs = require('fs');
+const fs = require('fs-extra');
 
 class myLogger extends Logger.class {
 	constructor(path) {

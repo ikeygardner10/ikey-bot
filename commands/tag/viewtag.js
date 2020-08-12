@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
 /* eslint-disable prefer-const */
-const fs = require('fs');
+const fs = require('fs-extra');
 const { promisify } = require('util');
 const txtFormatter = require('../../functions/txtFormatter.js');
 
@@ -18,12 +18,12 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
-		const tag = args[0]; let filePath = './images/tags/'; let fileName;
+		const tag = args[0]; let fileName; let fileURL;
 		if(!tag) return message.channel.send('`Invalid tag (NO TAG NAME)`'); if(tag.length > 30) return message.channel.send('`Invalid tag (MAX. 30 CHAR TAG NAME)`');
-		const ntn = txtFormatter(tag); const fileGrab = promisify(fs.access); let fileURL;
+		const ntn = txtFormatter(tag); const fileGrab = fs.access;
 
-		const checkGlobal = 'SELECT `tag`, `content`, `imageURL` FROM `tags` WHERE BINARY `tag`=? AND `guildID` IS NULL';
-		const checkServer = 'SELECT `tag`, `content`, `imageURL` FROM `tags` WHERE BINARY `tag`=? AND `guildID`=?';
+		const checkGlobal = 'SELECT `tag`, `content`, `imageURL` FROM `tags` WHERE BINARY `tag`=? AND `guildID` IS NULL;';
+		const checkServer = 'SELECT `tag`, `content`, `imageURL` FROM `tags` WHERE BINARY `tag`=? AND `guildID`=?;';
 
 		const SQLpool = client.conPool.promise();
 		const [serverRows] = await SQLpool.query(checkServer, [ntn, message.guild.id]);
@@ -32,7 +32,7 @@ module.exports = {
 			try {
 				if(serverRows[0].imageURL !== null) {
 					fileURL = serverRows[0].imageURL; fileName = fileURL.substring(fileURL.lastIndexOf('/') + 1, fileURL.length);
-					await fileGrab(fileURL)
+					return fileGrab(fileURL)
 						.then(() => {
 							console.success(`[VIEW TAG] Server tag sent: ${ntn}`);
 							return message.channel.send(serverRows[0].content, { files: [{ attachment: fileURL, name: fileName }] });
@@ -58,7 +58,7 @@ module.exports = {
 				try {
 					if(globalRows[0].imageURL !== null) {
 						fileURL = globalRows[0].imageURL; fileName = fileURL.substring(fileURL.lastIndexOf('/') + 1, fileURL.length);
-						await fileGrab(fileURL)
+						return fileGrab(fileURL)
 							.then(() => {
 								console.success(`[VIEW TAG] Global tag sent: ${ntn}`);
 								return message.channel.send(globalRows[0].content, { files: [{ attachment: fileURL, name: fileName }] });

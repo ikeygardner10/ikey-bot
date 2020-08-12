@@ -21,7 +21,7 @@ module.exports = async (client, message) => {
 	if(message.author.bot || !message.guild || message.channel.type !== 'text') return;
 
 	// If someone mentions the bot, return
-	if(message.mentions.users.first() && message.mentions.users.first().id === client.user.id) return;
+	if(message.mentions.users.first() && message.mentions.users.first().id === client.user.id && message.author.id !== config.ownerID) return;
 
 	const SQLpool = client.conPool.promise();
 

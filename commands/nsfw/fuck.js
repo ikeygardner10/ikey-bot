@@ -16,22 +16,22 @@ module.exports = {
 
 		const member = message.mentions.members.first(); if(!member) return message.channel.send('`Invalid (NO USER)');
 		const fuckArray = client.imageArrays.fuck; const file = fuckArray[(Math.floor(Math.random() * fuckArray.length))];
-		const trackedID = `${message.author.id}+${member.id}`; let messageCount = 1;
+		let messageCount = 1;
 
 		const yes = ['yes', 'yea', 'ye', 'yeah', 'y', 'ya', 'yah']; const no = ['no', 'na', 'nah', 'nope', 'never', 'ew'];
 		const filter = response => {
 			return yes.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === member.id) || no.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === member.id);
 		};
 
-		const check = 'SELECT * FROM `fuckcount` WHERE `trackedID`=?';
-		const addUpdate = 'INSERT INTO `fuckcount` (`trackedID`, `userID`, `memberID`, `messageCount`) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE `messageCount`=`messageCount`+1';
+		const check = 'SELECT * FROM `fuckcount` WHERE `userID`= ? AND `memberID`= ?';
+		const addUpdate = 'INSERT INTO `fuckcount` (`userID`, `memberID`, `messageCount`) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE `messageCount`= `messageCount`+1';
 
 		const fEmbed = new MessageEmbed()
 			.setTimestamp()
 			.setColor(0xFFFFFA);
 
 		const SQLpool = client.conPool.promise();
-		const [rows] = await SQLpool.query(check, [trackedID]);
+		const [rows] = await SQLpool.query(check, [message.guild.id, member.id]);
 
 		message.channel.send(`${member}, you and ${message.author}, sex... now? :hot_face:`).then(() => {
 			message.channel.awaitMessages(filter, { max: 1, time: 15000, errors: ['time'] })
@@ -52,14 +52,14 @@ module.exports = {
 							messageCount = rows[0].messageCount + 1;
 							fEmbed.setFooter(`[${messageCount} times]`, client.user.avatarURL());
 							message.channel.send(fEmbed);
-							return SQLpool.execute(addUpdate, [trackedID, message.author.id, member.id, 1])
-								.then(() => console.success(`[FUCK CMD] messageCount record updated: ${trackedID}`))
+							return SQLpool.execute(addUpdate, [message.author.id, member.id, 1])
+								.then(() => console.success('[FUCK CMD] messageCount record updated'))
 								.catch((error) => console.error(`[FUCK CMD] ${error.stack}`));
 						} else {
 							fEmbed.setFooter(`[${messageCount} times]`, client.user.avatarURL());
 							message.channel.send(fEmbed);
-							return SQLpool.execute(addUpdate, [trackedID, message.author.id, member.id, 1])
-								.then(() => console.success(`[FUCK CMD] messageCount record added: ${trackedID}`))
+							return SQLpool.execute(addUpdate, [message.author.id, member.id, 1])
+								.then(() => console.success('[FUCK CMD] messageCount record added'))
 								.catch((error) => console.error(`[FUCK CMD] ${error.stack}`));
 						}
 					} else if(no.includes(collected.first().content.toLowerCase())) {

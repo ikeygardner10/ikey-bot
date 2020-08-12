@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable prefer-const */
 const { promisify } = require('util');
-const fs = require('fs');
+const fs = require('fs-extra');
 
 module.exports = {
 	config: {

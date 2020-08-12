@@ -3,6 +3,7 @@
 
 ##### [discord.js @ v12.2.0](https://www.npmjs.com/package/discord.js)
 ##### [nodemon @ 2.0.4](https://www.npmjs.com/package/nodemon)
+##### [fs-extra @ 9.0.1](https://www.npmjs.com/package/fs-extra)
 ##### [better-sqlite3 @ 7.1.0](https://www.npmjs.com/package/better-sqlite3)
 ##### [bluebird @ 3.7.2](https://www.npmjs.com/package/bluebird)
 ##### [chalk @ 4.1.0](https://www.npmjs.com/package/chalk)

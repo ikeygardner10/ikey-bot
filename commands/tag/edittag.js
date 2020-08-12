@@ -1,6 +1,5 @@
 /* eslint-disable no-unused-vars */
-const fs = require('fs');
-const { promisify } = require('util');
+const fs = require('fs-extra');
 const txtFormatter = require('../../functions/txtFormatter.js');
 const shortid = require('shortid');
 const fileDownload = require('../../functions/fileDownload.js');
@@ -19,7 +18,7 @@ module.exports = {
 	execute: async (client, message, args) => {
 
 		const [tag, ...restArgs] = args; const content = restArgs.join(' '); const config = client.config;
-		let attachment = message.attachments; const imageDelete = promisify(fs.unlink);
+		let attachment = message.attachments; const imageDelete = fs.unlink;
 		if(!tag) return message.channel.send('`Invalid tag (NO TAG NAME)`'); if(!content && !message.attachments.first()) return message.channel.send('`Invalid Tag (NO TAG CONTENT)`');
 		if(tag.length > 30) return message.channel.send('`Invalid tag (MAX. 30 CHAR TAG NAME)`'); if(content.length > 1950) return message.channel.send('`Invalid tag (MAX. 1950 CHAR CONTENT)`');
 		const ntn = txtFormatter(tag); const ntc = txtFormatter(content) || '';

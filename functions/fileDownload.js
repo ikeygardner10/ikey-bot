@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('fs-extra');
 const request = require('request');
 
 module.exports = async function(URI, fileName, filePath) {

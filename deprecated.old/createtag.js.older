@@ -1,6 +1,6 @@
 /* eslint-disable quotes */
 // Grab required modules
-const fs = require('fs');
+const fs = require('fs-extra');
 const request = require('request');
 
 module.exports = {

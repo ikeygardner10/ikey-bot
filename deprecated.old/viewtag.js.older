@@ -4,7 +4,7 @@
 ## NESTING HELL/AWFUL PROMISES INSIDE ONE ANOTHER
 
 // Grab required modules
-const fs = require('fs');
+const fs = require('fs-extra');
 
 module.exports = {
 	// Export command config

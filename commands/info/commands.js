@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { MessageEmbed } = require('discord.js');
-const fs = require('fs');
+const fs = require('fs-extra');
 const { promisify } = require('util');
 
 module.exports = {
