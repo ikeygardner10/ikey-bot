@@ -69,7 +69,7 @@ module.exports = {
 							return message.channel.send(hEmbed);
 						}
 					}).catch((timeout) => {
-						console.info(`[HANDHOLD CMD] ${timeout}`);
+						console.info(`[HANDHOLD CMD] ${JSON.stringify(timeout)}`);
 						return message.channel.send(`${message.author}, no response :pensive:`);
 					});
 			});

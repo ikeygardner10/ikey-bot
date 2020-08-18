@@ -10,6 +10,7 @@ const permissionsObject = {
 	'Manage Nicknames': 'MANAGE_NICKNAMES', 'Manage Roles': 'MANAGE_ROLES',
 	'Manage Emojis': 'MANAGE_EMOJIS',
 };
+const responseArray = require('../data/temp/responseArray.json');
 const checkPrefix = 'SELECT `prefix` FROM `guildsettings` WHERE `guildID`= ?';
 const updatePrefix = 'UPDATE `guildsettings` SET `prefix`= ? WHERE `guildID`= ?';
 const addGuildSettings = 'INSERT INTO `guildsettings` (`guildID`, `prefix`, `maxFamilySize`, `allowIncest`) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE `prefix`= VALUES (`prefix`)';
@@ -21,7 +22,7 @@ module.exports = async (client, message) => {
 	if(message.author.bot || !message.guild || message.channel.type !== 'text') return;
 
 	// If someone mentions the bot, return
-	if(message.mentions.users.first() && message.mentions.users.first().id === client.user.id && message.author.id !== config.ownerID) return;
+	if(message.mentions.users.first() && message.mentions.users.first().id === client.user.id && message.author.id !== config.ownerID) return message.channel.send(responseArray[(Math.floor(Math.random() * responseArray.length))]);
 
 	const SQLpool = client.conPool.promise();
 

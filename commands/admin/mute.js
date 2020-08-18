@@ -40,7 +40,6 @@ module.exports = {
 			if(authorrole.position < memberrole.position || authorrole.position === memberrole.position) return message.channel.send('`Invalid Permission (USERS ROLE HIGHER/EQUAL TO YOURS)`');
 			if(memberrole.position > botrole.position || memberrole.position === botrole.position) return message.channel.send('`Invalid Permission (USERS ROLE HIGHER/EQUAL TO MINE)`');
 		}
-		if(member.roles.cache.has(muterole.id)) return message.channel.send('`Invalid (USER ALREADY MUTED)`');
 
 		const mEmbed = new MessageEmbed()
 			.setThumbnail(member.user.avatarURL({ format: 'png', dynamic: true, size: 512 }))
@@ -62,6 +61,7 @@ module.exports = {
 			}
 		}
 
+		if(member.roles.cache.has(muterole.id)) return message.channel.send('`Invalid (USER ALREADY MUTED)`');
 		await (member.roles.add(muterole.id))
 			.then(() => {
 				mEmbed.setDescription(`**Result:** ${member} has been muted.\n\n**Muted By:** <@${message.author.id}>\n**Time:** ${ms(ms(mutetime))}\n**Reason:** ${reason || 'No reason provided.'}`);

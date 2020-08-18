@@ -16,6 +16,7 @@ module.exports = {
 		try {
 			const string = args.join(' '); if(!string) return message.channel.send('`Invalid (NO STRING)`');
 			const newStr = txtFormatter(string);
+			console.info(newStr);
 			return message.channel.send((newStr));
 		} catch(error) {
 			console.error(`[STRING CMD] ${error.stack}`);

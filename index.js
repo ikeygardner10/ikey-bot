@@ -74,9 +74,10 @@ fs.readdir('./commands/', (error, folders) => {
 	});
 });
 
-process.on('unhandledRejection', error => {
+process.on('unhandledRejection', async (error) => {
 	console.error(`[CLIENT] ${error.stack}`);
-	client.users.cache.get('341086875232108545').send(`**unhandledPromiseRejection error**\n${error.stack}`);
+	client.users.cache.get(config.ownerID).send(`__***ERROR***__\n\n**Name:** *${error.name}*\n**Method:** *${error.method}*\n**Code:** *${error.code}*\n**httpStatus:** *${error.httpStatus}*\n\n**Server:** \`${client.channels.cache.get(error.path.slice(10, -28)).guild.name}\`\n**Path:** \`${error.path}\`\n**Message:** \`${error.message}\``);
+	if(error.message === 'Missing Permissions') client.channels.cache.get(error.path.slice(10, -28)).send(`\`An error occured:\`\n\`\`\`${error.name}: ${error.message}\`\`\``);
 });
 
 client.login(config.botToken);
