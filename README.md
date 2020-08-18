@@ -28,10 +28,3 @@ Feel free to contact me with any questions, or issues.
 ![Review2](https://imgur.com/aedb7J2.png)
 ![Review3](https://imgur.com/MQHDPJs.png)
 ![Review4](https://imgur.com/Clhi0XS.png)
-
-
-### DISCLAIMER
-Please feel free to reuse code as you need, though I don't recommend it if you don't understand what it does (or better, WHY it does).
-I took pieces from many projects, mostly ideas, but sometimes code for the parts I couldn't write originally.
-I regretted it, and went back to relearn all the code/theory behind the code.
-If this is you, I recommend asking questions first. Ask me, I won't send you to google, or tell you it's a duplicate thread lol.
