@@ -74,10 +74,18 @@ fs.readdir('./commands/', (error, folders) => {
 	});
 });
 
+process.on('STARTUP', function() {
+	client.users.cache.get(config.ownerID).send('Successfully started application :white_check_mark:');
+});
+
 process.on('unhandledRejection', async (error) => {
 	console.error(`[CLIENT] ${error.stack}`);
-	client.users.cache.get(config.ownerID).send(`__***ERROR***__\n\n**Name:** *${error.name}*\n**Method:** *${error.method}*\n**Code:** *${error.code}*\n**httpStatus:** *${error.httpStatus}*\n\n**Server:** \`${client.channels.cache.get(error.path.slice(10, -28)).guild.name}\`\n**Path:** \`${error.path}\`\n**Message:** \`${error.message}\``);
-	if(error.message === 'Missing Permissions') client.channels.cache.get(error.path.slice(10, -28)).send(`\`An error occured:\`\n\`\`\`${error.name}: ${error.message}\`\`\``);
+	if(error.path) {
+		client.users.cache.get(config.ownerID).send(`__***ERROR***__\n\n**Name:** *${error.name}*\n**Method:** *${error.method}*\n**Code:** *${error.code}*\n**httpStatus:** *${error.httpStatus}*\n\n**Path:** \`${error.path}\`\n**Message:** \`${error.message}\``);
+		if(error.message === 'Missing Permissions') client.channels.cache.get(error.path.slice(10, -28)).send(`\`An error occured:\`\n\`\`\`${error.name}: ${error.message}\`\`\``);
+	} else {
+		client.users.cache.get(config.ownerID).send(`__***ERROR***__\n\n**Name:** *${error.name}*\n**Method:** *${error.method}*\n**Code:** *${error.code}*\n**httpStatus:** *${error.httpStatus}*\n\n**Message:** \`${error.message}\``);
+	}
 });
 
 client.login(config.botToken);

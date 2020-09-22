@@ -26,17 +26,17 @@ module.exports = {
 					return fileGrab(fileURL)
 						.then(() => {
 							console.success(`[RANDOM TAG] Random tag sent: ${rows[0].tag}`);
-							return message.channel.send(rows[0].content, { files: [{ attachment: fileURL, name: fileName }] });
+							return message.channel.send(`${rows[0].content}\n\n*Tag:* ${rows[0].tag}`, { files: [{ attachment: fileURL, name: fileName }] });
 						})
 						.catch((error) => {
 							console.error(`[RANDOM TAG] ${error.stack}`);
 							console.error(`[RANDOM TAG] Random tag image ${rows[0].imageURL} corrupted`);
 							console.success(`[RANDOM TAG] Random tag sent: ${rows[0].tag}`);
-							return message.channel.send(rows[0].content + '\n\n*(file corrupted)*');
+							return message.channel.send(`${rows[0].content}\n\n**(file corrupted)**\n\n*Tag:* ${rows[0].tag}`);
 						});
 				} else {
 					console.success(`[RANDOM TAG] Random tag sent: ${rows[0].tag}`);
-					return message.channel.send(rows[0].content);
+					return message.channel.send(`${rows[0].content}\n\n*Tag:* ${rows[0].tag}`);
 				}
 			}).catch((error) => {
 				console.error(`[RANDOM TAG] ${error.stack}`);
