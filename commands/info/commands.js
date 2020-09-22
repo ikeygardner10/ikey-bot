@@ -24,7 +24,7 @@ module.exports = {
 		const cEmbed = new MessageEmbed()
 			.setAuthor(`${message.guild.me.displayName} Commands`, client.user.avatarURL())
 			.setThumbnail(message.guild.iconURL({ format: 'png', dynamic: true, size: 512 }))
-			.setDescription(`Available Commands for ${message.guild.me.displayName}\nServer Prefix is: **${prefix[0].prefix || config.defaultPrefix}**\nGlobal Prefix: **${config.defaultPrefix}**\nHelp: \`${prefix[0].prefix || config.defaultPrefix}help\` or \`${prefix[0].prefix || config.defaultPrefix}help <command>\``)
+			.setDescription(`Server Prefix is: **${prefix[0].prefix || config.defaultPrefix}**\nGlobal Prefix: **${config.defaultPrefix}**\nHelp: \`${prefix[0].prefix || config.defaultPrefix}help\` or \`${prefix[0].prefix || config.defaultPrefix}help <command>\nFurther Help: [Command List](https://ikeybot.github.io)\``)
 			.setFooter(`${message.guild.me.displayName} | Total Commands: ${client.commands.size}`, client.user.avatarURL())
 			.setColor('0xFFFFFA');
 

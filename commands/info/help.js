@@ -30,7 +30,7 @@ module.exports = {
 						.setAuthor(`${client.user.username} Help`, client.user.avatarURL())
 						.setThumbnail(client.user.avatarURL({ format: 'png', dynamic: true, size: 512 }))
 						.setDescription(`**Server Prefix: ${prefix[0].prefix || config.defaultPrefix}**\n\n**Name:** ${commandName}\n**Description:** ${command.config.description || 'No Description'}\n**Usage:** ${((prefix[0].prefix || config.defaultPrefix) + args[0] + ' ' + command.config.usage || (prefix[0].prefix || config.defaultPrefix) + args[0])}\n**Cooldown:** ${command.config.cooldown}s\n**Permissions Required:** ${command.config.permissions || 'None'}\n**Category:** ${category}\n**Aliases:** ${command.config.noalias || command.config.aliases}`)
-						.addField('**Links**', '[All Commands](https://ikeygardner10.github.io)\n[Support Server](https://discord.gg/GQh6XEk)\n[Invite To Your Server](https://discord.com/oauth2/authorize?client_id=607091388588359687&permissions=1544027255&scope=bot)\n[Donate](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CXU2L6XUT2YWN&source=url)')
+						.addField('**Links**', '[All Commands](https://ikeybot.github.io)\n[Support Server](https://discord.gg/GQh6XEk)\n[Invite To Your Server](https://discord.com/oauth2/authorize?client_id=607091388588359687&permissions=1544027255&scope=bot)\n[Donate](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CXU2L6XUT2YWN&source=url)')
 						.setFooter(`${client.user.username}`, client.user.avatarURL())
 						.setColor('0xFFFFFA')
 						.setTimestamp();
@@ -50,7 +50,7 @@ module.exports = {
 				.setAuthor(`${client.user.username} Help`, client.user.avatarURL())
 				.setThumbnail(client.user.avatarURL({ format: 'png', dynamic: true, size: 512 }))
 				.setDescription(`**Server Prefix: ${prefix[0].prefix || config.defaultPrefix}**\n**Global Prefix: ${config.defaultPrefix}**\n**Support Server:** [${await client.guilds.cache.get('413532909400752139').name || 'Link'}](https://discord.gg/GQh6XEk)`)
-				.addField('**Links**', '[All Commands](https://ikeygardner10.github.io)\n[Support Server](https://discordapp.com/invite/GQh6XEk)\n[Invite To Your Server](https://discord.com/oauth2/authorize?client_id=607091388588359687&permissions=1544027255&scope=bot)\n[Donate](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CXU2L6XUT2YWN&source=url)')
+				.addField('**Links**', '[All Commands](https://ikeybot.github.io)\n[Support Server](https://discordapp.com/invite/GQh6XEk)\n[Invite To Your Server](https://discord.com/oauth2/authorize?client_id=607091388588359687&permissions=1544027255&scope=bot)\n[Donate](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CXU2L6XUT2YWN&source=url)')
 				.setFooter(`${client.user.username}`, client.user.avatarURL())
 				.setColor('0xFFFFFA')
 				.setTimestamp();
