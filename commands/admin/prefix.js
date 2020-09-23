@@ -5,7 +5,7 @@ module.exports = {
 		aliases: [],
 		usage: '<new prefix>',
 		cooldown: 10,
-		category: 'guild',
+		category: 'admin',
 		permissions: 'Manage Server',
 		args: false,
 		description: 'Change or check server prefix\n(+prefixreset resets to default)',

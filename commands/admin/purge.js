@@ -27,6 +27,7 @@ module.exports = {
 			}
 			return message.channel.send(`\`Success\`\n\`${amount} deleted\``);
 		} else {
+			await message.delete();
 			await message.channel.bulkDelete(amount)
 				.then(() => {
 					return message.channel.send(`\`Success\`\n\`${amount} deleted\``);

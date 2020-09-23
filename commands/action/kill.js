@@ -1,8 +1,7 @@
 module.exports = {
 	config: {
 		name: 'kill',
-		noalias: 'No Aliases',
-		aliases: [],
+		aliases: ['attack'],
 		usage: '<@user>',
 		cooldown: 5,
 		category: 'action',
