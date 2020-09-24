@@ -19,7 +19,7 @@ module.exports = {
 		let messageCount = 1;
 
 		const check = 'SELECT `messageCount` FROM `highfivecount` WHERE `userID`= ? AND `memberID`= ?';
-		const addUpdate = 'INSERT INTO `highfivecount` (userID`, `memberID`, `messageCount`) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE `messageCount`= `messageCount`+1';
+		const addUpdate = 'INSERT INTO `highfivecount` (`userID`, `memberID`, `messageCount`) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE `messageCount`= `messageCount`+1';
 
 		const hEmbed = new MessageEmbed()
 			.setTimestamp()
