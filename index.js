@@ -34,10 +34,10 @@ const logger = createLogger({
 	level: 'info',
 	format: format.combine(
 		format.timestamp({
-			format: 'YY-MM-DD HH:mm:ss'
+			format: 'YY-MM-DD HH:mm:ss',
 		}),
 		format.errors({ stack: true }),
-		format.json()
+		format.json(),
 	),
 	transports: [
 		new transports.File({ filename: './logs/ikeybot-error.log', level: 'error' }),
