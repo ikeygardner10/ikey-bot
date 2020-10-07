@@ -27,16 +27,34 @@ const conPool = mysql.createPool({
 });
 client.conPool = conPool;
 
-const logger = require('./functions/logger.js')('./logs/logs.txt');
-const chalk = require('chalk');
-logger.setFormat('{date}/{month}/{year} {hour}:{minute}:{second}');
-logger.theme.log = chalk.white;
-logger.theme.debug = chalk.blue;
-logger.theme.info = chalk.cyan;
-logger.theme.alert = chalk.magenta;
-logger.theme.warn = chalk.yellow;
-logger.theme.error = chalk.red;
-logger.theme.success = chalk.green;
+
+const { format } = require('logform');
+const { createLogger, transports } = require('winston');
+const logger = createLogger({
+	level: 'info',
+	format: format.combine(
+		format.timestamp({
+			format: 'YY-MM-DD HH:mm:ss'
+		}),
+		format.errors({ stack: true }),
+		format.json()
+	),
+	transports: [
+		new transports.File({ filename: './logs/ikeybot-error.log', level: 'error' }),
+		new transports.File({ filename: './logs/ikeybot-combined.log' }),
+	],
+});
+
+// const logger = require('./functions/logger.js')('./logs/logs.txt');
+// const chalk = require('chalk');
+// logger.setFormat('{date}/{month}/{year} {hour}:{minute}:{second}');
+// logger.theme.log = chalk.white;
+// logger.theme.debug = chalk.blue;
+// logger.theme.info = chalk.cyan;
+// logger.theme.alert = chalk.magenta;
+// logger.theme.warn = chalk.yellow;
+// logger.theme.error = chalk.red;
+// logger.theme.success = chalk.green;
 
 const buildImageArray = require('./functions/buildImageArray.js');
 buildImageArray.execute(client);

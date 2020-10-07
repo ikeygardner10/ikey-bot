@@ -15,3 +15,4 @@
 ##### [mysql2 @ 2.1.0](https://www.npmjs.com/package/mysql2)
 ##### [shortid @ 2.2.15](https://www.npmjs.com/package/shortid)
 ##### [utf8 @ 3.0.0](https://www.npmjs.com/package/utf8)
+##### [winston @ 3.3.3](https://www.npmjs.com/package/winston)
