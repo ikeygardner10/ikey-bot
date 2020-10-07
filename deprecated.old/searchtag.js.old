@@ -3,7 +3,6 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable prefer-const */
 const txtFormatter = require('../../functions/txtFormatter.js');
-const { MessageEmbed } = require('discord.js');
 
 module.exports = {
 	config: {
@@ -18,63 +17,34 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
-		checkUser = 'SELECT `tag`, `guildID` FROM `tags` WHERE `userID`=?;'; checkServer = 'SELECT `tag` FROM `tags` WHERE `guildID`=?;';
-		checkTag = 'SELECT `tag`, `userID`, `guildID` FROM `tags` WHERE BINARY `tag`=?;'; checkSelf = 'SELECT `tag`, `guildID` FROM `tags` WHERE `userID`=?;';
+		checkUser = 'SELECT `tag`, `guildID` FROM `tags` WHERE `userID`=?'; checkServer = 'SELECT `tag` FROM `tags` WHERE `guildID`=?';
+		checkTag = 'SELECT `tag`, `userID`, `guildID` FROM `tags` WHERE BINARY `tag`=?'; checkSelf = 'SELECT `tag`, `guildID` FROM `tags` WHERE `userID`=?';
 
-		const SQLpool = client.conPool.promise(); let tagArray = []; let embedAuthor; let currentIndex = 0;
-
-		const generateEmbed = start => {
-			const current = tagArray.slice(start, start + 15);
-			const stEmbed = new MessageEmbed()
-				.setTimestamp()
-				.setColor(0xFFFFFA)
-				.setAuthor(embedAuthor)
-				.setDescription(`Showing tags ${start + 1}-${start + current.length} out of ${tagArray.length}\n\n${current.join('\n')}\n`);
-
-			return stEmbed;
-		};
-
-		const sendEmbed = () => {
-			message.channel.send(generateEmbed(0)).then(msg => {
-				if(tagArray.length <= 15) return;
-				msg.react('➡️');
-				const collector = msg.createReactionCollector((reaction, user) => ['⬅️', '➡️'].includes(reaction.emoji.name) && user.id === message.author.id, { time: 60000 });
-				currentIndex = 0;
-				collector.on('collect', reaction => {
-					msg.reactions.removeAll().then(async () => {
-						reaction.emoji.name === '⬅️' ? currentIndex -= 15 : currentIndex += 15;
-						msg.edit(generateEmbed(currentIndex));
-						if(currentIndex !== 0) await msg.react('⬅️');
-						if(currentIndex + 15 < tagArray.length) msg.react('➡️');
-					});
-				});
-			});
-		};
+		const SQLpool = client.conPool.promise(); let tags;
 
 		if(message.mentions.users.first()) {
 			try {
-				const member = message.mentions.users.first();
-				const [userRows] = await SQLpool.query(checkUser, [member.id]);
-				console.info(`[SEARCH TAG] Querying for user ${member.id} tags`);
+				const [userRows] = await SQLpool.query(checkUser, [message.mentions.users.first().id]);
+				console.info(`[SEARCH TAG] Querying for user ${message.mentions.users.first().id} tags`);
 				if(userRows[0] === undefined) {
 					console.info('[SEARCH TAG] No user tags found');
 					return message.channel.send(':mag: No user tags found');
 				} else {
+					tags = [];
 					console.info('[SEARCH TAG] Pushing tags');
 					await userRows.forEach(tag => {
 						const ntn = txtFormatter(tag.tag);
 						if(tag.guildID !== null) {
-							tagArray.push(ntn + ' (Server)');
+							tags.push(ntn + ' (Server)');
 						} else {
-							tagArray.push(ntn);
+							tags.push(ntn);
 						}
 					});
-					if(tagArray.length === 0) {
+					if(tags.length === 0) {
 						console.info(`[SEARCH TAG] No tags found: ${ntn}`);
 						return message.channel.send(`:mag: No tags **${ntn}** found`);
 					} else {
-						embedAuthor = `${member.tag}'s tags`;
-						sendEmbed();
+						message.channel.send(`:scroll: **${message.mentions.users.first().tag}'s tags**\n\n${tags.join('\n')}`, { split: true });
 						return console.success('[SEARCH TAG] Found user tags, sent message');
 					}
 				}
@@ -92,21 +62,22 @@ module.exports = {
 					console.info('[SEARCH TAG] No user tags found');
 					return message.channel.send(':mag: You have no tags');
 				} else {
+					tags = [];
 					console.info('[SEARCH TAG] Pushing tags');
 					await selfRows.forEach(tag => {
 						let ntn = txtFormatter(tag.tag);
+						if(tags.includes(ntn)) return;
 						if(tag.guildID !== null) {
-							return tagArray.push(ntn + ' (Server)');
+							return tags.push(ntn + ' (Server)');
 						} else {
-							return tagArray.push(ntn);
+							return tags.push(ntn);
 						}
 					});
-					if(tagArray.length === 0) {
+					if(tags.length === 0) {
 						console.info(`[SEARCH TAG] No tags found: ${ntn}`);
 						return message.channel.send(`:mag: No tags **${ntn}** found`);
 					} else {
-						embedAuthor = `${message.member.user.tag}'s tags`;
-						sendEmbed();
+						message.channel.send(`**:scroll: ${message.member.user.tag}'s tags**\n\n${tags.join('\n')}`, { split: true });
 						return console.success('[SEARCH TAG] Found user tags, sent message');
 					}
 				}
@@ -124,17 +95,17 @@ module.exports = {
 					console.info('[SEARCH TAG] No server tags found');
 					return message.channel.send(':mag: No server tags found');
 				} else {
+					tags = [];
 					console.info('[SEARCH TAG] Pushing tags');
 					await serverRows.forEach(tag => {
 						const ntn = txtFormatter(tag.tag);
-						tagArray.push(ntn);
+						tags.push(ntn);
 					});
-					if(tagArray.length === 0) {
+					if(tags.length === 0) {
 						console.info(`[SEARCH TAG] No tags found: ${ntn}`);
 						return message.channel.send(`:mag: No tags **${ntn}** found`);
 					} else {
-						embedAuthor = `${message.guild.name}'s tags`;
-						sendEmbed();
+						message.channel.send(`**:scroll: ${message.guild.name}'s tags**\n\n${tags.join('\n')}`, { split: true });
 						return console.success('[SEARCH TAG] Found server tags, sent message');
 					}
 				}
@@ -152,23 +123,23 @@ module.exports = {
 					console.info(`[SEARCH TAG] No tags found: ${ntn}`);
 					return message.channel.send(`:mag: No tags **${ntn}** found`);
 				} else {
+					tags = [];
 					console.info('[SEARCH TAG] Pushing tags');
 					await tagRows.forEach(tag => {
 						ntn = txtFormatter(tag.tag);
 						let user = client.users.cache.get(tag.userID);
 						if(tag.guildID !== null) {
 							if(tag.guildID !== message.guild.id) return;
-							tagArray.push(`${ntn} (Server)\nOwner: ${user.tag}`);
+							tags.push(`${ntn} (Server)\nOwner: ${user.tag}`);
 						} else {
-							tagArray.push(`${ntn}\nOwner: ${user.tag}`);
+							tags.push(`${ntn}\nOwner: ${user.tag}`);
 						}
 					});
-					if(tagArray.length === 0) {
+					if(tags.length === 0) {
 						console.info(`[SEARCH TAG] No tags found: ${ntn}`);
 						return message.channel.send(`:mag: No tags **${ntn}** found`);
 					} else {
-						embedAuthor = `${ntn} details`;
-						sendEmbed();
+						message.channel.send(`**:scroll: ${ntn} details**\n\n${tags.join('\n\n')}`);
 						return console.success(`[SEARCH TAG] Found tag ${ntn}, sent message`);
 					}
 				}

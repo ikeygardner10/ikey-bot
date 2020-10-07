@@ -10,30 +10,48 @@ module.exports = {
 		usage: '',
 		cooldown: 8,
 		category: 'guild',
-		permissions: 'Manage Roles',
+		permissions: 'None',
 		args: false,
 		description: 'View server roles',
 	},
-	execute: (client, message) => {
+	execute: async (client, message) => {
 
-		let list = message.guild.roles.cache.map(r => `${r}`).join(' ');
+		let roles = message.guild.roles.cache; let rolesArray = []; let currentIndex = 0;
 
-		const sendEmbeds = async function(text, channel) {
-			const arr = text.match(/.{1,2048}/g);
+		const generateEmbed = start => {
+			const current = rolesArray.slice(start, start + 15);
+			const rEmbed = new MessageEmbed()
+				.setTimestamp()
+				.setColor(0xFFFFFA)
+				.setAuthor(`${message.guild.name}'s roles`)
+				.setDescription(`Roles ${start + 1}-${start + current.length} out of ${rolesArray.length}\n\n${current.join('\n')}\n`);
 
-			for (let list of arr) {
-				let embed = new MessageEmbed()
-					.setAuthor(`${message.guild.name} Roles`, message.guild.iconURL())
-					.setDescription(list)
-					.setFooter(`${client.user.username}`, client.user.avatarURL())
-					.setColor(0xFFFFFA);
-
-				await channel.send({ embed });
-			}
+			return rEmbed;
 		};
 
+		const sendEmbed = () => {
+			message.channel.send(generateEmbed(0)).then(msg => {
+				if(rolesArray.length <= 15) return;
+				msg.react('➡️');
+				const collector = msg.createReactionCollector((reaction, user) => ['⬅️', '➡️'].includes(reaction.emoji.name) && user.id === message.author.id, { time: 60000 });
+				currentIndex = 0;
+				collector.on('collect', reaction => {
+					msg.reactions.removeAll().then(async () => {
+						reaction.emoji.name === '⬅️' ? currentIndex -= 15 : currentIndex += 15;
+						msg.edit(generateEmbed(currentIndex));
+						if(currentIndex !== 0) await msg.react('⬅️');
+						if(currentIndex + 15 < rolesArray.length) msg.react('➡️');
+					});
+				});
+			});
+		};
+
+
 		try {
-			sendEmbeds(list, message.channel);
+			await roles.forEach(role => {
+				rolesArray.push(role);
+			});
+			return sendEmbed();
 		} catch(error) {
 			console.error(`[ROLES CMD] ${error.stack}`);
 			return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);

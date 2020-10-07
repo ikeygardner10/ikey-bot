@@ -69,7 +69,7 @@ module.exports = {
 							return message.channel.send(fEmbed);
 						}
 					}).catch((timeout) => {
-						console.info(`[FUCK] ${JSON.stringify(timeout)}`);
+						console.info(`[FUCK] ${timeout}`);
 						return message.channel.send(`${message.author}, no response :pensive:`);
 					});
 			});

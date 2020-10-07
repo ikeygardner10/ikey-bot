@@ -22,7 +22,7 @@ module.exports = async (client, message) => {
 	if(message.author.bot || !message.guild || message.channel.type !== 'text') return;
 
 	// If someone mentions the bot, return
-	if(message.mentions.users.first() && message.mentions.users.first().id === client.user.id && message.author.id !== config.ownerID) return message.channel.send(responseArray[(Math.floor(Math.random() * responseArray.length))]);
+	if(message.mentions.users.first() && message.mentions.users.first().id === client.user.id) return message.channel.send(responseArray[(Math.floor(Math.random() * responseArray.length))]);
 
 	const SQLpool = client.conPool.promise();
 

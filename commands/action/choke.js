@@ -19,7 +19,7 @@ module.exports = {
 		const chokeArray = client.imageArrays.choke; const file = chokeArray[(Math.floor(Math.random() * chokeArray.length))];
 		let messageCount = 1;
 
-		const check = 'SELECT `messageCount` FROM `chokecount` WHERE `userID`= ? AND `memberID`= ?';
+		const check = 'SELECT `messageCount`, `userID`, `memberID` FROM `chokecount` WHERE `userID`= ? AND `memberID`= ?';
 		const addUpdate = 'INSERT INTO `chokecount` (`userID`, `memberID`, `messageCount`) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE `messageCount`= `messageCount`+1';
 
 		const cEmbed = new MessageEmbed()

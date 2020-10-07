@@ -5,7 +5,7 @@ module.exports = {
 		name: 'randomtag',
 		aliases: ['rt', 'rtag'],
 		usage: '',
-		cooldown: 5,
+		cooldown: 8,
 		category: 'tag',
 		permissions: '',
 		args: false,
