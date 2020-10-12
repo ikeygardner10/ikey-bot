@@ -158,9 +158,9 @@ module.exports = {
 						let user = client.users.cache.get(tag.userID);
 						if(tag.guildID !== null) {
 							if(tag.guildID !== message.guild.id) return;
-							tagArray.push(`${ntn} (Server)\nOwner: ${user.tag}`);
+							tagArray.push(`${ntn} *(Server)*\nOwner: ${user.tag}\n`);
 						} else {
-							tagArray.push(`${ntn}\nOwner: ${user.tag}`);
+							tagArray.push(`${ntn}\nOwner: ${user.tag}\n`);
 						}
 					});
 					if(tagArray.length === 0) {

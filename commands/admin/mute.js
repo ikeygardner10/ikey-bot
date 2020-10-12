@@ -16,15 +16,44 @@ module.exports = {
 	execute: async (client, message, args) => {
 
 		if(args[0] === 'list') {
-			try {
-				const muted = message.guild.roles.cache.find(role => role.name === 'Muted').members;
-				const list = muted.map(u => u.user.tag).join('\n');
-				if(!list) return message.channel.send('No muted members.');
-				return message.channel.send(`**${muted.size} member(s) are muted:**\n${list}`, { split: true });
-			} catch(error) {
-				console.error(`[MUTE CMD] ${error.stack}`);
-				return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
-			}
+
+			const muteListArray = []; let currentIndex = 0;
+			const muteList = message.guild.roles.cache.find(role => role.name === 'Muted').members;
+			if(muteListArray.length === 0) return message.channel.send('`Invalid (NO MUTED USERS)`');
+
+			const generateEmbed = start => {
+				const current = muteListArray.slice(start, start + 15);
+				const mEmbed = new MessageEmbed()
+					.setTimestamp()
+					.setColor(0xFFFFFA)
+					.setAuthor(`${message.guild.name}'s mute list`)
+					.setDescription(`Muted users ${start + 1}-${start + current.length} out of ${muteListArray.length}\n\n${current.join('\n')}\n`);
+
+				return mEmbed;
+			};
+
+			const sendEmbed = () => {
+				message.channel.send(generateEmbed(0)).then(msg => {
+					if(muteListArray.length <= 15) return;
+					msg.react('➡️');
+					const collector = msg.createReactionCollector((reaction, user) => ['⬅️', '➡️'].includes(reaction.emoji.name) && user.id === message.author.id, { time: 60000 });
+					currentIndex = 0;
+					collector.on('collect', reaction => {
+						msg.reactions.removeAll().then(async () => {
+							reaction.emoji.name === '⬅️' ? currentIndex -= 15 : currentIndex += 15;
+							msg.edit(generateEmbed(currentIndex));
+							if(currentIndex !== 0) await msg.react('⬅️');
+							if(currentIndex + 15 < muteListArray.length) msg.react('➡️');
+						});
+					});
+				});
+			};
+
+			await muteList.map(user => user.user.tag).forEach(mute => {
+				muteListArray.push(mute);
+			});
+
+			return sendEmbed();
 		}
 
 		const member = message.guild.member(message.mentions.members.first()); if(!member) return message.channel.send('Mention a user.');

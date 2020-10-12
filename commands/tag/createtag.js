@@ -4,6 +4,7 @@
 const txtFormatter = require('../../functions/txtFormatter.js');
 const shortid = require('shortid');
 const fileDownload = require('../../functions/fileDownload.js');
+const blacklist = require('../../data/temp/blacklist.json');
 
 module.exports = {
 	config: {
@@ -17,6 +18,8 @@ module.exports = {
 		description: 'Create a tag, global or server',
 	},
 	execute: async (client, message, args) => {
+
+		if(blacklist.IDs.includes(message.author.id)) return message.channel.send('`Invalid (BLACKLISTED)`');
 
 		let [tag, ...restArgs] = args; let content = restArgs.join(' ');
 		let attachment = message.attachments; const config = client.config;

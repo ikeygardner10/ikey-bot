@@ -15,15 +15,45 @@ module.exports = {
 	execute: async (client, message, args) => {
 
 		if(args[0] === 'list') {
-			return message.guild.fetchBans()
-				.then(banned => {
-					const list = banned.map(user => user.user.tag).join('\n');
-					if(!list) return message.channel.send('`Invalid (NO BANNED USERS)`');
-					return message.channel.send(`**${banned.size} user(s) are banned:**\n${list}`, { split: true });
-				}).catch((error) => {
-					console.error(`[BAN CMD] ${error.stack}`);
-					return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+
+			const banListArray = []; let currentIndex = 0;
+
+			const generateEmbed = start => {
+				const current = banListArray.slice(start, start + 15);
+				const bEmbed = new MessageEmbed()
+					.setTimestamp()
+					.setColor(0xFFFFFA)
+					.setAuthor(`${message.guild.name}'s ban list`)
+					.setDescription(`Bans ${start + 1}-${start + current.length} out of ${banListArray.length}\n\n${current.join('\n')}\n`);
+
+				return bEmbed;
+			};
+
+			const sendEmbed = () => {
+				message.channel.send(generateEmbed(0)).then(msg => {
+					if(banListArray.length <= 15) return;
+					msg.react('➡️');
+					const collector = msg.createReactionCollector((reaction, user) => ['⬅️', '➡️'].includes(reaction.emoji.name) && user.id === message.author.id, { time: 60000 });
+					currentIndex = 0;
+					collector.on('collect', reaction => {
+						msg.reactions.removeAll().then(async () => {
+							reaction.emoji.name === '⬅️' ? currentIndex -= 15 : currentIndex += 15;
+							msg.edit(generateEmbed(currentIndex));
+							if(currentIndex !== 0) await msg.react('⬅️');
+							if(currentIndex + 15 < banListArray.length) msg.react('➡️');
+						});
+					});
 				});
+			};
+
+			await message.guild.fetchBans().then(banned => {
+				banned.map(user => user.user.tag).forEach(ban => {
+					banListArray.push(ban);
+				});
+			});
+
+			if(banListArray.length === 0) return message.channel.send('`Invalid (NO BANNED USERS)`');
+			return sendEmbed();
 		}
 
 		const member = message.mentions.members.first(); if(!member) return message.channel.send('`Invalid (MENTION USER)`');

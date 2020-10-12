@@ -78,6 +78,12 @@ module.exports = async (client, message) => {
 		if(!message.member.hasPermission(permissionsObject[command.config.permissions]) && message.author.id !== config.ownerID) return message.channel.send(`\`Requires ${command.config.permissions} Permission\``);
 	}
 
+	if(message.mentions.users.first()) {
+		if(message.mentions.users.first().id === config.ownerID && command.config.category === 'admin') {
+			return message.channel.send(responseArray[(Math.floor(Math.random() * responseArray.length))]);
+		}
+	}
+
 	// Check for required args on command
 	// Define basic reply, redefine if command has config.usage
 	if(command.config.args && !args.length) {

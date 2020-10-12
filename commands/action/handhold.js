@@ -1,4 +1,5 @@
 const { MessageEmbed } = require('discord.js');
+const YesNo = require('../../data/YesNo.json');
 
 module.exports = {
 	config: {
@@ -18,7 +19,7 @@ module.exports = {
 		const handholdArray = client.imageArrays.handhold; const file = handholdArray[(Math.floor(Math.random() * handholdArray.length))];
 		let messageCount = 1;
 
-		const yes = ['yes', 'yea', 'ye', 'yeah', 'y', 'ya', 'yah']; const no = ['no', 'na', 'nah', 'nope', 'never', 'ew'];
+		const yes = YesNo.yes; const no = YesNo.no;
 		const filter = response => {
 			return yes.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === member.id) || no.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === member.id);
 		};
@@ -69,7 +70,7 @@ module.exports = {
 							return message.channel.send(hEmbed);
 						}
 					}).catch((timeout) => {
-						console.info(`[HANDHOLD CMD] ${JSON.stringify(timeout)}`);
+						console.info(`[HANDHOLD CMD] ${timeout}`);
 						return message.channel.send(`${message.author}, no response :pensive:`);
 					});
 			});
