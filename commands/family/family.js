@@ -16,6 +16,8 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
+		return;
+
 		const member = message.mentions.members.first() || message.member; const guild = message.guild;
 
 		const checkMarriages = 'SELECT * FROM `marriages` WHERE (`partnerOneID`=? OR `partnerTwoID`=?) AND `guildID`=?;';

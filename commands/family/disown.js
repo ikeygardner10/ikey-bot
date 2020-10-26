@@ -17,6 +17,8 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
+		return;
+
 		const member = message.mentions.members.first() || message.member;
 		const guild = message.guild; const author = message.author;
 

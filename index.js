@@ -11,21 +11,19 @@ const client = new Client({
 	cloneLevel: 'deep',
 });
 
-const config = require('./data/owner/config.json');
-client.config = config;
+client.config = require('./data/owner/config.json');
 
 const mysql = require('mysql2');
-const conPool = mysql.createPool({
+client.conPool = mysql.createPool({
 	connectionLimit: 10,
 	multipleStatements: true,
 	host: 'localhost',
 	user: 'ikeybot',
-	password: config.mySQLpw,
+	password: client.config.mySQLpw,
 	database: 'ikeybot',
 	charset: 'utf8mb4',
 	Promise: bluebird,
 });
-client.conPool = conPool;
 
 const logger = require('./functions/logger.js')('./logs/logs.txt');
 const chalk = require('chalk');
@@ -40,6 +38,8 @@ logger.theme.success = chalk.green;
 
 const buildImageArray = require('./functions/buildImageArray.js');
 buildImageArray.execute(client);
+
+client.invites = new Enmap();
 
 fs.readdir('./events/', (error, files) => {
 	if(error) return console.error(`[CLIENT] ${error.stack}`);
@@ -74,18 +74,14 @@ fs.readdir('./commands/', (error, folders) => {
 	});
 });
 
-process.on('STARTUP', function() {
-	client.users.cache.get(config.ownerID).send('Successfully started application :white_check_mark:');
-});
-
 process.on('unhandledRejection', async (error) => {
 	console.error(`[CLIENT] ${error.stack}`);
 	if(error.path) {
-		client.users.cache.get(config.ownerID).send(`__***ERROR***__\n\n**Name:** *${error.name}*\n**Method:** *${error.method}*\n**Code:** *${error.code}*\n**httpStatus:** *${error.httpStatus}*\n\n**Path:** \`${error.path}\`\n**Message:** \`${error.message}\``);
+		client.users.cache.get('341086875232108545').send(`__***ERROR***__\n\n**Name:** *${error.name}*\n**Method:** *${error.method}*\n**Code:** *${error.code}*\n**httpStatus:** *${error.httpStatus}*\n\n**Path:** \`${error.path}\`\n**Message:** \`${error.message}\``);
 		if(error.message === 'Missing Permissions') client.channels.cache.get(error.path.slice(10, -28)).send(`\`An error occured:\`\n\`\`\`${error.name}: ${error.message}\`\`\``);
 	} else {
-		client.users.cache.get(config.ownerID).send(`__***ERROR***__\n\n**Name:** *${error.name}*\n**Method:** *${error.method}*\n**Code:** *${error.code}*\n**httpStatus:** *${error.httpStatus}*\n\n**Message:** \`${error.message}\``);
+		client.users.cache.get('341086875232108545').send(`__***ERROR***__\n\n**Name:** *${error.name}*\n**Method:** *${error.method}*\n**Code:** *${error.code}*\n**httpStatus:** *${error.httpStatus}*\n\n**Message:** \`${error.message}\``);
 	}
 });
 
-client.login(config.botToken);
+client.login(client.config.botToken);

@@ -1,4 +1,5 @@
 const { MessageEmbed } = require('discord.js');
+const sendEmbed = require('../../functions/sendEmbed.js');
 
 module.exports = {
 	config: {
@@ -14,66 +15,64 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
+		// If arguments = list then return ban list
 		if(args[0] === 'list') {
 
-			const banListArray = []; let currentIndex = 0;
+			// Define array to push bans into
+			// Define embed author to pass to function
+			const banListArray = [];
+			const author = `${message.guild.name}'s ban list`;
 
-			const generateEmbed = start => {
-				const current = banListArray.slice(start, start + 15);
-				const bEmbed = new MessageEmbed()
-					.setTimestamp()
-					.setColor(0xFFFFFA)
-					.setAuthor(`${message.guild.name}'s ban list`)
-					.setDescription(`Bans ${start + 1}-${start + current.length} out of ${banListArray.length}\n\n${current.join('\n')}\n`);
-
-				return bEmbed;
-			};
-
-			const sendEmbed = () => {
-				message.channel.send(generateEmbed(0)).then(msg => {
-					if(banListArray.length <= 15) return;
-					msg.react('➡️');
-					const collector = msg.createReactionCollector((reaction, user) => ['⬅️', '➡️'].includes(reaction.emoji.name) && user.id === message.author.id, { time: 60000 });
-					currentIndex = 0;
-					collector.on('collect', reaction => {
-						msg.reactions.removeAll().then(async () => {
-							reaction.emoji.name === '⬅️' ? currentIndex -= 15 : currentIndex += 15;
-							msg.edit(generateEmbed(currentIndex));
-							if(currentIndex !== 0) await msg.react('⬅️');
-							if(currentIndex + 15 < banListArray.length) msg.react('➡️');
-						});
-					});
-				});
-			};
-
+			// Wait for all guild bans to fetch, then push to array
 			await message.guild.fetchBans().then(banned => {
 				banned.map(user => user.user.tag).forEach(ban => {
 					banListArray.push(ban);
 				});
 			});
 
-			if(banListArray.length === 0) return message.channel.send('`Invalid (NO BANNED USERS)`');
-			return sendEmbed();
+			// If there is no bans, return, else pass to embed function
+			if(!banListArray[0]) return message.channel.send('`Invalid (NO BANNED USERS)`');
+			return sendEmbed(message, banListArray, author, 15, '\n');
 		}
 
-		const member = message.mentions.members.first(); if(!member) return message.channel.send('`Invalid (MENTION USER)`');
-		const [, ...restArgs] = args; const reason = restArgs.join(' ');
+		// Define member, return if no member mentioned
+		let member = message.mentions.members.first();
+		if(args[0] && args[0].match(/^[0-9]{18}$/)) {
+			await message.guild.members.fetch(args[0]);
+			member = message.guild.members.cache.get(args[0]);
+		}
+		if(!member) return message.channel.send('`Invalid (MENTION USER/USER ID)`');
 
+		// A few role checks, first define author, member & bot highest roles
+		// Checks if member has admin/mod perms, return if true
+		// Checks for author to member role, returns if member is equal or higher
+		// Checks for bot to member role, returns if member is equal or higher
+		if(message.author.id !== client.config.ownerID) {
+			const authorrole = message.member.roles.highest;
+			const memberrole = member.roles.highest;
+			const botrole = message.guild.me.roles.highest;
+			const perms = ['ADMINISTRATOR', 'BAN_MEMBERS', 'MANAGE_SERVER'];
+			if(member.hasPermission(perms)) return message.channel.send('`Invalid Permission (USER HAS ADMIN/MOD PERMISSIONS)`');
+			if(authorrole.position <= memberrole.position) return message.channel.send('`Invalid Permission (USERS ROLE HIGHER/EQUAL TO YOURS)`');
+			if(memberrole.position >= botrole.position) return message.channel.send('`Invalid Permission (USERS ROLE HIGHER/EQUAL TO MINE)`');
+		}
+
+		// Check to see if member is bannable, if all other checks succeed
+		if(!message.guild.member(member.user).bannable) return message.channel.send('`Invalid Permission (USER NOT BANNABLE)`');
+
+		// Define any arguments after a mentioned member as the reason
+		// Join them to look pretty
+		const [, ...restArgs] = args;
+		const reason = restArgs.join(' ');
+
+		// Create basic embed
 		const bEmbed = new MessageEmbed()
 			.setThumbnail(member.user.avatarURL({ format: 'png', dynamic: true, size: 512 }))
 			.setFooter(`${message.guild.me.displayName}`, client.user.avatarURL())
 			.setTimestamp()
 			.setColor(0xFFFFFA);
 
-		if(message.author.id !== client.config.ownerID) {
-			const authorrole = message.member.roles.highest; const memberrole = member.roles.highest;
-			const botrole = message.guild.me.roles.highest;
-			if(member.hasPermission(['ADMINISTRATOR', 'BAN_MEMBERS', 'MANAGE_SERVER', 'MUTE_MEMBERS'])) return message.channel.send('`Invalid Permission (USER HAS ADMIN/MOD PERMISSIONS)`');
-			if(authorrole.position < memberrole.position || authorrole.position === memberrole.position) return message.channel.send('`Invalid Permission (USERS ROLE HIGHER/EQUAL TO YOURS)`');
-			if(memberrole.position > botrole.position || memberrole.position === botrole.position) return message.channel.send('`Invalid Permission (USERS ROLE HIGHER/EQUAL TO MINE)`');
-		}
-		if(!message.guild.member(member.user).bannable) return message.channel.send('`Invalid Permission (USER NOT BANNABLE)`');
-
+		// Return member ban, with optional reason, then returns embed, or fails and return error
 		return member.ban({ reason: `${reason || 'No reason provided.'}` })
 			.then(() => {
 				bEmbed.setDescription(`**Result:** ${member} (ID: \`${member.id}\`) has been banned\n\n**Banned By:** <@${message.author.id}>\n**Reason:** ${reason || 'No reason provided'}`);

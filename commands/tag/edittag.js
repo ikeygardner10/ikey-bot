@@ -3,7 +3,6 @@ const fs = require('fs-extra');
 const txtFormatter = require('../../functions/txtFormatter.js');
 const shortid = require('shortid');
 const fileDownload = require('../../functions/fileDownload.js');
-const blacklist = require('../../data/temp/blacklist.json');
 
 module.exports = {
 	config: {
@@ -17,8 +16,6 @@ module.exports = {
 		description: '\nEdit a server tag\nEdit a global tag',
 	},
 	execute: async (client, message, args) => {
-
-		if(blacklist.IDs.includes(message.author.id)) return message.channel.send('`Invalid (BLACKLISTED)`');
 
 		const [tag, ...restArgs] = args; const content = restArgs.join(' '); const config = client.config;
 		let attachment = message.attachments; const imageDelete = fs.unlink;

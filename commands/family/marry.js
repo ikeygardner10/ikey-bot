@@ -8,7 +8,7 @@ module.exports = {
 	config: {
 		name: 'marry',
 		aliases: ['my'],
-		usage: '<@user (optional)>',
+		usage: '<@user>',
 		cooldown: 10,
 		category: 'family',
 		permissions: '',
@@ -17,26 +17,32 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
-		const author = message.author; const member = message.mentions.members.first(); const guild = message.guild;
-		if(!member) return message.channel.send('`Invalid Proposal (NO USER MENTIONED)`'); if(author.id === member.id) return message.channel.send('`Invalid Proposal (NO SOLOGAMY)`');
+		return;
 
-		const checkMarriages = 'SELECT * FROM `marriages` WHERE (`partnerOneID`=? OR `partnerTwoID`=?) AND `guildID`=?;';
-		let checkAdoptions = 'SELECT * FROM `adoptions` WHERE `childID`=? AND `guildID`=?;';
-		const addMarriage = 'INSERT INTO `marriages` (`partnerOneID`, `partnerTwoID`, `familyID`, `guildID`, `createdAt`) VALUES (?, ?, ?, ?, ?);';
+		const author = message.author;
+		const member = message.mentions.members.first();
+		const guild = message.guild;
+
+		if(!member) return message.channel.send('`Invalid Proposal (NO USER MENTIONED)`');
+		if(author.id === member.id) return message.channel.send('`Invalid Proposal (NO SOLOGAMY)`');
 
 		const SQLpool = client.conPool.promise();
+		const checkUsersMarriage = ';';
+		const checkPartnerMarriage = ';';
+		const checkRelations = ';';
+
 
 		const [authorRows] = await SQLpool.query(checkMarriages, [author.id, author.id, guild.id]);
-		console.info(`[MARRY CMD] Querying database for partnerOneID: ${author.id} in guild: ${guild.id}`);
+		console.info(`[MARRY CMD] Querying database for userID: ${author.id} in guild: ${guild.id}`);
 		if(authorRows[0] !== undefined) {
-			console.info(`[MARRY CMD] Entry found for partnerOneID: ${author.id} in guild: ${guild.id}, proposal cancelled`);
+			console.info(`[MARRY CMD] Entry found for userID: ${author.id} in guild: ${guild.id}, proposal cancelled`);
 			return message.channel.send('`Invalid Proposal (YOU\'RE ALREADY MARRIED)`');
 		}
 
 		const [memberRows] = await SQLpool.query(checkMarriages, [member.id, member.id, guild.id]);
-		console.info(`[MARRY CMD] Querying database for partnerTwoID: ${member.id} in guild: ${guild.id}`);
+		console.info(`[MARRY CMD] Querying database for partnerID: ${member.id} in guild: ${guild.id}`);
 		if(memberRows[0] !== undefined) {
-			console.info(`[MARRY CMD] Entry found for partnerTwoID: ${member.id} in guild: ${guild.id}, proposal cancelled`);
+			console.info(`[MARRY CMD] Entry found for partnerID: ${member.id} in guild: ${guild.id}, proposal cancelled`);
 			return message.channel.send('`Invalid Proposal (PARTNER ALREADY MARRIED)`');
 		}
 

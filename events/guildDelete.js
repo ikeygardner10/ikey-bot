@@ -1,7 +1,7 @@
 module.exports = async (client, guild) => {
 
 	const updateGuild = 'UPDATE `guilds` SET `joined`= ? WHERE `guildID`= ?';
-	const deleteGuildSettings = 'DELETE FROM `guildsettings` WHERE `guildID`= ?';
+	const deleteGuildSettings = 'SET SQL_SAFE_UPDATES=0; DELETE FROM `guildsettings` WHERE `guildID`= ?';
 
 	console.info('[GUILD DELETE] Left guild, updating records in database');
 	const SQLpool = client.conPool.promise();

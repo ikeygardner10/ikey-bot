@@ -14,11 +14,13 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
+		// Create embed
 		const iEmbed = new MessageEmbed()
 			.setImage(message.guild.iconURL({ format: 'png', dynamic: true, size: 1024 }))
 			.setFooter(`${message.guild.name}'s Icon`, client.user.avatarURL())
 			.setColor(0xFFFFFA);
 
+		// Return embed
 		return message.channel.send(iEmbed);
 
 	} };

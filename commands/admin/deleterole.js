@@ -13,24 +13,33 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
+		// Define input as args joined, return of no args
 		const input = args.join(' ');
 		if(!input) return message.channel.send('`Invalid (NO ROLE NAMED)`');
 
+		// Wait for roles to fetch, search roles for input, return if no role found
+		await message.guild.roles.fetch();
 		const role = message.guild.roles.cache.find(r => r.name === input);
 		if(!role) return message.channel.send('`Invalid (NO ROLE FOUND)`');
 
+		// Create basic embed
 		const dEmbed = new MessageEmbed()
 			.setThumbnail(message.guild.iconURL({ format: 'png', dynamic: true, size: 512 }))
 			.setFooter(`${message.guild.me.displayName}`, client.user.avatarURL())
 			.setTimestamp()
 			.setColor(0xFFFFFA);
 
+		// Define highest roles for bot and author
+		// If author role is equal or higher to role, return
+		// If role position is equal or higher to the bots role, return
 		if(message.author.id !== client.config.ownerID) {
-			const authorrole = message.member.roles.highest; const botrole = message.guild.me.roles.highest;
-			if(authorrole.position < role.position || authorrole.position === role.position) return message.channel.send('`Invalid Permission (ROLE IS HIGHER/EQUAL TO YOURS)`');
-			if(role.position > botrole.position || role.position === botrole.position) return message.channel.send('`Invalid Permission (ROLE IS HIGHER/EQUAL TO MINE)`');
+			const authorrole = message.member.roles.highest;
+			const botrole = message.guild.me.roles.highest;
+			if(authorrole.position <= role.position) return message.channel.send('`Invalid Permission (ROLE IS HIGHER/EQUAL TO YOURS)`');
+			if(role.position >= botrole.position) return message.channel.send('`Invalid Permission (ROLE IS HIGHER/EQUAL TO MINE)`');
 		}
 
+		// Return role delete, then define embed desc and return, or return error
 		return role.delete()
 			.then((deleted) => {
 				dEmbed.setDescription(`**Result:** **${deleted.name}** role has been deleted\n\n**Deleted By:** <@${message.author.id}>`);

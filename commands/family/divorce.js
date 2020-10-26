@@ -16,6 +16,8 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
+		return;
+
 		const author = message.author; let partnerOne; let partnerTwo; const guild = message.guild;
 		const checkMarriages = 'SELECT `partnerOneID`, `partnerTwoID`, `guildID` FROM `marriages` WHERE (`partnerOneID`=? OR `partnerTwoID`=?) AND `guildID`=?;';
 		const deleteMarriage = 'SET SQL_SAFE_UPDATES=0; DELETE FROM `marriages` WHERE `partnerOneID`=? AND `partnerTwoID`=? AND `guildID`=?;';

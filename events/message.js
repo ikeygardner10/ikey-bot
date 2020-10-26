@@ -1,5 +1,7 @@
 /* eslint-disable quotes */
 const config = require('../data/owner/config.json'); let prefix;
+const userBlacklist = require('../data/owner/userBlacklist.json');
+const serverBlacklist = require('../data/owner/serverBlacklist.json');
 const active = new Map(); const ops = { active: active };
 const { Collection } = require('discord.js'); const cooldowns = new Collection();
 const permissionsObject = {
@@ -14,12 +16,15 @@ const responseArray = require('../data/temp/responseArray.json');
 const checkPrefix = 'SELECT `prefix` FROM `guildsettings` WHERE `guildID`= ?';
 const updatePrefix = 'UPDATE `guildsettings` SET `prefix`= ? WHERE `guildID`= ?';
 const addGuildSettings = 'INSERT INTO `guildsettings` (`guildID`, `prefix`, `maxFamilySize`, `allowIncest`) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE `prefix`= VALUES (`prefix`)';
-const checkChannel = 'SELECT `channelID` FROM `disabledchannels` WHERE `guildID`= ? AND `channelID`= ?';
+const checkDisabledCmds = 'SELECT * FROM `disabledcommands` WHERE `command`=? AND `guildID`= ? AND `channelID`= ?';
 
 module.exports = async (client, message) => {
 
 	// Ignore all bots, to stop looping or worse, ignore non guild message, or non text channels
 	if(message.author.bot || !message.guild || message.channel.type !== 'text') return;
+
+
+	if(serverBlacklist.includes(message.guild.id) || userBlacklist.includes(message.author.id)) return;
 
 	// If someone mentions the bot, return
 	if(message.mentions.users.first() && message.mentions.users.first().id === client.user.id) return message.channel.send(responseArray[(Math.floor(Math.random() * responseArray.length))]);
@@ -66,23 +71,28 @@ module.exports = async (client, message) => {
 	const command = client.commands.get(commandName) || client.commands.get(client.aliases.get(commandName));
 	if(!command) return;
 
-	const [disabledChannel] = await SQLpool.execute(checkChannel, [message.guild.id, message.channel.id]);
-	if(disabledChannel[0] !== undefined && disabledChannel[0].channelID === message.channel.id && command.config.name !== 'toggle') return;
+	const [checkAllRows] = await SQLpool.execute(checkDisabledCmds, ['all', message.guild.id, message.channel.id]);
+	if(checkAllRows[0] !== undefined && command.config.name !== 'toggle') return;
+
+	const [checkCmdRows] = await SQLpool.execute(checkDisabledCmds, [command.config.name, message.guild.id, message.channel.id]);
+	if(checkCmdRows[0] !== undefined && command.config.name !== 'toggle') return;
 
 	// Check for NSFW channel
 	if(command.config.nsfw && !message.channel.nsfw) return message.channel.send('`NSFW channels only`');
 
 	// Check for required user permissions
 	if(command.config.permissions) {
-		if(command.config.permissions === 'Bot Owner' && message.author.id !== config.ownerID) return message.channel.send(`\`Bot Owner Only\``);
-		if(!message.member.hasPermission(permissionsObject[command.config.permissions]) && message.author.id !== config.ownerID) return message.channel.send(`\`Requires ${command.config.permissions} Permission\``);
+		if(command.config.permissions === 'Bot Owner' && !config.ownerID.includes(message.author.id)) return message.channel.send(`\`Bot Owner Only\``);
+		if(!message.member.hasPermission(permissionsObject[command.config.permissions]) && !config.ownerID.includes(message.author.id)) return message.channel.send(`\`Requires ${command.config.permissions} Permission\``);
 	}
 
 	if(message.mentions.users.first()) {
-		if(message.mentions.users.first().id === config.ownerID && command.config.category === 'admin') {
+		if(message.mentions.users.first().id === config.ownerID && command.config.category === 'admin' && message.author.id !== config.ownerID) {
 			return message.channel.send(responseArray[(Math.floor(Math.random() * responseArray.length))]);
 		}
 	}
+
+	if(Date.now() - message.author.createdAt < 1000 * 60 * 60 * 24 * 7 && command.config.category === 'tag') return message.channel.send('`Invalid (ACC NEWER THAN 7 DAYS)`');
 
 	// Check for required args on command
 	// Define basic reply, redefine if command has config.usage

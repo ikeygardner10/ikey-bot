@@ -4,6 +4,7 @@
 /* eslint-disable prefer-const */
 const txtFormatter = require('../../functions/txtFormatter.js');
 const { MessageEmbed } = require('discord.js');
+const sendEmbed = require('../../functions/sendEmbed.js');
 
 module.exports = {
 	config: {
@@ -18,163 +19,125 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
-		checkUser = 'SELECT `tag`, `guildID` FROM `tags` WHERE `userID`=?;'; checkServer = 'SELECT `tag` FROM `tags` WHERE `guildID`=?;';
-		checkTag = 'SELECT `tag`, `userID`, `guildID` FROM `tags` WHERE BINARY `tag`=?;'; checkSelf = 'SELECT `tag`, `guildID` FROM `tags` WHERE `userID`=?;';
+		// Outline SQL statements
+		const checkUser = 'SELECT `tag`, `guildID` FROM `tags` WHERE `userID`=?;';
+		const checkServer = 'SELECT `tag` FROM `tags` WHERE `guildID`=?;';
+		const checkTag = 'SELECT `tag`, `userID`, `guildID` FROM `tags` WHERE BINARY `tag`=?;';
+		const checkSelf = 'SELECT `tag`, `guildID` FROM `tags` WHERE `userID`=?;';
 
-		const SQLpool = client.conPool.promise(); let tagArray = []; let embedAuthor; let currentIndex = 0;
+		// Define mentioned memeber, setup tagArray and format args
+		const member = message.mentions.users.first();
+		const tagArray = []; let author; let ntn = txtFormatter(args[0]);
 
-		const generateEmbed = start => {
-			const current = tagArray.slice(start, start + 15);
-			const stEmbed = new MessageEmbed()
-				.setTimestamp()
-				.setColor(0xFFFFFA)
-				.setAuthor(embedAuthor)
-				.setDescription(`Showing tags ${start + 1}-${start + current.length} out of ${tagArray.length}\n\n${current.join('\n')}\n`);
+		// Define SQLpool
+		const SQLpool = client.conPool.promise();
 
-			return stEmbed;
-		};
-
-		const sendEmbed = () => {
-			message.channel.send(generateEmbed(0)).then(msg => {
-				if(tagArray.length <= 15) return;
-				msg.react('➡️');
-				const collector = msg.createReactionCollector((reaction, user) => ['⬅️', '➡️'].includes(reaction.emoji.name) && user.id === message.author.id, { time: 60000 });
-				currentIndex = 0;
-				collector.on('collect', reaction => {
-					msg.reactions.removeAll().then(async () => {
-						reaction.emoji.name === '⬅️' ? currentIndex -= 15 : currentIndex += 15;
-						msg.edit(generateEmbed(currentIndex));
-						if(currentIndex !== 0) await msg.react('⬅️');
-						if(currentIndex + 15 < tagArray.length) msg.react('➡️');
-					});
-				});
-			});
-		};
-
-		if(message.mentions.users.first()) {
-			try {
-				const member = message.mentions.users.first();
-				const [userRows] = await SQLpool.query(checkUser, [member.id]);
-				console.info(`[SEARCH TAG] Querying for user ${member.id} tags`);
-				if(userRows[0] === undefined) {
-					console.info('[SEARCH TAG] No user tags found');
-					return message.channel.send(':mag: No user tags found');
-				} else {
-					console.info('[SEARCH TAG] Pushing tags');
-					await userRows.forEach(tag => {
-						const ntn = txtFormatter(tag.tag);
-						if(tag.guildID !== null) {
-							tagArray.push(ntn + ' (Server)');
-						} else {
-							tagArray.push(ntn);
-						}
-					});
-					if(tagArray.length === 0) {
-						console.info(`[SEARCH TAG] No tags found: ${ntn}`);
-						return message.channel.send(`:mag: No tags **${ntn}** found`);
-					} else {
-						embedAuthor = `${member.tag}'s tags`;
-						sendEmbed();
-						return console.success('[SEARCH TAG] Found user tags, sent message');
-					}
-				}
-			} catch(error) {
-				console.error(`[SEARCH TAG] ${error.stack}`);
-				return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
-			}
-		}
-
+		// If no args are given
 		if(!args[0]) {
-			try {
-				const [selfRows] = await SQLpool.query(checkSelf, [message.author.id]);
-				console.info(`[SEARCH TAG] Querying for user ${message.author.id} tags`);
-				if(selfRows[0] === undefined) {
-					console.info('[SEARCH TAG] No user tags found');
-					return message.channel.send(':mag: You have no tags');
+
+			// Define SQL query, if no tags are found, return
+			const [selfRows] = await SQLpool.query(checkSelf, [message.author.id]);
+			if(selfRows[0] === undefined) return message.channel.send(':mag: You have no tags');
+
+			// Define author
+			// Wait for each tag to be pushed to the array
+			author = `${message.member.user.tag}'s tags`;
+			await selfRows.forEach(tag => {
+				ntn = txtFormatter(tag.tag);
+				if(tag.guildID !== null) {
+					return tagArray.push(ntn + ' (Server)');
 				} else {
-					console.info('[SEARCH TAG] Pushing tags');
-					await selfRows.forEach(tag => {
-						let ntn = txtFormatter(tag.tag);
-						if(tag.guildID !== null) {
-							return tagArray.push(ntn + ' (Server)');
-						} else {
-							return tagArray.push(ntn);
-						}
-					});
-					if(tagArray.length === 0) {
-						console.info(`[SEARCH TAG] No tags found: ${ntn}`);
-						return message.channel.send(`:mag: No tags **${ntn}** found`);
-					} else {
-						embedAuthor = `${message.member.user.tag}'s tags`;
-						sendEmbed();
-						return console.success('[SEARCH TAG] Found user tags, sent message');
-					}
+					return tagArray.push(ntn);
 				}
-			} catch(error) {
-				console.error(`[SEARCH TAG] ${error.stack}`);
-				return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
-			}
+			});
+
+			return sendEmbed(message, tagArray, author, 15, '\n');
 		}
 
-		if(args[0] === 'server') {
-			try {
-				const [serverRows] = await SQLpool.query(checkServer, [message.guild.id]);
-				console.info(`[SEARCH TAG] Querying for server ${message.guild.id} tags`);
-				if(serverRows[0] === undefined) {
-					console.info('[SEARCH TAG] No server tags found');
-					return message.channel.send(':mag: No server tags found');
+		// If message mentions a member
+		if(member) {
+
+			// Define SQL query, if no tags are found, return
+			const [userRows] = await SQLpool.query(checkUser, [member.id]);
+			if(userRows[0] === undefined) return message.channel.send(':mag: No user tags found');
+
+			// Define author
+			// Wait for each tag found to be pushed to the array
+			author = `${member.tag}'s tags`;
+			await userRows.forEach(tag => {
+				ntn = txtFormatter(tag.tag);
+				if(tag.guildID !== null) {
+					tagArray.push(ntn + ' (Server)');
 				} else {
-					console.info('[SEARCH TAG] Pushing tags');
-					await serverRows.forEach(tag => {
-						const ntn = txtFormatter(tag.tag);
-						tagArray.push(ntn);
-					});
-					if(tagArray.length === 0) {
-						console.info(`[SEARCH TAG] No tags found: ${ntn}`);
-						return message.channel.send(`:mag: No tags **${ntn}** found`);
-					} else {
-						embedAuthor = `${message.guild.name}'s tags`;
-						sendEmbed();
-						return console.success('[SEARCH TAG] Found server tags, sent message');
-					}
+					tagArray.push(ntn);
 				}
-			} catch(error) {
-				console.error(`[SEARCH TAG] ${error.stack}`);
-				return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
-			}
+			});
+
+			return sendEmbed(message, tagArray, author, 15, '\n');
+		}
+
+		// If args[0] matches a user id format
+		if(args[0] && args[0].match(/^[0-9]{18}$/)) {
+
+			// Define SQL query, if no tags are found, return
+			const [idRows] = await SQLpool.query(checkUser, [args[0]]);
+			if(idRows[0] === undefined) return message.channel.send(':mag: No user tags found');
+
+			// Define author
+			// Wait for each tag found to be pushed to the array
+			await client.users.fetch(args[0]);
+			author = `${client.users.cache.get(args[0]).tag || 'Unknown User'}'s tags`;
+			await idRows.forEach(tag => {
+				ntn = txtFormatter(tag.tag);
+				if(tag.guildID !== null) {
+					tagArray.push(ntn + ' (Server)');
+				} else {
+					tagArray.push(ntn);
+				}
+			});
+
+			return sendEmbed(message, tagArray, author, 15, '\n');
+		}
+
+		// If args[0] matches 'server'
+		if(args[0] === 'server') {
+
+			// Define SQL query, if no tags are found, return
+			const [serverRows] = await SQLpool.query(checkServer, [message.guild.id]);
+			if(serverRows[0] === undefined) return message.channel.send(':mag: No server tags found');
+
+			// Define author
+			// Wait for each tag found to be pushed to the array
+			author = `${message.guild.name}'s tags`;
+			await serverRows.forEach(tag => {
+				ntn = txtFormatter(tag.tag);
+				tagArray.push(ntn);
+			});
+
+			return sendEmbed(message, tagArray, author, 15, '\n');
 		}
 
 		else {
-			try {
-				let ntn = txtFormatter(args[0]);
-				const [tagRows] = await SQLpool.query(checkTag, [ntn]);
-				if(tagRows[0] === undefined) {
-					console.info(`[SEARCH TAG] No tags found: ${ntn}`);
-					return message.channel.send(`:mag: No tags **${ntn}** found`);
+
+			// Define SQL query, if no tags are found, return
+			const [tagRows] = await SQLpool.query(checkTag, [ntn]);
+			if(tagRows[0] === undefined) return message.channel.send(`:mag: No tag **${ntn}** found`);
+
+			// Define author
+			// Wait for each tag found to be pushed to the array
+			author = `${ntn} details`;
+			await client.users.fetch(tagRows[0].userID);
+			await tagRows.forEach(tag => {
+				ntn = txtFormatter(tag.tag);
+				let user = client.users.cache.get(tag.userID).tag || 'Unknown User';
+				if(tag.guildID !== null) {
+					if(tag.guildID !== message.guild.id) return;
+					tagArray.push(`${ntn} *(Server)*\nOwner: ${user}\n`);
 				} else {
-					console.info('[SEARCH TAG] Pushing tags');
-					await tagRows.forEach(tag => {
-						ntn = txtFormatter(tag.tag);
-						let user = client.users.cache.get(tag.userID);
-						if(tag.guildID !== null) {
-							if(tag.guildID !== message.guild.id) return;
-							tagArray.push(`${ntn} *(Server)*\nOwner: ${user.tag}\n`);
-						} else {
-							tagArray.push(`${ntn}\nOwner: ${user.tag}\n`);
-						}
-					});
-					if(tagArray.length === 0) {
-						console.info(`[SEARCH TAG] No tags found: ${ntn}`);
-						return message.channel.send(`:mag: No tags **${ntn}** found`);
-					} else {
-						embedAuthor = `${ntn} details`;
-						sendEmbed();
-						return console.success(`[SEARCH TAG] Found tag ${ntn}, sent message`);
-					}
+					tagArray.push(`${ntn}\nOwner: ${user}\n`);
 				}
-			} catch(error) {
-				console.error(`[SEARCH TAG] ${error.stack}`);
-				return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
-			}
+			});
+
+			return sendEmbed(message, tagArray, author, 15, '\n');
 		}
 	} };

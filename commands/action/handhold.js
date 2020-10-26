@@ -15,67 +15,77 @@ module.exports = {
 	},
 	execute: async (client, message) => {
 
-		const member = message.mentions.members.first(); if(!member) return message.channel.send('`Invalid (NO USER)');
-		const handholdArray = client.imageArrays.handhold; const file = handholdArray[(Math.floor(Math.random() * handholdArray.length))];
-		let messageCount = 1;
+		// Define member, return if no member mentioned
+		const member = message.mentions.members.first();
+		if(!member) return message.channel.send('`Invalid (NO USER)');
 
+		// Define imageArray, select random image URL
+		const handholdArray = client.imageArrays.handhold;
+		const file = handholdArray[(Math.floor(Math.random() * handholdArray.length))];
+
+		// Create basic embed
+		const hEmbed = new MessageEmbed()
+			.setTimestamp()
+			.setColor(0xFFFFFA);
+
+		// Outline SQL statements
+		const check = 'SELECT `messageCount` FROM `handholdcount` WHERE `userID`= ? AND `memberID`= ?';
+		const addUpdate = 'INSERT INTO `handholdcount` (`userID`, `memberID`, `messageCount`) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE `messageCount`= `messageCount`+1';
+
+		// Switch for self mentions
+		switch(member.id) {
+		case message.author.id:
+			hEmbed.setDescription(`${message.author}... :pensive:`);
+			hEmbed.attachFiles('./images/self/handhold.gif');
+			hEmbed.setImage('attachment://handhold.gif');
+			break;
+		default:
+			hEmbed.setDescription(`${message.author} and ${member}`);
+			hEmbed.attachFiles(`./images/handhold/${file}`);
+			hEmbed.setImage(`attachment://${file}`);
+		}
+
+		// Define yes/no, define response filter
+		// Check for response author and response content
 		const yes = YesNo.yes; const no = YesNo.no;
 		const filter = response => {
 			return yes.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === member.id) || no.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === member.id);
 		};
 
-		const check = 'SELECT `messageCount` FROM `handholdcount` WHERE `userID`= ? AND `memberID`= ?';
-		const addUpdate = 'INSERT INTO `handholdcount` (`userID`, `memberID`, `messageCount`) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE `messageCount`= `messageCount`+1';
+		// Define SQLpool, define SQL query
+		const SQLpool = client.conPool.promise();
+		const [rows] = await SQLpool.query(check, [message.author.id, member.id]);
 
-		const hEmbed = new MessageEmbed()
-			.setTimestamp()
-			.setColor(0xFFFFFA);
-
-		try {
-			const SQLpool = client.conPool.promise();
-			const [rows] = await SQLpool.query(check, [message.author.id, member.id]);
-			message.channel.send(`${member}, ${message.author} wants to hold hands... do you accept? :flushed:`).then(() => {
-				message.channel.awaitMessages(filter, { max: 1, time: 15000, errors: ['time'] })
-					.then(collected => {
-						if(yes.includes(collected.first().content.toLowerCase())) {
-							switch(member.id) {
-							case message.author.id:
-								hEmbed.setDescription(`${message.author}... :pensive:`);
-								hEmbed.attachFiles('./images/self/handhold.gif');
-								hEmbed.setImage('attachment://handhold.gif');
-								break;
-							default:
-								hEmbed.setDescription(`${message.author} and ${member}`);
-								hEmbed.attachFiles(`./images/handhold/${file}`);
-								hEmbed.setImage(`attachment://${file}`);
-							}
-							if(rows[0] !== undefined) {
-								messageCount = rows[0].messageCount + 1;
-								hEmbed.setFooter(`[${messageCount} times]`, client.user.avatarURL());
-								message.channel.send(hEmbed);
-								return SQLpool.execute(addUpdate, [message.author.id, member.id, 1])
-									.then(() => console.success('[HANDHOLD CMD] messageCount record updated'))
-									.catch((error) => console.error(`[HANDHOLD CMD] ${error.stack}`));
-							} else {
-								hEmbed.setFooter(`[${messageCount} times]`, client.user.avatarURL());
-								message.channel.send(hEmbed);
-								return SQLpool.execute(addUpdate, [message.author.id, member.id, 1])
-									.then(() => console.success('[HANDHOLD CMD] messageCount record added'))
-									.catch((error) => console.error(`[HANDHOLD CMD] ${error.stack}`));
-							}
-						} else if(no.includes(collected.first().content.toLowerCase())) {
-							hEmbed.setDescription(`${member} said no! :sob:`);
-							hEmbed.attachFiles('./images/self/handholdno.gif');
-							hEmbed.setImage('attachment://handholdno.gif');
-							return message.channel.send(hEmbed);
+		// Send question to mentioned user, then create message collector
+		// If response is yes, check for existing record, if undefined, create new else update
+		// If response is no, redefine embed and return it, otherwise catch timeout (15s)
+		message.channel.send(`${member}, ${message.author} wants to hold hands... do you accept? :flushed:`).then(() => {
+			message.channel.awaitMessages(filter, { max: 1, time: 15000, errors: ['time'] })
+				.then(collected => {
+					if(yes.includes(collected.first().content.toLowerCase())) {
+						if(rows[0] === undefined) {
+							const messageCount = 1;
+							hEmbed.setFooter(`[${messageCount} times]`, client.user.avatarURL());
+							message.channel.send(hEmbed);
+							return SQLpool.execute(addUpdate, [message.author.id, member.id, 1])
+								.then(() => console.success('[HANDHOLD CMD] messageCount record added'))
+								.catch((error) => console.error(`[HANDHOLD CMD] ${error.stack}`));
+						} else {
+							const messageCount = rows[0].messageCount + 1;
+							hEmbed.setFooter(`[${messageCount} times]`, client.user.avatarURL());
+							message.channel.send(hEmbed);
+							return SQLpool.execute(addUpdate, [message.author.id, member.id, 1])
+								.then(() => console.success('[HANDHOLD CMD] messageCount record updated'))
+								.catch((error) => console.error(`[HANDHOLD CMD] ${error.stack}`));
 						}
-					}).catch((timeout) => {
-						console.info(`[HANDHOLD CMD] ${timeout}`);
-						return message.channel.send(`${message.author}, no response :pensive:`);
-					});
-			});
-		} catch(error) {
-			console.error(`[HANDHOLD CMD] ${error.stack}`);
-			return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
-		}
+					} else if(no.includes(collected.first().content.toLowerCase())) {
+						hEmbed.setDescription(`${member} said no! :sob:`);
+						hEmbed.attachFiles('./images/self/handholdno.gif');
+						hEmbed.setImage('attachment://handholdno.gif');
+						return message.channel.send(hEmbed);
+					}
+				}).catch(() => {
+					return message.channel.send(`${message.author}, no response :pensive:`);
+				});
+		});
 	} };

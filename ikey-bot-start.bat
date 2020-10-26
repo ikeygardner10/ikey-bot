@@ -1,2 +1,2 @@
 @echo off
-nodemon --delay 15000ms --signal STARTUP ./index.js
+nodemon --delay 5000ms --signal STARTUP ./index.js

@@ -12,19 +12,20 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
-		const member = message.mentions.members.first(); if(!member) return message.channel.send('Invalid (NO USER)');
-		const number = Math.random();
+		// Define member, return if no member mentioned
+		const member = message.mentions.members.first();
+		if(!member) return message.channel.send('Invalid (NO USER)');
 
-		try {
-			if(number > 0.33) {
-				return client.commands.get('choke').execute(client, message, args, member);
-			} else if(number < 0.66) {
-				return client.commands.get('shoot').execute(client, message, args, member);
-			} else {
-				return client.commands.get('stab').execute(client, message, args, member);
-			}
-		} catch(error) {
-			console.error(`[KILL CMD] ${error.stack}`);
-			return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+		// Define chace as random value
+		const chance = Math.random();
+
+		// 33% chance for each, below .33 choke, between .33 & .66 shoot, else stab
+		// Execute command based on value, pass member through, command will do the rest
+		if(chance < 0.33) {
+			return client.commands.get('choke').execute(client, message, args, member);
+		} else if(chance > 0.33 && chance < 0.66) {
+			return client.commands.get('shoot').execute(client, message, args, member);
+		} else {
+			return client.commands.get('stab').execute(client, message, args, member);
 		}
 	} };

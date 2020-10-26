@@ -1,0 +1,100 @@
+{
+    "status": {
+        "online": "Online",
+        "idle": "Idle",
+        "dnd": "Do Not Disturb",
+        "offline": "Offline/Invisible"
+    },
+    "permissions": {
+        "ADMINISTRATOR": "Admin",
+        "CREATE_INSTANT_INVITE": "Create Invite",
+        "KICK_MEMBERS": "Kick",
+        "BAN_MEMBERS": "Ban",
+        "MANAGE_CHANNELS": "Manage Channels",
+        "MANAGE_GUILD": "Manage Server",
+        "ADD_REACTIONS": "Add Reactions",
+        "VIEW_AUDIT_LOG": "View Logs",
+        "PRIORITY_SPEAKER": "VC Priority",
+        "STREAM": "Stream Video",
+        "VIEW_CHANNEL": "View Current Channel",
+        "SEND_MESSAGES": "Send Messages",
+        "SEND_TTS_MESSAGES": "Send TTS Messages",
+        "MANAGE_MESSAGES": "Manage Messages",
+        "EMBED_LINKS": "Attach Links",
+        "ATTACH_FILES": "Attach Files",
+        "READ_MESSAGE_HISTORY": "View Historical Messages",
+        "MENTION_EVERYONE": "Mention Everyone",
+        "USE_EXTERNAL_EMOJIS": "Use Other Server Emotes",
+        "VIEW_GUILD_INSIGHTS": "View Server Insights",
+        "CONNECT": "Connect To VC",
+        "SPEAK": "Speak In VC",
+        "MUTE_MEMBERS": "Mute",
+        "DEAFEN_MEMBERS": "Deafen",
+        "MOVE_MEMBERS": "Manage VC Users",
+        "USE_VAD": "Use Voice Detection",
+        "CHANGE_NICKNAME": "Change Nickname",
+        "MANAGE_NICKNAMES": "Manage User Nicknames",
+        "MANAGE_ROLES": "Manage Roles",
+        "MANAGE_WEBHOOKS": "Manage Webhooks",
+        "MANAGE_EMOJIS": "Manage Emotes"
+    },
+    "flags": {
+        "DISCORD_EMPLOYEE": "Discord Employee",
+        "DISCORD_PARTNER": "Discord Partner",
+        "HYPESQUAD_EVENTS": "Hypesquad Events",
+        "BUGHUNTER_LEVEL_1": "Bug Hunter Lvl 1",
+        "HOUSE_BRAVERY": "House Bravery",
+        "HOUSE_BRILLIANCE": "House Brilliance",
+        "HOUSE_BALANCE": "House Balance",
+        "EARLY_SUPPORTER": "Early Supporter",
+        "TEAM_USER": "Team User",
+        "SYSTEM": "System",
+        "BUGHUNTER_LEVEL_2": "Bug Hunter Lvl 2",
+        "VERIFIED_BOT": "Verified Bot",
+        "VERIFIED_DEVELOPER": "Verified Developer"
+    },
+    "activity": {
+		"STREAMING": "Streaming",
+        "LISTENING": "Listening",
+        "WATCHING": "Watching",
+		"PLAYING": "Playing",
+        "CUSTOM_STATUS": "Custom Status"
+    },
+    "verification": {
+        "NONE": "Off :zero:",
+        "LOW": "Low :one:",
+		"MEDIUM": "Medium :two:",
+        "HIGH": "High :three:",
+		"VERY_HIGH": "Highest :four:"
+
+    },
+    "premium": {
+		"0": "None :zero:",
+        "1": "Level 1 :one:",
+		"2": "Level 2 :two:",
+        "3": "Level 3 :three:"
+    },
+    "region": {
+		"eu-central": "Central Europe :flag_eu:",
+        "singapore": "Singapore :flag_sg:",
+		"us-central": "U.S. Central :flag_us:",
+        "sydney": "Sydney :flag_au:",
+		"us-east": "U.S. East :flag_us:",
+        "us-south": "U.S. South :flag_us:",
+		"us-west": "U.S. West :flag_us:",
+        "eu-west": "Western Europe :flag_eu:",
+		"vip-us-east": "VIP U.S. East :flag_us:",
+        "london": "London :flag_gb:",
+		"amsterdam": "Amsterdam :flag_nl:",
+        "hongkong": "Hong Kong :flag_hk:",
+		"russia": "Russia :flag_ru:",
+        "southafrica": "South Africa :flag_za:"
+    },
+    "prefix": [
+        "+", "-", "&",
+        "^", "%", "$",
+        "!", "=", "_",
+        "/", "?", ">",
+        ".", ",", ";"
+    ]
+}

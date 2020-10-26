@@ -15,30 +15,32 @@ module.exports = {
 	},
 	execute: async (client, message) => {
 
-		let dodge = Math.random(); if(message.author.id === client.config.ownerID) dodge = 0.1;
+		// Define dodge as random value, though set to 0.1 for botOwner (always succeed)
+		let dodge = Math.random();
+		if(message.author.id === client.config.ownerID) dodge = 0.1;
 
+		// Create basic embed
 		const dEmbed = new MessageEmbed()
 			.setColor(0xFFFFFA)
 			.setFooter(`${client.user.username}`, client.user.avatarURL());
 
-		try {
-			if(dodge < 0.5) {
-				const dodgesuccessArray = client.imageArrays.dodgesuccess;
-				const file = dodgesuccessArray[(Math.floor(Math.random() * dodgesuccessArray.length))];
-				dEmbed.setDescription(`${message.author} successfully dodged the attack!`);
-				dEmbed.attachFiles(`./images/dodgesuccess/${file}`);
-				dEmbed.setImage(`attachment://${file}`);
-				return message.channel.send(dEmbed);
-			} else if(dodge > 0.5) {
-				const dodgefailArray = client.imageArrays.dodgefail;
-				const file = dodgefailArray[(Math.floor(Math.random() * dodgefailArray.length))];
-				dEmbed.setDescription(`${message.author} failed to dodge the attack! :open_mouth:`);
-				dEmbed.attachFiles(`./images/dodgefail/${file}`);
-				dEmbed.setImage(`attachment://${file}`);
-				return message.channel.send(dEmbed);
-			}
-		} catch(error) {
-			console.error(`[DODGE CMD] ${error.stack}`);
-			return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+		// Define imageArrays, select random image URLs
+		const dodgesuccessArray = client.imageArrays.dodgesuccess;
+		const fileS = dodgesuccessArray[(Math.floor(Math.random() * dodgesuccessArray.length))];
+		const dodgefailArray = client.imageArrays.dodgefail;
+		const fileF = dodgefailArray[(Math.floor(Math.random() * dodgefailArray.length))];
+
+		// 50/50 chance, below .5 success, above .5 fail
+		// Define rest of embed based on results
+		if(dodge < 0.5) {
+			dEmbed.setDescription(`${message.author} successfully dodged the attack!`);
+			dEmbed.attachFiles(`./images/dodgesuccess/${fileS}`);
+			dEmbed.setImage(`attachment://${fileS}`);
+			return message.channel.send(dEmbed);
+		} else if(dodge > 0.5) {
+			dEmbed.setDescription(`${message.author} failed to dodge the attack! :open_mouth:`);
+			dEmbed.attachFiles(`./images/dodgefail/${fileF}`);
+			dEmbed.setImage(`attachment://${fileF}`);
+			return message.channel.send(dEmbed);
 		}
 	} };

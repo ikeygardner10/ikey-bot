@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { MessageEmbed } = require('discord.js');
 const moment = require('moment');
+const { status, permissions, flags, activity } = require('../../data/arrayData.json');
 
 module.exports = {
 	config: {
@@ -15,64 +16,100 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
-		const status = {
-			online: 'Online', idle: 'Idle',
-			dnd: 'Do Not Disturb', offline: 'Offline/Invisible',
-		};
-		const flags = {
-			DISCORD_EMPLOYEE: 'Discord Employee', DISCORD_PARTNER: 'Discord Partner', HYPESQUAD_EVENTS: 'Hypesquad Events',
-			BUGHUNTER_LEVEL_1: 'Bug Hunter Lvl 1', HOUSE_BRAVERY: 'House Bravery', HOUSE_BRILLIANCE: 'House Brilliance',
-			HOUSE_BALANCE: 'House Balance', EARLY_SUPPORTER: 'Early Supporter', TEAM_USER: 'Team User',
-			SYSTEM: 'System', BUGHUNTER_LEVEL_2: 'Bug Hunter Lvl 2', VERIFIED_BOT: 'Verified Bot',
-			VERIFIED_DEVELOPER: 'Verified Developer',
-		};
-		const activity = {
-			STREAMING: 'Streaming', LISTENING: 'Listening', WATCHING: 'Watching',
-			PLAYING: 'Playing', CUSTOM_STATUS: 'Custom Status',
-		};
-		const member = message.mentions.members.first() || message.member;
-		const user = member.user; const roles = member.roles.cache.map(r => `${r}`).join(' ');
-		const roleList = roles.replace(/@everyone/g, ''); let actList = 'None';
-
-		let permissions = 'None';
-		if(member.hasPermission('MANAGE_MESSAGES' || 'MANAGE_ROLES' || 'BAN_MEMBERS' || 'MUTE_MEMBERS')) {
-			permissions = 'Moderator';
-		}
-		if(member.hasPermission('ADMINISTRATOR')) {
-			permissions = 'Administrator';
-		}
-		if(user.id == message.guild.owner) {
-			permissions = 'Server Owner';
+		// Define member and user, if ID is given, fetch member and user, redefine
+		let member = message.mentions.members.first() || message.member;
+		let user = member.user;
+		if(args[0] && args[0].match(/^[0-9]{18}$/)) {
+			await message.guild.members.fetch(args[0]);
+			member = message.guild.members.cache.get(args[0]);
+			await client.users.fetch(args[0]);
+			user = client.users.cache.get(args[0]);
 		}
 
-		const activities = user.presence.activities; const actArray = [];
-		if(activities !== undefined) {
-			activities.forEach(act => {
-				if(act.type === 'CUSTOM_STATUS') {
-					actArray.push(`${act.state} *(Custom Status)*`);
-				} else if(act.type === 'LISTENING') {
-					actArray.push(`Listening to: ${act.details} by ${act.state.replace(/;/g, ', ')}`);
-				} else {
-					actArray.push(`${activity[act.type]}: ${act.name}`);
+		// Define roles, and remove @everyone
+		const roles = member.roles.cache.map(r => `${r}`).join(' ');
+		const roleList = roles.replace(/@everyone/g, '');
+
+		// Create array, define list
+		const actArray = []; let actList = 'None';
+		if(user.presence.activities) {
+
+			// Wait to push activities to array
+			await user.presence.activities.forEach(act => {
+				switch(act.type) {
+				case 'CUSTOM_STATUS':
+					return actArray.push(`${act.state} *(Custom Status)*`);
+				case 'LISTENING':
+					return actArray.push(`Listening to: **${act.details}** by **${act.state.replace(/;/g, ', ')}**`);
+				default:
+					return actArray.push(`${activity[act.type]}: ${act.name}`);
 				}
 			});
+
+			// Switch for actList, join if > 1
 			if(actArray.length === 1) actList = actArray.join(' ');
 			if(actArray.length > 1) actList = `\n${actArray.join('\n')}`;
 		}
 
-		const flagArray = []; let userFlags = 'None';
-		await user.flags.toArray().forEach(flag => {
-			flagArray.push(flags[flag]);
-		});
-		userFlags = flagArray.join(', ');
+		// Create array, define list
+		const permArray = []; let permList = 'None';
+		if(member.permissions) {
 
-		const pEmbed = new MessageEmbed()
+			// Wait to push activities to array
+			await member.permissions.toArray().forEach(perm => {
+				permArray.push(permissions[perm]);
+			});
+
+			// Switch for permList, join if > 1
+			if(permArray.length === 1) permList = permArray.join(' ');
+			if(permArray.length > 1) permList = `\n${permArray.join('\n')}`;
+		}
+
+		// Create array, define list
+		const flagArray = []; let userFlags = 'None';
+		if(user.flags) {
+
+			// Wait to push activities to array
+			await user.flags.toArray().forEach(flag => {
+				flagArray.push(flags[flag]);
+			});
+
+			// Join userFlags
+			userFlags = flagArray.join(', ');
+		}
+
+		// Create embed pageOne
+		const pageOne = new MessageEmbed()
 			.setAuthor('User Profile', member.user.avatarURL())
 			.setThumbnail(member.user.avatarURL({ format: 'png', dynamic: true, size: 512 }))
-			.setDescription(`**:pencil: Username:** ${member.user.tag}\n**:robot: Bot:** ${member.user.bot ? 'Yes' : 'No'}\n**:satellite: Status:** ${status[member.user.presence.status]}\n**:beginner: Account Flags:** ${userFlags}\n**:video_game: Activity:** ${actList}\n\n**:calendar: Account Created:** ${moment(member.user.createdAt).format('MMMM Do YYYY')}\n**:calendar_spiral: Server Joined:** ${moment(member.joinedAt).format('MMMM Do YYYY')}\n\n**:question: Permissions:** ${permissions}\n**:gem: Boost:** ${member.premiumSinceTimestamp ? 'Yes' : 'No'}\n**:rainbow: Roles:** ${roleList || 'No Roles'}`)
+			.setDescription(`**:pencil: Username:** ${user.tag}\n**:robot: Bot:** ${user.bot ? 'Yes' : 'No'}\n**:satellite: Status:** ${status[user.presence.status]}\n**:beginner: Account Flags:** ${userFlags}\n**:video_game: Activity:** ${actList}\n\n**:calendar: Account Created:** ${moment(user.createdAt).format('MMMM Do YYYY')}\n**:calendar_spiral: Server Joined:** ${moment(member.joinedAt).format('MMMM Do YYYY')}\n\n**:gem: Boost:** ${member.premiumSinceTimestamp ? 'Yes' : 'No'}\n**:rainbow: Roles:** ${roleList || 'No Roles'}`)
 			.setFooter(`ID: ${message.author.id}`)
 			.setTimestamp()
-			.setColor(0xFFFFFA);
+			.setColor(member.displayHexColor || 0xFFFFFA);
 
-		return message.channel.send(pEmbed);
+		// Create embed pageTwo
+		const pageTwo = new MessageEmbed()
+			.setAuthor('User Profile', member.user.avatarURL())
+			.setThumbnail(member.user.avatarURL({ format: 'png', dynamic: true, size: 512 }))
+			.setDescription(`**:pencil: Username:** ${user.tag}\n\n**:question: Permissions:** ${permList}`)
+			.setFooter(`ID: ${message.author.id}`)
+			.setTimestamp()
+			.setColor(member.displayHexColor || 0xFFFFFA);
+
+		// Define currentPage then send embed and create reaction collector
+		let currentPage = pageOne;
+		return message.channel.send(currentPage).then(msg => {
+			if(permList === 'None') return;
+			msg.react('➡️');
+			const collector = msg.createReactionCollector((reaction, author) => ['⬅️', '➡️'].includes(reaction.emoji.name) && author.id === message.author.id, { time: 60000 });
+			collector.on('collect', reaction => {
+				msg.reactions.removeAll().then(async () => {
+					if(reaction.emoji.name === '⬅️') currentPage = pageOne;
+					if(reaction.emoji.name === '➡️') currentPage = pageTwo;
+					msg.edit(currentPage);
+					if(currentPage === pageTwo) await msg.react('⬅️');
+					if(currentPage === pageOne) await msg.react('➡️');
+				});
+			});
+		});
 	} };

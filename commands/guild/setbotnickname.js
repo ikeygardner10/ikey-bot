@@ -12,8 +12,11 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
-		const name = args.join(' '); if(!name) return message.channel.send('No nickname given.');
+		// Define new name as args joined, return if no args
+		const name = args.join(' ');
+		if(!name) return message.channel.send('No nickname given.');
 
+		// Wait for nickname to be set, then return message, or return error
 		await message.guild.me.setNickname(name)
 			.then(() => {
 				return message.channel.send(`My new nickname is **${name}**`);

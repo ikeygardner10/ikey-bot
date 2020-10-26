@@ -4,7 +4,6 @@
 const txtFormatter = require('../../functions/txtFormatter.js');
 const shortid = require('shortid');
 const fileDownload = require('../../functions/fileDownload.js');
-const blacklist = require('../../data/temp/blacklist.json');
 
 module.exports = {
 	config: {
@@ -19,8 +18,6 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
-		if(blacklist.IDs.includes(message.author.id)) return message.channel.send('`Invalid (BLACKLISTED)`');
-
 		let [tag, ...restArgs] = args; let content = restArgs.join(' ');
 		let attachment = message.attachments; const config = client.config;
 		if(!tag) return message.channel.send('`Invalid tag (NO TAG NAME)`'); if(!content && !message.attachments.first()) return message.channel.send('`Invalid Tag (NO TAG CONTENT)`');
@@ -34,7 +31,7 @@ module.exports = {
 		let addServer = 'INSERT INTO `tags` (`tag`, `content`, `userID`, `guildID`) VALUES (?, ?, ?, ?);'; let serverData = [ntn, ntc, message.author.id, message.guild.id];
 
 		if(attachment.size > 0) {
-			if(attachment.size > 1) return message.channel.send('`Invalid attachment (MAX. 1)`');
+			if(attachment.size > 1) return message.channel.send('`Invalid attachment (MAX. 1 (LIMIT INC. SOON))`');
 			if(attachment.first().size > 8388608) return message.channel.send('`Invalid attachment (MAX. 8MB)`');
 
 			attachment = message.attachments.first().name;

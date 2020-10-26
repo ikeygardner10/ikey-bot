@@ -16,6 +16,8 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
+		return;
+
 		const author = message.author; const member = message.mentions.members.first(); const guild = message.guild;
 		if(!member) return message.channel.send('`Invalid Adoption (NO USER MENTIONED)`'); if(author.id === member.id) return message.channel.send('`Invalid Adoption (NO SELF ADOPTING)`');
 

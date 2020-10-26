@@ -20,7 +20,7 @@ module.exports = {
 		if(args[0] == 'help') return message.channel.send(`Use \`${prefix[0].prefix || config.defaultPrefix}help\` or \`${prefix[0].prefix || config.defaultPrefix}help <command>\``);
 
 		if(args[0]) {
-			let command = args[0];
+			let command = args[0].toLowerCase();
 			if(client.commands.has(command) || client.aliases.has(command)) {
 				try {
 					command = client.commands.get(command) || client.commands.get(client.aliases.get(command));
