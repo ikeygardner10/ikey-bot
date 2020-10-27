@@ -6,12 +6,16 @@ Suggestions for commands can be put in the support server.
 Commands can be found on the website, along with other links.
 Feel free to contact me with any questions, or issues.
 
+
+## SERVER
 [![Honey, I'm Home](https://discordapp.com/api/guilds/413532909400752139/widget.png?style=banner2)](https://discord.gg/weX9DR)
 
 
-### Links
+## WEBSITE / COMMANDS
+- **[WEBSITE](https://ikeybot.github.io/)**
 
-- [Commands](https://ikeygardner10.github.io/)
+
+### Other Links
 - [Bot Invite](https://discord.com/api/oauth2/authorize?client_id=607091388588359687&permissions=8&scope=bot)
 - [Email](mailto:ikeygardner10@gmail.com)
 - [Donate](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CXU2L6XUT2YWN&source=url)
@@ -20,11 +24,12 @@ Feel free to contact me with any questions, or issues.
 - [discord.js (use a v11 fork if possible, v12 sucks)](https://discord.js.org/#/)
 - [Node.js v12](https://nodejs.org/en/)
 - [MySQL](https://www.mysql.com/)
-- Help from: [Discord.js supp... SIKE!!! They're too stuck up to be of any real help lmao](https://i.imgur.com/RCcAoxq.png)
+- Help from: [Discord.js](https://i.imgur.com/RCcAoxq.png)(sorta?)
 - Lots of other peoples modules: [Full List - These people ACTUALLY helped](https://github.com/ikeygardner10/ikey-bot/blob/master/data/temp/nodemodules.md)
 - Lots of sleep deprivation :)
 
-### USER TESTIMONIALS SEE WHAT THEY HAVE TO SAY!
+
+## USER TESTIMONIALS SEE WHAT THEY HAVE TO SAY!
 ![Review1](https://imgur.com/O60OCLf.png)
 ![Review2](https://imgur.com/aedb7J2.png)
 ![Review3](https://imgur.com/CctOm6L.png)
