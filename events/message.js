@@ -83,7 +83,7 @@ module.exports = async (client, message) => {
 	// Check for required user permissions
 	if(command.config.permissions) {
 		if(command.config.permissions === 'Bot Owner' && !config.ownerID.includes(message.author.id)) return message.channel.send(`\`Bot Owner Only\``);
-		if(!message.member.hasPermission(permissionsObject[command.config.permissions]) && !config.ownerID.includes(message.author.id)) return message.channel.send(`\`Requires ${command.config.permissions} Permission\``);
+		if(!message.member.hasPermission(permissionsObject[command.config.permissions]) && message.author.id !== config.ownerID) return message.channel.send(`\`Requires ${command.config.permissions} Permission\``);
 	}
 
 	if(message.mentions.users.first()) {

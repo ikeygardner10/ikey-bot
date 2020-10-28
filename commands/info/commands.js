@@ -21,11 +21,14 @@ module.exports = {
 		const [prefix] = await SQLpool.execute(checkPrefix, [message.guild.id]);
 		const readdir = promisify(fs.readdir); const categories = await readdir('./commands/');
 
+		let totalSize = client.commands.size - client.commands.filter(c => c.config.category === 'owner').size;
+		if(message.author.id === client.config.ownerID) totalSize = client.commands.size;
+
 		const cEmbed = new MessageEmbed()
 			.setAuthor(`${message.guild.me.displayName} Commands`, client.user.avatarURL())
-			.setThumbnail(message.guild.iconURL({ format: 'png', dynamic: true, size: 512 }))
+			.setThumbnail(client.user.avatarURL({ format: 'png', dynamic: true, size: 512 }))
 			.setDescription(`Server Prefix is: **${prefix[0].prefix || config.defaultPrefix}**\nGlobal Prefix: **${config.defaultPrefix}**\nHelp: \`${prefix[0].prefix || config.defaultPrefix}help\` or \`${prefix[0].prefix || config.defaultPrefix}help <command>\`\nFurther Help: [Command List](https://ikeybot.github.io)`)
-			.setFooter(`${message.guild.me.displayName} | Total Commands: ${client.commands.size}`, client.user.avatarURL())
+			.setFooter(`${message.guild.me.displayName} | Total Commands: ${totalSize}`, client.user.avatarURL())
 			.setColor('0xFFFFFA');
 
 		try {

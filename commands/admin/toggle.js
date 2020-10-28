@@ -1,13 +1,16 @@
+/* eslint-disable no-inner-declarations */
+const { MessageEmbed } = require('discord.js');
+
 module.exports = {
 	config: {
 		name: 'toggle',
 		aliases: ['tc'],
-		usage: '<command>/all',
+		usage: '<command>/all/list',
 		cooldown: 5,
 		category: 'admin',
 		permissions: 'Manage Server',
 		args: true,
-		description: 'Disable/enable commands per channel\nOR\nDisable ALL commands per channel',
+		description: '**-** Disable/enable commands per channel\n**-** Disable ALL commands per channel\n**-** List currently disabled commands',
 	},
 	execute: async (client, message, args) => {
 
@@ -17,9 +20,40 @@ module.exports = {
 		const checkDisabledCommand = 'SELECT * FROM `disabledcommands` WHERE `command`=? AND `guildID`=? AND `channelID`=?;';
 		const addDisabledCommand = 'INSERT INTO `disabledcommands` (`command`, `guildID`, `channelID`) VALUES (?, ?, ?);';
 		const delDisabledCommand = 'DELETE FROM `disabledcommands` WHERE `command`=? AND `guildID`=? AND `channelID`=?;';
+		const selectAll = 'SELECT * FROM `disabledcommands` WHERE `guildID`=?;';
 
-		if(!args[0]) return message.channel.send('`Invalid (CHOOSE A COMMAND OR ALL)`');
+		if(!args[0]) return message.channel.send('`Invalid (CHOOSE A COMMAND/ALL/LIST)`');
 		if(!message.channel) return message.channel.send('`Invalid (INVALID CHANNEL TYPE');
+
+		if(args[0].toLowerCase() === 'list') {
+
+			const [allRows] = await SQLpool.execute(selectAll, [guild.id]);
+			if(allRows[0] === undefined) return message.channel.send('`Invalid (NOTHING DISABLED)`');
+
+			const tEmbed = new MessageEmbed()
+				.setAuthor(`${guild.name}'s Disabled List`, guild.iconURL())
+				.setThumbnail(guild.iconURL({ format: 'png', dynamic: true, size: 512 }))
+				.setFooter(`${guild.me.displayName}`, client.user.avatarURL())
+				.setTimestamp()
+				.setColor(0xFFFFFA);
+
+
+			await guild.channels.cache.forEach(chan => {
+				if(chan.type !== 'text') return;
+				const mappedRows = allRows.map(row => {
+					if(row.channelID !== chan.id) return;
+					if(!row.command) return;
+					const cmd = `\`${row.command}\``;
+					return cmd;
+				});
+				const filtered = mappedRows.filter(function(cmd) {
+					return cmd != null;
+				});
+				if(filtered.length === 0) return;
+				tEmbed.addField(`> ${chan.name}`, filtered.join(' '));
+			});
+			return message.channel.send(tEmbed);
+		}
 
 		if(args[0].toLowerCase() === 'all') {
 
@@ -80,50 +114,4 @@ module.exports = {
 					});
 			}
 		}
-
-		// 	if(checkLogsRows[0].invTracking === 0) {
-		// 		if(!logsChannel) {
-		// 			await message.guild.channels.create('logs', {
-		// 				type: 'text',
-		// 				position: '1',
-		// 				reason: 'IkeyBot invite tracking',
-		// 				permissionOverwrites: [
-		// 					{
-		// 						id: message.guild.id,
-		// 						deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
-		// 					}],
-		// 			})
-		// 				.then(() => {
-		// 					return message.channel.send('`No logs channel was found, a new one has been created`');
-		// 				})
-		// 				.catch((error) => {
-		// 					console.error(`[TOGGLE CMD] ${error.stack}`);
-		// 					return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
-		// 				});
-		// 		}
-		// 		await addInvites(client, message.guild.id);
-		// 		return SQLpool.execute(changeEnableLogs, [1, message.guild.id])
-		// 			.then(() => {
-		// 				console.success(`[TOGGLE CMD] Successfully updated record for invTracking: ${message.guild.id}, invTracking enabled`);
-		// 				return message.channel.send('`Invite logs enabled`');
-		// 			})
-		// 			.catch((error) => {
-		// 				console.error(`[TOGGLE CMD] ${error.stack}`);
-		// 				return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
-		// 			});
-
-		// 	} else {
-		// 		return SQLpool.execute(changeEnableLogs, [0, message.guild.id])
-		// 			.then(() => {
-		// 				console.success(`[TOGGLE CMD] Successfully updated record for invTracking: ${message.guild.id}, invTracking disabled`);
-		// 				return message.channel.send('`Invite logs disabled`');
-		// 			})
-		// 			.catch((error) => {
-		// 				console.error(`[TOGGLE CMD] ${error.stack}`);
-		// 				return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
-		// 			});
-		// 	}
-		// } else {
-		// 	return message.channel.send('`Invalid (CHANNEL OR INVITE-LOG)`');
-		// }
 	} };
