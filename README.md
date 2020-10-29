@@ -25,7 +25,7 @@ Feel free to contact me with any questions, or issues.
 - [Node.js v12](https://nodejs.org/en/)
 - [MySQL](https://www.mysql.com/)
 - Help from: [Discord.js](https://i.imgur.com/RCcAoxq.png)(sorta?)
-- Lots of other peoples modules: [Full List - These people ACTUALLY helped](https://github.com/ikeygardner10/ikey-bot/blob/master/data/temp/nodemodules.md)
+- Lots of other peoples modules: [Full List](https://github.com/ikeygardner10/ikey-bot/blob/master/data/temp/nodemodules.md)
 - Lots of sleep deprivation :)
 
 
