@@ -3,7 +3,7 @@ const { MessageEmbed } = require('discord.js');
 module.exports = async (client, member) => {
 
 	const updateGuild = 'UPDATE `guilds` SET `members`= ? WHERE `guildID`= ?';
-	const checkTracking = 'SELECT `invTracking` FROM `guildsettings` WHERE `guildID`=?;';
+	const checkTracking = 'SELECT `invTracking`, `logsChannel` FROM `guildsettings` WHERE `guildID`=?;';
 
 	console.info('[GUILD MEMBER REMOVE] Connected to database.');
 	const SQLpool = client.conPool.promise();
@@ -16,8 +16,8 @@ module.exports = async (client, member) => {
 
 	const [rows] = await SQLpool.query(checkTracking, [member.guild.id]);
 	if(rows[0].invTracking === 0) return;
+	const channelName = rows[0].logsChannel;
 
-	const logsChannel = member.guild.channels.cache.find(channel => channel.name === 'logs');
 	const iEmbed = new MessageEmbed()
 		.setAuthor('Member Leave', member.guild.iconURL())
 		.setThumbnail(member.user.avatarURL())
@@ -26,6 +26,25 @@ module.exports = async (client, member) => {
 		.setTimestamp()
 		.setColor(0xFFFFFA);
 
+	const logsChannel = member.guild.channels.cache.find(channel => channel.name === channelName);
+	if(!logsChannel) {
+		member.guild.channels.create(channelName, {
+			type: 'text',
+			position: '1',
+			reason: 'logs',
+			permissionOverwrites: [
+				{
+					id: member.guild.id,
+					deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
+				}],
+		})
+			.then(() => {
+				console.success(`[GUILD MEMBER ADD] Successfully created logs channel: ${channelName} for guild: ${member.guild.id}`);
+			})
+			.catch((error) => {
+				console.error(`[GUILD MEMBER ADD] ${error.stack}`);
+			});
+	}
 
 	return logsChannel.send(iEmbed);
 

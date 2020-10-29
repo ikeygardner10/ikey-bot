@@ -4,7 +4,7 @@ const ms = require('ms');
 module.exports = async (client, member) => {
 
 	const updateGuild = 'UPDATE `guilds` SET `members`= ? WHERE `guildID`= ?;';
-	const checkTracking = 'SELECT `invTracking` FROM `guildsettings` WHERE `guildID`=?;';
+	const checkTracking = 'SELECT `invTracking`, `logsChannel` FROM `guildsettings` WHERE `guildID`=?;';
 	const getInvites = 'SELECT * FROM `invites` WHERE `guildID`=?;';
 	const addInvite = 'INSERT INTO `invites` (`code`, `guildID`, `uses`, `inviterID`) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE `uses`= VALUES (`uses`);';
 
@@ -19,6 +19,7 @@ module.exports = async (client, member) => {
 
 	const [trckRows] = await SQLpool.query(checkTracking, [member.guild.id]);
 	if(trckRows[0].invTracking === 0) return;
+	const channelName = trckRows[0].logsChannel;
 
 	const [invRows] = await SQLpool.query(getInvites, [member.guild.id]);
 	if(!invRows) return;
@@ -42,7 +43,7 @@ module.exports = async (client, member) => {
 
 	const inviter = client.users.cache.get(invAuthor[0]);
 	const accAge = (Date.now() - member.user.createdAt);
-	const logsChannel = member.guild.channels.cache.find(channel => channel.name === 'logs');
+	const logsChannel = member.guild.channels.cache.find(channel => channel.name === channelName);
 	const iEmbed = new MessageEmbed()
 		.setAuthor('New Member', member.guild.iconURL())
 		.setThumbnail(member.user.avatarURL())
@@ -52,10 +53,10 @@ module.exports = async (client, member) => {
 		.setColor(0xFFFFFA);
 
 	if(!logsChannel) {
-		member.guild.channels.create('logs', {
+		member.guild.channels.create(channelName, {
 			type: 'text',
-			position: '1',
-			reason: 'IkeyBot invite tracking',
+			position: '500',
+			reason: 'logs',
 			permissionOverwrites: [
 				{
 					id: member.guild.id,
@@ -63,10 +64,10 @@ module.exports = async (client, member) => {
 				}],
 		})
 			.then(() => {
-				console.success(`[TOGGLE CMD] Successfully updated record for invTracking: ${member.guild.id}, invTracking enabled`);
+				console.success(`[GUILD MEMBER ADD] Successfully created logs channel: ${channelName} for guild: ${member.guild.id}`);
 			})
 			.catch((error) => {
-				console.error(`[TOGGLE CMD] ${error.stack}`);
+				console.error(`[GUILD MEMBER ADD] ${error.stack}`);
 			});
 	}
 
