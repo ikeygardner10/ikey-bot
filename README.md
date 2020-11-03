@@ -12,8 +12,11 @@ Feel free to contact me with any questions, or issues.
 
 
 ## WEBSITE / COMMANDS
-- **[WEBSITE](https://ikeybot.github.io/)**
+- **[Website](https://ikeybot.github.io/)**
 
+
+### Upcoming Changes
+- Family command catgegory (adopt/marry/divorce)
 
 ### Other Links
 - [Bot Invite](https://discord.com/api/oauth2/authorize?client_id=607091388588359687&permissions=8&scope=bot)
