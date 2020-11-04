@@ -16,7 +16,7 @@ Feel free to contact me with any questions, or issues.
 
 
 ### Upcoming Changes
-- Family command catgegory (adopt/marry/divorce)
+- [To-Do List](https://github.com/ikeygardner10/ikey-bot/blob/master/TODO.md#to-do-list)
 
 ### Other Links
 - [Bot Invite](https://discord.com/api/oauth2/authorize?client_id=607091388588359687&permissions=8&scope=bot)
