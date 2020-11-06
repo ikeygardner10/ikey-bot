@@ -96,5 +96,18 @@
         "!", "=", "_",
         "/", "?", ">",
         ".", ",", ";"
-    ]
+    ],
+    "botPerms": {
+        "Administrator": "ADMINISTRATOR",
+        "Create Invite": "CREATE_INSTANT_INVITE",
+	    "Kick Members": "KICK_MEMBERS",
+        "Ban Members": "BAN_MEMBERS",
+	    "Manage Channels": "MANAGE_CHANNELS",
+        "Manage Server": "MANAGE_GUILD",
+	    "Manage Messages": "MANAGE_MESSAGES",
+        "Mute Members": "MUTE_MEMBERS",
+	    "Manage Nicknames": "MANAGE_NICKNAMES",
+        "Manage Roles": "MANAGE_ROLES",
+	    "Manage Emojis": "MANAGE_EMOJIS"
+    }
 }

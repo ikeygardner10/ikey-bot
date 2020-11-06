@@ -22,7 +22,7 @@ module.exports = {
 				case 'self': case 'tags': return;
 				}
 				fs.readdir(`./images/${folder}`, (err, images) => {
-					if(err) return console.error(`[IMG ARRAYS] ${error.stack}`);
+					if(err) return console.error(`[IMG ARRAYS] ${err.stack}`);
 					if(images.length > 500) {
 						fs.writeFile(`./data/temp/${folder}.json`, JSON.stringify(images, null, ''), (err) => {
 							if(err) return console.error(`[IMG ARRAYS] ${err.stack}`);

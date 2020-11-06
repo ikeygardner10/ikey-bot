@@ -1,97 +1,54 @@
 /* eslint-disable quotes */
-const config = require('../data/owner/config.json'); let prefix;
-const userBlacklist = require('../data/owner/userBlacklist.json');
-const serverBlacklist = require('../data/owner/serverBlacklist.json');
+const config = require('../data/owner/config.json');
 const active = new Map(); const ops = { active: active };
 const { Collection } = require('discord.js'); const cooldowns = new Collection();
-const permissionsObject = {
-	'Administrator': 'ADMINISTRATOR', 'Create Invite': 'CREATE_INSTANT_INVITE',
-	'Kick Members': 'KICK_MEMBERS', 'Ban Members': 'BAN_MEMBERS',
-	'Manage Channels': 'MANAGE_CHANNELS', 'Manage Server': 'MANAGE_GUILD',
-	'Manage Messages': 'MANAGE_MESSAGES', 'Mute Members': 'MUTE_MEMBERS',
-	'Manage Nicknames': 'MANAGE_NICKNAMES', 'Manage Roles': 'MANAGE_ROLES',
-	'Manage Emojis': 'MANAGE_EMOJIS',
-};
-const responseArray = require('../data/temp/responseArray.json');
-const checkPrefix = 'SELECT `prefix` FROM `guildsettings` WHERE `guildID`= ?';
-const updatePrefix = 'UPDATE `guildsettings` SET `prefix`= ? WHERE `guildID`= ?';
-const addGuildSettings = 'INSERT INTO `guildsettings` (`guildID`, `prefix`, `maxFamilySize`, `allowIncest`) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE `prefix`= VALUES (`prefix`)';
-const checkDisabledCmds = 'SELECT * FROM `disabledcommands` WHERE `command`=? AND `guildID`= ? AND `channelID`= ?';
+const { botPerms } = require('../data/arrayData.json');
+const prefixReset = require('../functions/prefixReset');
+const checkDisabledCmds = 'SELECT * FROM `disabledcommands` WHERE (`command`=? OR `command`=?) AND `guildID`= ? AND `channelID`= ?';
 
 module.exports = async (client, message) => {
 
 	// Ignore all bots, to stop looping or worse, ignore non guild message, or non text channels
 	if(message.author.bot || !message.guild || message.channel.type !== 'text') return;
 
+	// Check for guilds prefix from Enmap, otherwise use default
+	const guildPrefix = client.prefixes.get(message.guild.id);
+	const prefix = guildPrefix ? guildPrefix : config.defaultPrefix;
 
-	if(serverBlacklist.includes(message.guild.id) || userBlacklist.includes(message.author.id)) return;
-
-	// If someone mentions the bot, return
-	if(message.mentions.users.first() && message.mentions.users.first().id === client.user.id) return message.channel.send(responseArray[(Math.floor(Math.random() * responseArray.length))]);
-
-	const SQLpool = client.conPool.promise();
-
-	// Prefix reset command, hardcoded. The amount of times I've wanted or needed one
-	// And the bots NEVER FUCKING HAVE ONE!
-	if(message.content.startsWith(`${config.defaultPrefix}prefixreset`) && ((message.member.hasPermission('ADMINISTRATOR') || message.author.id === config.ownerID))) {
-		return SQLpool.execute(updatePrefix, [config.defaultPrefix, message.guild.id])
-			.then(() => {
-				console.success(`[PREFIX RESET] Successfully updated record for guildsettings: ${message.guild.id}`);
-				return message.channel.send(`\`Server prefix reset to ${config.defaultPrefix}\``);
-			}).catch((error) => {
-				console.error(`[PREFIX RESET] ${error.stack}`);
-				return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
-			});
-	}
-	// Define guildPrefix, await check MySQL DB for guild prefix
-	// Define defaultPrefix from config.json
-	// If user uses defaultPrefix with a custom guildPrefix set, send guildPrefix
-	const [guildPrefix] = await SQLpool.execute(checkPrefix, [message.guild.id]);
-	if(guildPrefix[0] !== undefined) {
-		if(message.content.startsWith(guildPrefix[0].prefix)) {
-			prefix = guildPrefix[0].prefix;
-		} else if(message.content.startsWith(config.defaultPrefix) && guildPrefix[0].prefix !== config.defaultPrefix) {
-			return message.channel.send(`Your server prefix is \`${guildPrefix[0].prefix}\`\nUse \`${config.defaultPrefix}prefixreset\` to reset to \`${config.defaultPrefix}\``);
-		}
-	} else {
-		await SQLpool.execute(addGuildSettings, [message.guild.id, config.defaultPrefix, 250, false])
-			.then(() => prefix = `${config.defaultPrefix}`)
-			.catch((error) => {
-				console.error(`[MESSAGE] ${error.stack}`);
-				prefix = `${config.defaultPrefix}`;
-			});
-	}
+	// If someone mentions the bot, return guild prefix, hardcoded prefixreset
+	const clientRegex = RegExp(`^<@!${client.user.id}>$`);
+	if(message.content.match(clientRegex)) return message.channel.send(`Prefix for \`${message.guild.name}\` is \`${prefix}\``);
+	if(message.content.startsWith(`${config.defaultPrefix}prefixreset`)) return prefixReset(client, message);
 
 	// If first char of message isn't prefix, ignore it
 	if(message.content.indexOf(prefix) !== 0) return;
 
 	// Define args, define commandName
-	// Check for commandName in commands Collection
+	// Check for commandName in commands Enmap
 	const args = message.content.slice(1).trim().split(/ +/g); const commandName = args.shift().toLowerCase();
 	const command = client.commands.get(commandName) || client.commands.get(client.aliases.get(commandName));
 	if(!command) return;
 
-	const [checkAllRows] = await SQLpool.execute(checkDisabledCmds, ['all', message.guild.id, message.channel.id]);
+	// Define SQLpool, query for disabled commands
+	// If returns true and command isn't toggle, return
+	const SQLpool = client.conPool.promise();
+	const [checkAllRows] = await SQLpool.execute(checkDisabledCmds, ['all', command.config.name, message.guild.id, message.channel.id]);
 	if(checkAllRows[0] !== undefined && command.config.name !== 'toggle') return;
-
-	const [checkCmdRows] = await SQLpool.execute(checkDisabledCmds, [command.config.name, message.guild.id, message.channel.id]);
-	if(checkCmdRows[0] !== undefined && command.config.name !== 'toggle') return;
 
 	// Check for NSFW channel
 	if(command.config.nsfw && !message.channel.nsfw) return message.channel.send('`NSFW channels only`');
 
 	// Check for required user permissions
 	if(command.config.permissions) {
-		if(command.config.permissions === 'Bot Owner' && !config.ownerID.includes(message.author.id)) return message.channel.send(`\`Bot Owner Only\``);
-		if(!message.member.hasPermission(permissionsObject[command.config.permissions]) && message.author.id !== config.ownerID) return message.channel.send(`\`Requires ${command.config.permissions} Permission\``);
+		if(command.config.permissions === 'Bot Owner' && message.author.id !== config.ownerID) return message.channel.send(`\`Bot Owner Only\``);
+		if(!message.member.hasPermission(botPerms[command.config.permissions]) && message.author.id !== config.ownerID) return message.channel.send(`\`Requires ${command.config.permissions} Permission\``);
 	}
 
-	if(message.mentions.users.first()) {
-		if(message.mentions.users.first().id === config.ownerID && command.config.category === 'admin' && message.author.id !== config.ownerID) {
-			return message.channel.send(responseArray[(Math.floor(Math.random() * responseArray.length))]);
-		}
-	}
+	// If someone uses bot against owner, return
+	const ownerRegex = RegExp(`<@${config.ownerID}>`);
+	if(message.content.match(ownerRegex) && command.config.category === 'admin') return;
 
+	// Temp setting for alt accounts and tag features
 	if(Date.now() - message.author.createdAt < 1000 * 60 * 60 * 24 * 7 && command.config.category === 'tag') return message.channel.send('`Invalid (ACC NEWER THAN 7 DAYS)`');
 
 	// Check for required args on command

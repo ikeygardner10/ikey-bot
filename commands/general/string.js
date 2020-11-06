@@ -1,3 +1,4 @@
+const { MessageEmbed } = require('discord.js');
 const txtFormatter = require('../../functions/txtFormatter.js');
 
 module.exports = {

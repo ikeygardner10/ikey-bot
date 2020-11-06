@@ -13,13 +13,14 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
-		const checkPrefix = 'SELECT `prefix` FROM `guildsettings` WHERE `guildID`= ?';
-		const SQLpool = client.conPool.promise(); const config = client.config;
-		const [prefix] = await SQLpool.execute(checkPrefix, [message.guild.id]);
+		// Check for guilds prefix from Enmap, otherwise use default
+		const guildPrefix = client.prefixes.get(message.guild.id);
+		const prefix = guildPrefix ? guildPrefix : client.config.defaultPrefix;
 
-		if(args[0] == 'help') return message.channel.send(`Use \`${prefix[0].prefix || config.defaultPrefix}help\` or \`${prefix[0].prefix || config.defaultPrefix}help <command>\``);
+		if(args[0] == 'help') return message.channel.send(`Use \`${prefix}help\` or \`${prefix}help <command>\``);
 
 		if(args[0]) {
+
 			let command = args[0].toLowerCase();
 			if(client.commands.has(command) || client.aliases.has(command)) {
 				try {
@@ -28,12 +29,10 @@ module.exports = {
 					const category = command.config.category.slice(0, 1).toUpperCase() + command.config.category.slice(1);
 					const hEmbed = new MessageEmbed()
 						.setAuthor(`${client.user.username} Help`, client.user.avatarURL())
-						.setThumbnail(client.user.avatarURL({ format: 'png', dynamic: true, size: 512 }))
-						.setDescription(`**Server Prefix: ${prefix[0].prefix || config.defaultPrefix}**\n\n**Name:** ${commandName}\n**Description:** ${command.config.description || 'No Description'}\n**Usage:** ${((prefix[0].prefix || config.defaultPrefix) + args[0] + ' ' + command.config.usage || (prefix[0].prefix || config.defaultPrefix) + args[0])}\n**Cooldown:** ${command.config.cooldown}s\n**Permissions Required:** ${command.config.permissions || 'None'}\n**Category:** ${category}\n**Aliases:** ${command.config.noalias || command.config.aliases}`)
-						.addField('**Links**', '[All Commands](https://ikeybot.github.io)\n[Support Server](https://discord.gg/GQh6XEk)\n[Invite To Your Server](https://discord.com/oauth2/authorize?client_id=607091388588359687&permissions=1544027255&scope=bot)\n[Donate](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CXU2L6XUT2YWN&source=url)')
-						.setFooter(`${client.user.username}`, client.user.avatarURL())
-						.setColor('0xFFFFFA')
-						.setTimestamp();
+						.setDescription(`**Name:** ${commandName}\n**Aliases:** ${command.config.noalias || command.config.aliases.join(', ')}\n**Usage:** ${(prefix + args[0] + ' ' + command.config.usage || prefix + args[0])}\n**Cooldown:** ${command.config.cooldown}s\n**Category:** ${category}\n**Permissions Required:** ${command.config.permissions || 'None'}\n**Description:**\n${command.config.description || 'No Description'}\n`)
+						.setFooter(`Server Prefix is: ${prefix}`)
+						.setTimestamp()
+						.setColor(0xFFFFFA);
 
 					return message.channel.send(hEmbed);
 				} catch(error) {
@@ -48,19 +47,18 @@ module.exports = {
 		if(!args[0]) {
 			const dmEmbed = new MessageEmbed()
 				.setAuthor(`${client.user.username} Help`, client.user.avatarURL())
-				.setThumbnail(client.user.avatarURL({ format: 'png', dynamic: true, size: 512 }))
-				.setDescription(`**Server Prefix: ${prefix[0].prefix || config.defaultPrefix}**\n**Global Prefix: ${config.defaultPrefix}**\n**Support Server:** [${await client.guilds.cache.get('413532909400752139').name || 'Link'}](https://discord.gg/GQh6XEk)`)
-				.addField('**Links**', '[All Commands](https://ikeybot.github.io)\n[Support Server](https://discordapp.com/invite/GQh6XEk)\n[Invite To Your Server](https://discord.com/oauth2/authorize?client_id=607091388588359687&permissions=1544027255&scope=bot)\n[Donate](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CXU2L6XUT2YWN&source=url)')
-				.setFooter(`${client.user.username}`, client.user.avatarURL())
-				.setColor('0xFFFFFA')
-				.setTimestamp();
+				.setDescription(`**Default prefix is: ${client.config.defaultPrefix}**\n__***@IkeyBot***__ for your server prefix\n*$prefixreset* resets prefix to default\n\n**Getting Started:**\n*$help command* -- e.g. $help createtag\n*$logs channel-name* -- e.g. $logs invite-logs\n\n**Commands:**\nAll commands available [here](https://ikeybot.github.io/)\n\n**Add to Server:**\nJoin the bot to your server [here](https://discord.com/api/oauth2/authorize?client_id=607091388588359687&permissions=1544027255&scope=bot)\n\n**Help & Support:**\nSupport avaliable in [${await client.guilds.cache.get('413532909400752139').name || 'the support server'}](https://discord.gg/GQh6XEk)`)
+				.setFooter(`${message.guild.name}`)
+				.setTimestamp()
+				.setColor(0xFFFFFA);
 
-			try {
-				await message.author.send(dmEmbed);
-				return message.channel.send('`Incoming DM`');
-			} catch(error) {
-				console.error(`[HELP CMD] ${error.stack}`);
-				return message.channel.send('`Invalid (DO YOU HAVE DMS OPEN?)`');
-			}
+			await message.author.send(dmEmbed)
+				.then(() => {
+					return message.channel.send('`DM Sent`');
+				})
+				.catch((error) => {
+					message.channel.send('`Failed to send DM`');
+					return message.channel.send(dmEmbed);
+				});
 		}
 	} };

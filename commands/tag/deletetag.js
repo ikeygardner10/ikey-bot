@@ -4,6 +4,7 @@
 const fs = require('fs-extra');
 const { promisify } = require('util');
 const txtFormatter = require('../../functions/txtFormatter.js');
+const botAdmins = require('../../data/owner/botAdmins.json');
 
 module.exports = {
 	config: {
@@ -52,7 +53,7 @@ module.exports = {
 			const [globalRows] = await SQLpool.query(checkGlobal, [ntn]);
 			console.info(`[DELETE TAG] Querying database for global tag: ${ntn}`);
 			if(globalRows[0] !== undefined) {
-				if(globalRows[0].userID !== message.author.id && message.author.id !== config.ownerID) return message.channel.send('`Invalid (TAG OWNER ONLY)`');
+				if(globalRows[0].userID !== message.author.id && !botAdmins.includes(message.author.id) && message.author.id !== config.ownerID) return message.channel.send('`Invalid (TAG OWNER/BOT ADMINS ONLY)`');
 				if(globalRows[0].imageURL !== null) {
 					console.info(`[DELETE TAG] Global tag file found, deleting: ${globalRows[0].imageURL}`);
 					fileDelete(globalRows[0].imageURL)

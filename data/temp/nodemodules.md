@@ -16,3 +16,5 @@
 ##### [shortid @ 2.2.15](https://www.npmjs.com/package/shortid)
 ##### [utf8 @ 3.0.0](https://www.npmjs.com/package/utf8)
 ##### [winston @ 3.3.3](https://www.npmjs.com/package/winston)
+##### [duckduckgo-images-api @ 1.0.5](https://www.npmjs.com/package/duckduckgo-images-api)
+##### [discord.js-pagination @ 1.0.2](https://www.npmjs.com/package/discord.js-pagination) (modified fork)

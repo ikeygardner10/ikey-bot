@@ -5,6 +5,7 @@ module.exports = async (client, guild) => {
 
 	console.info('[GUILD DELETE] Left guild, updating records in database');
 	const SQLpool = client.conPool.promise();
+
 	await SQLpool.execute(updateGuild, [false, guild.id])
 		.then(() => {
 			console.success(`[GUILD DELETE] Successfully updated record for guild: ${guild.id}`);

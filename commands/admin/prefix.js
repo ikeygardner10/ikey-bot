@@ -39,6 +39,7 @@ module.exports = {
 		// Update database and return success, or return if error
 		// If prefix isn't available, return list of available prefix
 		if(prefix.includes(newPrefix)) {
+			await client.prefixes.set(message.guild.id, newPrefix);
 			return SQLpool.execute(updatePrefix, [newPrefix, message.guild.id])
 				.then(() => {
 					console.success(`[PREFIX CMD] Successfully updated record for guildsettings: ${message.guild.id}`);

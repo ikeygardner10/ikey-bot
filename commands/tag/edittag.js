@@ -13,7 +13,7 @@ module.exports = {
 		category: 'tag',
 		permissions: '',
 		args: true,
-		description: '\nEdit a server tag\nEdit a global tag',
+		description: 'Edit a server tag\nEdit a global tag',
 	},
 	execute: async (client, message, args) => {
 

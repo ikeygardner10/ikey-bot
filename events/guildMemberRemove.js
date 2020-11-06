@@ -1,4 +1,5 @@
 const { MessageEmbed } = require('discord.js');
+const ban = require('../commands/admin/ban');
 
 module.exports = async (client, member) => {
 
@@ -16,7 +17,16 @@ module.exports = async (client, member) => {
 
 	const [rows] = await SQLpool.query(checkTracking, [member.guild.id]);
 	if(rows[0].invTracking === 0) return;
-	const channelName = rows[0].logsChannel;
+
+	const checkBan = await member.guild.fetchBans()
+		.then(bans => {
+			if(bans.some(u => member.id.includes(u.user.id))) {
+				return true;
+			} else {
+				return false;
+			}
+		});
+	if(checkBan) return;
 
 	const iEmbed = new MessageEmbed()
 		.setAuthor('Member Leave', member.guild.iconURL())
@@ -26,6 +36,7 @@ module.exports = async (client, member) => {
 		.setTimestamp()
 		.setColor(0xFFFFFA);
 
+	const channelName = rows[0].logsChannel;
 	const logsChannel = member.guild.channels.cache.find(channel => channel.name === channelName);
 	if(!logsChannel) {
 		member.guild.channels.create(channelName, {

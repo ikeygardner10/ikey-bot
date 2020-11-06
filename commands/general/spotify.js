@@ -26,7 +26,7 @@ module.exports = {
 
 		if(!spotifyObj) return message.channel.send('`Invalid (NOTHING PLAYING)`');
 
-		const trackIMG = `https://i.scdn.co/image/${spotifyObj.assets.largeImage.slice(8)}`;
+		const trackIMG = `https://i.scdn.co/image/${spotifyObj.assets.largeImage.slice(8)}` || 'https://imgur.com/ulUV1l6.png';
 		const trackURL = `https://open.spotify.com/track/${spotifyObj.syncID}`;
 		const trackName = spotifyObj.details;
 		const trackAuthor = spotifyObj.state;

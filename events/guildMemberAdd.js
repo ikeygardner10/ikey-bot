@@ -24,8 +24,8 @@ module.exports = async (client, member) => {
 	const [invRows] = await SQLpool.query(getInvites, [member.guild.id]);
 	if(!invRows) return;
 
-	const invite = [];
-	const invAuthor = [];
+	let invite = [];
+	let invAuthor = [];
 
 	await member.guild.fetchInvites()
 		.then(guildInvites => {
@@ -41,13 +41,18 @@ module.exports = async (client, member) => {
 			});
 		});
 
+	if(!invite[0]) {
+		invite = client.invArray;
+		invAuthor = client.invAuthor;
+	}
+
 	const inviter = client.users.cache.get(invAuthor[0]);
 	const accAge = (Date.now() - member.user.createdAt);
 	const logsChannel = member.guild.channels.cache.find(channel => channel.name === channelName);
 	const iEmbed = new MessageEmbed()
 		.setAuthor('New Member', member.guild.iconURL())
 		.setThumbnail(member.user.avatarURL())
-		.setDescription(`**Username:** <@${member.user.id}> *(${member.user.tag})*\n**Acc Age:** ${ms(accAge, { long: true })}\n\n**Invite Code:** \`discord.gg/${invite[0].code}\`\n**Invite Author:** ${inviter.tag}\n**Times Used:** ${invite[0].uses}`)
+		.setDescription(`**Username:** <@${member.user.id}> *(${member.user.tag})*\n**Acc Age:** ${ms(accAge, { long: true })}\n\n**Invite Code:** \`discord.gg/${invite[0].code}\`\n**Invite Author:** ${inviter.tag}\n**Times Used:** ${invite[0].uses || '1'}`)
 		.setFooter(`ID: ${member.user.id}`)
 		.setTimestamp()
 		.setColor(0xFFFFFA);
@@ -75,7 +80,7 @@ module.exports = async (client, member) => {
 
 	return SQLpool.execute(addInvite, [invite[0].code, invite[0].guild.id, invite[0].uses || null, invAuthor[0] || null])
 		.then(() => {
-			console.success(`[GUILD MEMBER] Added/updated invite: ${invite[0].code} for guild: ${invite[0].guild.id}`);
+			console.success(`[GUILD MEMBER ADD] Added/updated invite: ${invite[0].code} for guild: ${invite[0].guild.id}`);
 		})
 		.catch((error) => {
 			console.error(`[GUILD MEMBER ADD] ${error.stack}`);

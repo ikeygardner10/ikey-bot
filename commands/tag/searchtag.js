@@ -27,7 +27,7 @@ module.exports = {
 
 		// Define mentioned memeber, setup tagArray and format args
 		const member = message.mentions.users.first();
-		const tagArray = []; let author; let ntn = txtFormatter(args[0]);
+		const tagArray = []; let author; let ntn;
 
 		// Define SQLpool
 		const SQLpool = client.conPool.promise();
@@ -53,6 +53,8 @@ module.exports = {
 
 			return sendEmbed(message, tagArray, author, 15, '\n');
 		}
+
+		ntn = txtFormatter(args[0]);
 
 		// If message mentions a member
 		if(member) {

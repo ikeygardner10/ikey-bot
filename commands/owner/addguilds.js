@@ -19,7 +19,7 @@ module.exports = {
 	execute: async (client, message, args) => {
 
 		const addGuild = 'INSERT INTO `guilds` (`guildID`, `name`, `joined`, `ownerID`, `ownerName`, `members`, `region`, `createdAt`) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `name`= VALUES (`name`), `joined`=true, `members`= VALUES(`members`)';
-		const addGuildSettings = 'INSERT INTO `guildsettings` (`guildID`, `prefix`, `maxFamilySize`, `allowIncest`) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE `prefix`= VALUES (`prefix`)';
+		const addGuildSettings = 'INSERT INTO `guildsettings` (`guildID`, `prefix`, `maxFamilySize`, `allowIncest`, `invTracking`, `logsChannel`) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `id`=`id`;';
 		const SQLpool = client.conPool.promise();
 
 		client.guilds.cache.array().forEach((guild) => {
@@ -28,7 +28,7 @@ module.exports = {
 			return SQLpool.execute(addGuild, [guild.id, ngn, true, guild.owner.user.id, non, guild.members.cache.size, guild.region, guild.createdAt])
 				.then(() => {
 					console.success(`[GUILD CREATE] Successfully added/updated record for guild: ${guild.id}`);
-					return SQLpool.execute(addGuildSettings, [guild.id, client.config.defaultPrefix, 250, false])
+					return SQLpool.execute(addGuildSettings, [guild.id, client.config.defaultPrefix, 250, false, 0, null])
 						.then(() => {
 							console.success(`[GUILD CREATE] Successfully added/updated record for guildsettings: ${guild.id}`);
 						}).catch((error) => {

@@ -69,8 +69,7 @@ module.exports = {
 							fEmbed.setImage('attachment://fuckno.gif');
 							return message.channel.send(fEmbed);
 						}
-					}).catch((timeout) => {
-						console.info(`[FUCK] ${timeout}`);
+					}).catch(() => {
 						return message.channel.send(`${message.author}, no response :pensive:`);
 					});
 			});

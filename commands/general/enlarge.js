@@ -1,6 +1,3 @@
-const utf8 = require('utf8');
-const emojiList = require('../../data/temp/full-emoji-list.json');
-
 module.exports = {
 	config: {
 		name: 'enlarge',
@@ -17,7 +14,10 @@ module.exports = {
 		try {
 
 			const emoji = args[0];
-			if(!emoji.match(/<(.*?):(.*?):(.*?)>+/g)) return message.channel.send('Custom emotes only (work in progress)');
+			if(!emoji.match(/<(.*?):(.*?):(.*?)>+/g)) {
+				console.warn(emoji);
+				return message.channel.send('Custom emotes only (work in progress)');
+			}
 			const newemoji = emoji.replace(/<.*:/, '').slice(0, -1);
 			let extension = '.png';
 			if(emoji.match(/^(<a:)/)) extension = '.gif';

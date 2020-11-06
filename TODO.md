@@ -1,5 +1,11 @@
 # To-Do List
 
+- [ ] Entire Rewrite
+
+- [ ] Google Image Search (w Google Images URL?)
+
+- [ ] SFW/NSFW versions for fuck
+
 - [ ] Marriage Commands
   - [ ] adopt
   - [ ] marry
@@ -25,12 +31,12 @@
   - [ ] per feature
 
 - [ ] general bot cleanup
-  - [ ] better errors
+  - [ ] better errors **
   - [ ] better comments
   - [ ] better formatting
   - [ ] better definitions
 
 - [ ] enlarge command
-  - [ ] check for unicode emoji, replace
+  - [ ] check for unicode emoji, replace **
 
 - [ ] local db for other bot
