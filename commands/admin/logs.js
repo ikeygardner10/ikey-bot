@@ -60,7 +60,7 @@ module.exports = {
 			return SQLpool.execute(changeEnableLogs, [1, joinedArgs, message.guild.id])
 				.then(() => {
 					console.success(`[TOGGLE CMD] Successfully updated record for invTracking: ${message.guild.id}, invTracking enabled`);
-					return message.channel.send('`Invite logs enabled`');
+					return message.channel.send('`Logs enabled`');
 				})
 				.catch((error) => {
 					console.error(`[TOGGLE CMD] ${error.stack}`);
