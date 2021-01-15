@@ -2,7 +2,7 @@
 
 - [ ] Entire Rewrite
 
-- [ ] Google Image Search (w Google Images URL?)
+- [x] Google Image Search (w Google Images URL?)
 
 - [ ] SFW/NSFW versions for fuck
 

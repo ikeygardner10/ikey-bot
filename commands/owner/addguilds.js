@@ -18,24 +18,32 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
-		const addGuild = 'INSERT INTO `guilds` (`guildID`, `name`, `joined`, `ownerID`, `ownerName`, `members`, `region`, `createdAt`) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `name`= VALUES (`name`), `joined`=true, `members`= VALUES(`members`)';
-		const addGuildSettings = 'INSERT INTO `guildsettings` (`guildID`, `prefix`, `maxFamilySize`, `allowIncest`, `invTracking`, `logsChannel`) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `id`=`id`;';
+		const addGuild = 'INSERT INTO `guilds` (`guildID`, `name`, `joined`, `ownerID`, `ownerName`, `members`, `region`, `createdAt`) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `name`=?, `joined`=?, `members`=?';
+		const addGuildSettings = 'INSERT INTO `guildsettings` (`guildID`, `prefix`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `guildID`=`guildID`;';
+		const addLogSettings = 'INSERT INTO `logsettings` (`guildID`) VALUES (?) ON DUPLICATE KEY UPDATE `guildID`=`guildID`;';
+
 		const SQLpool = client.conPool.promise();
 
 		client.guilds.cache.array().forEach((guild) => {
 			const ngn = txtFormatter(guild.name);
 			const non = txtFormatter(guild.owner.user.tag);
-			return SQLpool.execute(addGuild, [guild.id, ngn, true, guild.owner.user.id, non, guild.members.cache.size, guild.region, guild.createdAt])
+			return SQLpool.execute(addGuild, [guild.id, ngn, true, guild.owner.user.id, non, guild.members.cache.size, guild.region, guild.createdAt, ngn, true, guild.members.cache.size])
 				.then(() => {
-					console.success(`[GUILD CREATE] Successfully added/updated record for guild: ${guild.id}`);
-					return SQLpool.execute(addGuildSettings, [guild.id, client.config.defaultPrefix, 250, false, 0, null])
+					console.success(`[ADD GUILDS] Successfully added/updated record for guild: ${guild.id}`);
+					return SQLpool.execute(addGuildSettings, [guild.id, client.config.defaultPrefix])
 						.then(() => {
-							console.success(`[GUILD CREATE] Successfully added/updated record for guildsettings: ${guild.id}`);
+							console.success(`[ADD GUILDS] Successfully added/updated record for guildsettings: ${guild.id}`);
+							return SQLpool.execute(addLogSettings, [guild.id])
+								.then(() => {
+									console.success(`[ADD GUILDS] Successfully added/updated record for logsettings: ${guild.id}`);
+								}).catch((error) => {
+									console.error(`[ADD GUILDS] ${error.stack}`);
+								});
 						}).catch((error) => {
-							console.error(`[GUILD CREATE] ${error.stack}`);
+							console.error(`[ADD GUILDS] ${error.stack}`);
 						});
 				}).catch((error) => {
-					console.error(`[GUILD CREATE] ${error.stack}`);
+					console.error(`[ADD GUILDS] ${error.stack}`);
 				});
 		});
 	} };

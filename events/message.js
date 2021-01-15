@@ -29,6 +29,8 @@ module.exports = async (client, message) => {
 	const command = client.commands.get(commandName) || client.commands.get(client.aliases.get(commandName));
 	if(!command) return;
 
+	if(message.channel.permissionsFor(client.user).has("SEND_MESSAGES") === false) return;
+
 	// Define SQLpool, query for disabled commands
 	// If returns true and command isn't toggle, return
 	const SQLpool = client.conPool.promise();

@@ -15,6 +15,8 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
+		// ADD LYRICS ON PAGE 2?????
+
 		const member = message.mentions.members.first() || message.member; const user = member.user;
 		const activities = user.presence.activities; const actArray = [];
 
@@ -32,7 +34,7 @@ module.exports = {
 		const trackAuthor = spotifyObj.state;
 		const trackAlbum = spotifyObj.assets.largeText;
 
-		const sEmbed = new MessageEmbed()
+		const pageOne = new MessageEmbed()
 			.setAuthor('Spotify Track Info', 'https://cdn.discordapp.com/emojis/653135129870336031.png?v=1')
 			.setColor(0x1ED760)
 			.setThumbnail(trackIMG)
@@ -40,7 +42,10 @@ module.exports = {
 			.setFooter(message.member.displayName, message.author.displayAvatarURL())
 			.setTimestamp();
 
+		const pageTwo = new MessageEmbed()
+			.setAuthor('Spotify Track Lyrics', 'https://cdn.discordapp.com/emojis/653135129870336031.png?v=1');
 
-		return message.channel.send(sEmbed);
+
+		return message.channel.send(pageOne);
 
 	} };

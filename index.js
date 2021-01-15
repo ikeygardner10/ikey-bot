@@ -2,7 +2,6 @@
 const { Discord, Client, Intents, MessageEmbed, Collection } = require('discord.js');
 const fs = require('fs-extra');
 const Enmap = require('enmap');
-const bluebird = require('bluebird');
 global.Promise = require('bluebird');
 const client = new Client({
 	ws: { intents: Intents.ALL },
@@ -22,7 +21,7 @@ client.conPool = mysql.createPool({
 	password: client.config.mySQLpw,
 	database: 'ikeybot',
 	charset: 'utf8mb4',
-	Promise: bluebird,
+	Promise: global.Promise,
 });
 
 const logger = require('./functions/logger.js')('./logs/logs.txt');
@@ -73,14 +72,16 @@ fs.readdir('./commands/', (error, folders) => {
 	});
 });
 
-const errorHandle = require('./functions/errorHandle');
 process.on('unhandledRejection', async (error) => {
-	await errorHandle(error);
+	console.error(`[CLIENT] ${error.stack}`);
 	if(error.path) {
-		client.users.cache.get('341086875232108545').send(`__***ERROR***__\n\n**Name:** *${error.name}*\n**Method:** *${error.method}*\n**Code:** *${error.code}*\n**httpStatus:** *${error.httpStatus}*\n\n**Path:** \`${error.path}\`\n**Message:** \`${error.message}\``);
-		if(error.message === 'Missing Permissions') client.channels.cache.get(error.path.slice(10, -28)).send(`\`An error occured:\`\n\`\`\`${error.name}: ${error.message}\`\`\``);
+		client.channels.cache.get('784192991492702218').send(`__***ERROR***__\n\n**Name:** *${error.name}*\n**Method:** *${error.method}*\n**Code:** *${error.code}*\n**httpStatus:** *${error.httpStatus}*\n\n**Path:** \`${error.path}\`\n**Message:** \`${error.message}\``);
+		if(error.message === 'Missing Permissions') {
+			const channelID = error.path.match(/[0-9]{18}/);
+			client.channels.cache.get(channelID).send(`\`An error occured:\`\n\`\`\`${error.name}: ${error.message}\`\`\``).catch(() => {});
+		}
 	} else {
-		client.users.cache.get('341086875232108545').send(`__***ERROR***__\n\n**Name:** *${error.name}*\n**Method:** *${error.method}*\n**Code:** *${error.code}*\n**httpStatus:** *${error.httpStatus}*\n\n**Message:** \`${error.message}\``);
+		client.channels.cache.get('784192991492702218').send(`__***ERROR***__\n\n**Name:** *${error.name}*\n**Method:** *${error.method}*\n**Code:** *${error.code}*\n**httpStatus:** *${error.httpStatus}*\n\n**Message:** \`${error.message}\``);
 	}
 });
 

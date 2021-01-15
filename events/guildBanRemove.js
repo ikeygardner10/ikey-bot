@@ -1,29 +1,19 @@
 const { MessageEmbed } = require('discord.js');
+const createChannel = require('../functions/createChannel');
 
 module.exports = async (client, guild, user) => {
 
+
+	const checkLogSettings = 'SELECT `members`, `logChannel` FROM `logsettings` WHERE `guildID`=?;';
+
 	const SQLpool = client.conPool.promise();
-	const checkTracking = 'SELECT `invTracking`, `logsChannel` FROM `guildsettings` WHERE `guildID`=?;';
+	const [logRows] = await SQLpool.query(checkLogSettings, [guild.id]);
+	const [members, channel] = [logRows[0].members, logRows[0].logChannel];
+	if(members === 0) return;
 
-	const [rows] = await SQLpool.query(checkTracking, [guild.id]);
-	if(rows[0].invTracking === 0) return;
-
-	const channelName = rows[0].logsChannel;
-	const logsChannel = guild.channels.cache.find(channel => channel.name === channelName);
+	const logsChannel = guild.channels.cache.find(ch => ch.name === channel);
 	if(!logsChannel) {
-		guild.channels.create(channelName, {
-			type: 'text',
-			position: '500',
-			reason: 'logs',
-			permissionOverwrites: [
-				{
-					id: guild.id,
-					deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
-				}],
-		})
-			.then(() => {
-				console.success(`[GUILD BAN REMOVE] Successfully created logs channel: ${channelName} for guild: ${guild.id}`);
-			})
+		await createChannel(client, guild, channel, 'text', 500, 'logs', guild.id, [], ['VIEW_CHANNEL', 'SEND_MESSAGES'])
 			.catch((error) => {
 				console.error(`[GUILD BAN REMOVE] ${error.stack}`);
 			});
@@ -32,7 +22,7 @@ module.exports = async (client, guild, user) => {
 	const iEmbed = new MessageEmbed()
 		.setAuthor('Member Unban', guild.iconURL())
 		.setThumbnail(user.avatarURL())
-		.setDescription(`**Username:** <@${user.id}> *(${user.tag})*`)
+		.setDescription(`**Username:** ${user.tag}`)
 		.setFooter(`ID: ${user.id}`)
 		.setTimestamp()
 		.setColor(0xFFFFFA);

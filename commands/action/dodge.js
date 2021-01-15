@@ -6,7 +6,7 @@ module.exports = {
 		noalias: 'No Aliases',
 		aliases: [],
 		usage: '',
-		cooldown: 3,
+		cooldown: 5,
 		category: 'action',
 		permissions: '',
 		args: false,

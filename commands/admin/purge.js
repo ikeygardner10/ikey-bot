@@ -35,9 +35,6 @@ module.exports = {
 		} else {
 			await message.delete();
 			await message.channel.bulkDelete(amount)
-				.then(() => {
-					return message.channel.send(`\`Success\`\n\`${amount} deleted\``);
-				})
 				.catch((error) => {
 					console.error(`[PURGE CMD] ${error.stack}`);
 					return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
