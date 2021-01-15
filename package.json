@@ -26,7 +26,7 @@
   "homepage": "https://github.com/ikeygardner10/ikey-bot#readme",
   "dependencies": {
     "@keyv/sqlite": "^2.0.2",
-    "axios": "^0.21.0",
+    "axios": "^0.21.1",
     "better-sqlite3": "^7.1.0",
     "bluebird": "^3.7.2",
     "chalk": "^4.1.0",
