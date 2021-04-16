@@ -14,7 +14,13 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
-		const member = message.guild.member(message.mentions.users.first()); if(!member) return message.channel.send('No user mentioned.');
+		// Define member and user, if ID is given, fetch member and user, redefine
+		let member = message.guild.member(message.mentions.users.first());
+		if(args[0] && args[0].match(/^[0-9]{18}$/)) {
+			await message.guild.members.fetch(args[0]);
+			member = message.guild.members.cache.get(args[0]);
+		}
+		if(!member) return message.channel.send('No user mentioned.');
 		const [, ...restArgs] = args; const input = restArgs.join(' '); if(!input) return message.channel.send('Specify a role.');
 
 		const role = message.guild.roles.cache.find(r => r.name === input);
@@ -28,8 +34,8 @@ module.exports = {
 
 		if(message.author.id !== client.config.ownerID) {
 			const authorrole = message.member.roles.highest; const botrole = message.guild.me.roles.highest;
-			if(authorrole.position < role.position || authorrole.position === role.position) return message.channel.send('`Invalid Permission (ROLE IS HIGHER/EQUAL TO YOURS)`');
-			if(role.position < botrole.position || role.position === botrole.position) return message.channel.send('`Invalid Permission (ROLE IS HIGHER/EQUAL TO MINE)`');
+			if(authorrole.position <= role.position) return message.channel.send('`Invalid Permission (ROLE IS HIGHER/EQUAL TO YOURS)`');
+			if(role.position <= botrole.position) return message.channel.send('`Invalid Permission (ROLE IS HIGHER/EQUAL TO MINE)`');
 		}
 
 		if(member.roles.cache.has(role.id)) {

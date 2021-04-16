@@ -13,11 +13,21 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
-		try {
-			console.info(`[PING CMD] Ping: ${client.ws.ping}`);
-			return message.channel.send(`Ping: \`${client.ws.ping}ms\``);
-		} catch(error) {
-			console.error(`[PING CMD] ${error.stack}`);
-			return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
-		}
+		return message.channel.send('`Pinging...`')
+			.then(async msg => {
+				msg.delete();
+				return message.channel.send(`Your Ping: \`${msg.createdTimestamp - message.createdTimestamp}ms\`\nBot Ping: \`${client.ws.ping}ms\``);
+			})
+			.catch(async error => {
+				console.error(`[PING CMD] ${error.stack}`);
+				return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+			});
+
+		// try {
+		// 	console.info(`[PING CMD] Ping: ${client.ws.ping}`);
+		// 	return message.channel.send(`Ping: \`${client.ws.ping}ms\``);
+		// } catch(error) {
+		// 	console.error(`[PING CMD] ${error.stack}`);
+		// 	return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+		// }
 	} };

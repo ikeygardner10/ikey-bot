@@ -17,8 +17,6 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
-		return;
-
 		const member = message.mentions.members.first() || message.member;
 		const guild = message.guild; const author = message.author;
 
@@ -36,7 +34,7 @@ module.exports = {
 		const [checkParentRows] = await SQLpool.query(checkParents, [familyID, guild.id]);
 		console.info(`[DISOWN CMD] Querying database for parents: ${familyID} in guild: ${guild.id}`);
 		if(checkParentRows[0] === undefined) return message.channel.send('`Invalid (NOT ADOPTED)`');
-		const parentOne = checkParentRows[0].partnerOneID; const parentTwo = checkParentRows[0].partnerTwoID;
+		const parentOne = checkParentRows[0].userID; const parentTwo = checkParentRows[0].partnerID;
 
 		const yes = YesNo.yes; const no = YesNo.no;
 		const responseFilter = response => {

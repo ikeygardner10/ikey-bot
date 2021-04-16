@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-const { Discord, Client, Intents, MessageEmbed, Collection } = require('discord.js');
+const { Discord, Client, Intents } = require('discord.js');
 const fs = require('fs-extra');
 const Enmap = require('enmap');
 global.Promise = require('bluebird');

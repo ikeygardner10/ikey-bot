@@ -17,53 +17,51 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
-		return;
+		// check for existing marriage, existing partner marriage, existing adoption, exsting sibling,
 
-		const author = message.author;
-		const member = message.mentions.members.first();
-		const guild = message.guild;
+		const author = message.author; const member = message.mentions.members.first(); const guild = message.guild;
+		if(!member) return message.channel.send('`Invalid Proposal (NO USER MENTIONED)`'); if(author.id === member.id) return message.channel.send('`Invalid Proposal (NO SOLOGAMY)`');
 
-		if(!member) return message.channel.send('`Invalid Proposal (NO USER MENTIONED)`');
-		if(author.id === member.id) return message.channel.send('`Invalid Proposal (NO SOLOGAMY)`');
+		const addMarriage = 'INSERT INTO `marriages` (`userID`, `partnerID`, `familyID`, `guildID`, `createdAt`) VALUES (?, ?, ?, ?, ?);';
 
-		const SQLpool = client.conPool.promise();
-		const checkUsersMarriage = ';';
-		const checkPartnerMarriage = ';';
-		const checkRelations = ';';
+		const SQLpool = client.conPool.promise(); let eligible = true;
 
-
-		const [authorRows] = await SQLpool.query(checkMarriages, [author.id, author.id, guild.id]);
-		console.info(`[MARRY CMD] Querying database for userID: ${author.id} in guild: ${guild.id}`);
-		if(authorRows[0] !== undefined) {
-			console.info(`[MARRY CMD] Entry found for userID: ${author.id} in guild: ${guild.id}, proposal cancelled`);
-			return message.channel.send('`Invalid Proposal (YOU\'RE ALREADY MARRIED)`');
-		}
-
-		const [memberRows] = await SQLpool.query(checkMarriages, [member.id, member.id, guild.id]);
-		console.info(`[MARRY CMD] Querying database for partnerID: ${member.id} in guild: ${guild.id}`);
-		if(memberRows[0] !== undefined) {
-			console.info(`[MARRY CMD] Entry found for partnerID: ${member.id} in guild: ${guild.id}, proposal cancelled`);
-			return message.channel.send('`Invalid Proposal (PARTNER ALREADY MARRIED)`');
-		}
-
-		const [authorChildRows] = await SQLpool.query(checkAdoptions, [author.id, guild.id]);
-		console.info(`[MARRY CMD] Querying database for children: ${author.id} in guild: ${guild.id}`);
-		if(authorChildRows[0] !== undefined) {
-			const authorFamilyID = authorChildRows[0].familyID;
-			checkAdoptions = 'SELECT * FROM `adoptions` WHERE `familyID`=? AND `guildID`=?;';
-			const [memberChildRows] = await SQLpool.query(checkAdoptions, [authorFamilyID, guild.id]);
-			console.info(`[MARRY CMD] Querying database for matching familyID: ${authorFamilyID} in guild: ${guild.id}`);
-			if(memberChildRows[0] !== undefined) {
-				if(authorFamilyID === memberChildRows[0].familyID) {
-					console.info(`[MARRY CMD] Entry found with matching familyID: ${authorFamilyID} in guild: ${guild.id}, cancelling proposal`);
-					return message.channel.send('`Invalid Proposal (RELATED THROUGH ADOPTION)`');
-				}
+		const sqlFunc = async (stmt, vars, column, ID, guildID, errorMsg, returnResult) => {
+			const [rows] = await SQLpool.query(stmt, vars);
+			console.info(`[MARRY CMD] Querying database for ${column}: ${ID} in guild: ${guildID}`);
+			if(rows[0]) {
+				eligible = false;
+				if(returnResult === true) return rows[0];
+				console.info(`[MARRY CMD] Entry found for ${column}: ${ID} in guild: ${guildID}, proposal cancelled`);
+				return message.channel.send(`\`Invalid Proposal (${errorMsg})\``);
 			}
-		}
+			return eligible = true;
+		};
+
+		let stmt = 'SELECT * FROM `marriages` WHERE (`userID`=? OR `partnerID`=?) AND `guildID`=?;';
+		let vars = [author.id, author.id, guild.id]; let errorMsg = 'YOU\'RE ALREADY MARRIED';
+		await sqlFunc(stmt, vars, 'userID', author.id, guild.id, errorMsg, false);
+		if(eligible === false) return;
+
+		vars = [member.id, member.id, guild.id]; errorMsg = 'MEMBER ALREADY MARRIED';
+		await sqlFunc(stmt, vars, 'partnerID', member.id, guild.id, errorMsg, false);
+		if(eligible === false) return;
+
+		stmt = 'SELECT * FROM `adoptions` WHERE `childID`=? AND `guildID`=?;';
+		vars = [author.id, guild.id]; errorMsg = '';
+		await sqlFunc(stmt, vars, 'childID', author.id, guild.id, errorMsg, true)
+			.then(result => {
+				if(eligible === true) return;
+				const familyID = result.familyID; const childID = result.childID;
+				stmt = 'SELECT * FROM `adoptions` WHERE `childID`=? AND `familyID`=? AND `guildID`=?;';
+				vars = [member.id, familyID, guild.id]; errorMsg = 'RELATED THROUGH ADOPTION';
+				return sqlFunc(stmt, vars, 'matching familyID', familyID, guild.id, errorMsg, false);
+			});
+		if(eligible === false) return;
 
 		const yes = YesNo.yes; const no = YesNo.no;
 		const filter = response => {
-			return yes.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === member.id) || no.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === member.id);
+			return yes.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === member.id && response.author.id !== client.user.id) || no.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === member.id && response.author.id !== client.user.id);
 		};
 		shortid.characters('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$@');
 		const familyID = shortid.generate(); const createdAt = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
@@ -87,7 +85,7 @@ module.exports = {
 						return message.channel.send(`${author}, ${member} declined the proposal! :sob:`);
 					}
 				}).catch((timeout) => {
-					console.info(`[MARRY CMD] ${timeout}`);
+					console.info(`[MARRY CMD] Timed out for user: ${author.id} in guild: ${guild.id}`);
 					return message.channel.send(`${author}, no response! :sob:`);
 				});
 		});

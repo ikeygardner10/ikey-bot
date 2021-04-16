@@ -7,42 +7,46 @@ module.exports = {
 	config: {
 		name: 'divorce',
 		aliases: ['dv'],
-		usage: '',
+		usage: '<@user>',
 		cooldown: 10,
 		category: 'family',
 		permissions: '',
-		args: false,
+		args: true,
 		description: 'Divorce your spouse',
 	},
 	execute: async (client, message, args) => {
 
-		return;
+		const author = message.author; const member = message.mentions.members.first(); const guild = message.guild;
+		let partnerOne; let partnerTwo; let familyID;
 
-		const author = message.author; let partnerOne; let partnerTwo; const guild = message.guild;
-		const checkMarriages = 'SELECT `partnerOneID`, `partnerTwoID`, `guildID` FROM `marriages` WHERE (`partnerOneID`=? OR `partnerTwoID`=?) AND `guildID`=?;';
-		const deleteMarriage = 'SET SQL_SAFE_UPDATES=0; DELETE FROM `marriages` WHERE `partnerOneID`=? AND `partnerTwoID`=? AND `guildID`=?;';
+		const checkMarriages = 'SELECT * FROM `marriages` WHERE (`userID`=? OR `partnerID`=?) AND (`userID`=? OR `partnerID`=?) AND `guildID`=?;';
+		const deleteMarriage = 'SET SQL_SAFE_UPDATES=0; DELETE FROM `marriages` WHERE `familyID`=? AND `guildID`=?;';
+		const checkAdoption = 'SELECT * FROM `adoptions` WHERE `familyID`=? AND `guildID`=?;';
+		const deleteAdoption = 'SET SQL_SAFE_UPDATES=0; DELETE FROM `adoptions` WHERE `familyID`=? AND `guildID`=?;';
 
 		const SQLpool = client.conPool.promise();
 
 		try {
 
-			const [authorRows] = await SQLpool.query(checkMarriages, [author.id, author.id, guild.id]);
+			const [authorRows] = await SQLpool.query(checkMarriages, [author.id, author.id, member.id, member.id, guild.id]);
 			console.info(`[DIVORCE CMD] Querying database for user: ${author.id} in guild: ${guild.id}`);
 			if(authorRows[0] === undefined) {
 				console.info(`[DIVORCE CMD] No entry found for user: ${author.id} in guild: ${guild.id}, cancelling divorce`);
-				return message.channel.send('`Invalid Divorce (YOU\'RE NOT MARRIED)`');
+				return message.channel.send('`Invalid Divorce (YOU\'RE NOT MARRIED TO THEM)`');
 			}
 
-			switch(authorRows[0].partnerOneID) {
+			switch(authorRows[0].userID) {
 			case author.id:
-				partnerOne = authorRows[0].partnerOneID;
-				partnerTwo = authorRows[0].partnerTwoID;
+				partnerOne = authorRows[0].userID;
+				partnerTwo = authorRows[0].partnerID;
 				break;
 			default:
-				partnerOne = authorRows[0].partnerTwoID;
-				partnerTwo = authorRows[0].partnerOneID;
+				partnerOne = authorRows[0].partnerID;
+				partnerTwo = authorRows[0].userID;
 				break;
 			}
+
+			familyID = authorRows[0].familyID;
 
 		} catch(error) {
 			console.error(`[DIVORCE CMD] ${error.stack}`);
@@ -51,7 +55,7 @@ module.exports = {
 
 		const yes = YesNo.yes; const no = YesNo.no;
 		const responseFilter = response => {
-			return yes.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === author.id) || no.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === author.id);
+			return yes.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === author.id && response.author.id !== client.user.id) || no.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === author.id);
 		};
 
 		console.info(`[DIVORCE CMD] Found marriage for user: ${author.id} in guild: ${guild.id}`);
@@ -59,10 +63,23 @@ module.exports = {
 			message.channel.awaitMessages(responseFilter, { max: 1, time: 15000, errors: ['time'] })
 				.then(collected => {
 					if(yes.includes(collected.first().content.toLowerCase())) {
-						return SQLpool.query(deleteMarriage, [partnerOne, partnerTwo, guild.id])
-							.then(() => {
-								console.success(`[DIVORCE CMD] Marraige removed for users: ${author.id} & ${partnerTwo} in guild: ${guild.id}`);
-								return message.channel.send(`**${author} & <@${partnerTwo}> are no longer together :broken_heart: :sob:**`);
+						console.warn(JSON.stringify(partnerOne));
+						console.warn(JSON.stringify(partnerTwo));
+						return SQLpool.query(deleteMarriage, [familyID, guild.id])
+							.then(async () => {
+								console.success(`[DIVORCE CMD] Marriage removed for users: ${author.id} & ${partnerTwo} in guild: ${guild.id}`);
+								message.channel.send(`**${author} & <@${partnerTwo}> are no longer together :broken_heart: :sob:**`);
+								const [adoptRows] = await SQLpool.query(checkAdoption, [familyID, guild.id]);
+								if(adoptRows[0] !== undefined) {
+									return SQLpool.query(deleteAdoption, [familyID, guild.id])
+										.then(() => {
+											return console.success(`[DIVORCE CMD] Adoption removed for user: ${adoptRows[0].childID} in guild: ${guild.id}`);
+										})
+										.catch((error) => {
+											console.error(`[DIVORCE CMD] ${error.stack}`);
+											return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+										});
+								}
 							})
 							.catch((error) => {
 								console.error(`[DIVORCE CMD] ${error.stack}`);

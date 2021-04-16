@@ -1,5 +1,6 @@
 /* eslint-disable quotes */
 const config = require('../data/owner/config.json');
+const userBL = require('../data/owner/userBlacklist.json');
 const active = new Map(); const ops = { active: active };
 const { Collection } = require('discord.js'); const cooldowns = new Collection();
 const { botPerms } = require('../data/arrayData.json');
@@ -8,8 +9,11 @@ const checkDisabledCmds = 'SELECT * FROM `disabledcommands` WHERE (`command`=? O
 
 module.exports = async (client, message) => {
 
+
 	// Ignore all bots, to stop looping or worse, ignore non guild message, or non text channels
 	if(message.author.bot || !message.guild || message.channel.type !== 'text') return;
+
+	if(userBL.includes(message.author.id)) return;
 
 	// Check for guilds prefix from Enmap, otherwise use default
 	const guildPrefix = client.prefixes.get(message.guild.id);
@@ -35,14 +39,14 @@ module.exports = async (client, message) => {
 	// If returns true and command isn't toggle, return
 	const SQLpool = client.conPool.promise();
 	const [checkAllRows] = await SQLpool.execute(checkDisabledCmds, ['all', command.config.name, message.guild.id, message.channel.id]);
-	if(checkAllRows[0] !== undefined && command.config.name !== 'toggle') return;
+	if(checkAllRows[0] !== undefined && command.config.name !== 'toggle' && message.author.id !== config.ownerID) return;
 
 	// Check for NSFW channel
 	if(command.config.nsfw && !message.channel.nsfw) return message.channel.send('`NSFW channels only`');
 
 	// Check for required user permissions
 	if(command.config.permissions) {
-		if(command.config.permissions === 'Bot Owner' && message.author.id !== config.ownerID) return message.channel.send(`\`Bot Owner Only\``);
+		if(command.config.permissions === 'Bot Owner' && message.author.id !== config.ownerID) return message.channel.send('that\'s sus bro <:amogus:811415219044745216>');
 		if(!message.member.hasPermission(botPerms[command.config.permissions]) && message.author.id !== config.ownerID) return message.channel.send(`\`Requires ${command.config.permissions} Permission\``);
 	}
 

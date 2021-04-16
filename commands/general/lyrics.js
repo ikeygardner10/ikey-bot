@@ -44,10 +44,15 @@ module.exports = {
 			optimizeQuery: true,
 		};
 
-		const lyricArray = [];
+		const lyricArray = []; let author;
 		await getSong(options)
 			.then(song => {
-				const author = `Lyrics for ${title} by ${artist}`;
+				try {
+					author = `Lyrics for ${song.title}`;
+				}
+				catch {
+					author = `Lyrics for ${title} by ${artist}`
+				}
 				async function createArray(text) {
 					const arr = text.match(/[\s\S]{1,1024}(?=(\[|$))/g);
 					for(const list of arr) {

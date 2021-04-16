@@ -14,7 +14,15 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
-		const user = message.mentions.users.first() || message.author;
+		// Define member and user, if ID is given, fetch member and user, redefine
+		let member = message.mentions.members.first() || message.member;
+		let user = member.user;
+		if(args[0] && args[0].match(/^[0-9]{18}$/)) {
+			await message.guild.members.fetch(args[0]);
+			member = message.guild.members.cache.get(args[0]);
+			await client.users.fetch(args[0]);
+			user = client.users.cache.get(args[0]);
+		}
 		const avatar = user.avatarURL({ format: 'png', dynamic: true, size: 1024 });
 
 		const avEmbed = new MessageEmbed()

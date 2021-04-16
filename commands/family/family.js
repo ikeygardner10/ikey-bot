@@ -16,11 +16,9 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
-		return;
-
 		const member = message.mentions.members.first() || message.member; const guild = message.guild;
 
-		const checkMarriages = 'SELECT * FROM `marriages` WHERE (`partnerOneID`=? OR `partnerTwoID`=?) AND `guildID`=?;';
+		const checkMarriages = 'SELECT * FROM `marriages` WHERE (`userID`=? OR `partnerID`=?) AND `guildID`=?;';
 		const checkAdoptions = 'SELECT * FROM `adoptions` WHERE `familyID`=? AND `guildID`=?;';
 		const checkIsChild = 'SELECT * FROM `adoptions` WHERE `childID`=? AND `guildID`=?;';
 		const checkParents = 'SELECT * FROM `marriages` WHERE `familyID`=? AND `guildiD`=?;';
@@ -36,24 +34,34 @@ module.exports = {
 		let desc = '';
 
 		try {
+
+			const dateCleaner = (yuckDate) => {
+				const cleanDate = yuckDate.match(/(\s[a-zA-Z0-9]*){3}/);
+				return cleanDate[0];
+			};
+
 			const [isMarriedRows] = await SQLpool.query(checkMarriages, [member.id, member.id, guild.id]);
 			console.info(`[FAMILY CMD] Querying database for partner: ${member.id} in guild: ${guild.id}`);
 			if(isMarriedRows[0] !== undefined) {
 
 				const marriedFamilyID = isMarriedRows[0].familyID;
-				const marriedDate = isMarriedRows[0].createdAt.toString();
-				const formattedMarriedDate = marriedDate.slice(0, marriedDate.lastIndexOf(':'));
-				let partner = isMarriedRows[0].partnerOneID;
-				if(member.id === partner) partner = isMarriedRows[0].partnerTwoID;
-				desc += `**:couple: Partner:** <@${partner}>\n**:calendar: Married:** ${formattedMarriedDate}\n\n`;
+				let formattedDate = await dateCleaner(isMarriedRows[0].createdAt.toString());
+				let partner = isMarriedRows[0].userID;
+				if(member.id === partner) partner = isMarriedRows[0].partnerID;
+				await guild.members.fetch(partner)
+					.then(result => {
+						desc += `**:couple: Partner:** ${result.displayName}\n**:calendar: Married:** ${formattedDate}\n\n`;
+					});
 
 				const [hasChildRows] = await SQLpool.query(checkAdoptions, [marriedFamilyID, guild.id]);
 				console.info(`[FAMILY CMD] Querying database for children: ${marriedFamilyID} in guild: ${guild.id}`);
 				if(hasChildRows[0] !== undefined) {
-					await hasChildRows.forEach(row => {
-						const adoptionDate = row.createdAt.toString();
-						const formattedAdoptionDate = adoptionDate.slice(0, adoptionDate.lastIndexOf(':'));
-						desc += `**:child: Child:** <@${row.childID}>\n**:calendar: Date Adopted:** ${formattedAdoptionDate}\n`;
+					await hasChildRows.forEach(async row => {
+						formattedDate = dateCleaner(row.createdAt.toString());
+						await guild.members.fetch(row.childID)
+							.then(result => {
+								desc += `**:child: Child:** ${result.displayName}\n**:calendar: Adopted:** ${formattedDate}\n`;
+							});
 					});
 				}
 			}
@@ -63,20 +71,29 @@ module.exports = {
 			if(isChildRows[0] !== undefined) {
 
 				const adoptedFamilyID = isChildRows[0].familyID;
-				const adoptedDate = isChildRows[0].createdAt.toString();
-				const formattedAdoptedDate = adoptedDate.slice(0, adoptedDate.lastIndexOf(':'));
+				formattedDate = dateCleaner(isChildRows[0].createdAt.toString());
 
 				const [hasParentRows] = await SQLpool.query(checkParents, [adoptedFamilyID, guild.id]);
 				console.info(`[FAMILY CMD] Querying database for parents: ${adoptedFamilyID} in guild: ${guild.id}`);
-				const parentOne = hasParentRows[0].partnerOneID; const parentTwo = hasParentRows[0].partnerTwoID;
-				desc += `\n\n**:people_holding_hands: Parents:** <@${parentOne}> & <@${parentTwo}>\n**:calendar: Adopted:** ${formattedAdoptedDate}\n`;
+				const parentOne = hasParentRows[0].userID; const parentTwo = hasParentRows[0].partnerID;
+				await guild.members.fetch(parentOne)
+					.then(resultOne => {
+						guild.members.fetch(parentTwo)
+							.then(resultTwo => {
+								desc += `\n\n**:people_holding_hands: Parents:** ${resultOne.displayName} & ${resultTwo.displayName}\n**:calendar: Adopted:** ${formattedDate}\n`;
+							});
+
+					});
 
 				const [hasSiblingsRows] = await SQLpool.query(checkSiblings, [adoptedFamilyID, guild.id]);
 				console.info(`[FAMILY CMD] Querying database for siblings: ${adoptedFamilyID} in guild: ${guild.id}`);
-				if(hasSiblingsRows[0] !== undefined) {
-					await hasSiblingsRows.forEach(row => {
-						if(row.childID === message.author.id) return;
-						desc += `\n**:child: Sibling:** <@${row.childID}>`;
+				if(hasSiblingsRows[0] !== undefined && hasSiblingsRows.size > 1) {
+					await hasSiblingsRows.forEach(async row => {
+						if(row.childID === member.id) return;
+						await guild.members.fetch(row.childID)
+							.then(result => {
+								desc += `\n**:child: Sibling:** ${result.displayName}`;
+							});
 					});
 				}
 			}

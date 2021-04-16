@@ -15,8 +15,6 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
-		// ADD LYRICS ON PAGE 2?????
-
 		const member = message.mentions.members.first() || message.member; const user = member.user;
 		const activities = user.presence.activities; const actArray = [];
 
@@ -28,24 +26,27 @@ module.exports = {
 
 		if(!spotifyObj) return message.channel.send('`Invalid (NOTHING PLAYING)`');
 
-		const trackIMG = `https://i.scdn.co/image/${spotifyObj.assets.largeImage.slice(8)}` || 'https://imgur.com/ulUV1l6.png';
+		// const trackIMG = `https://i.scdn.co/image/${spotifyObj.assets.largeImage.slice(8)}`;
 		const trackURL = `https://open.spotify.com/track/${spotifyObj.syncID}`;
 		const trackName = spotifyObj.details;
 		const trackAuthor = spotifyObj.state;
-		const trackAlbum = spotifyObj.assets.largeText;
+		const trackAlbum = spotifyObj.assets.largeText || 'Discord Broke Mobile Integration';
 
 		const pageOne = new MessageEmbed()
 			.setAuthor('Spotify Track Info', 'https://cdn.discordapp.com/emojis/653135129870336031.png?v=1')
 			.setColor(0x1ED760)
-			.setThumbnail(trackIMG)
 			.setDescription(`**:headphones: Title:** ${trackName}\n**:minidisc: Album:** ${trackAlbum}\n**:performing_arts: Artists:** ${trackAuthor}\n\n**Listen to Track:** [Spotify Link](${trackURL})`)
 			.setFooter(message.member.displayName, message.author.displayAvatarURL())
 			.setTimestamp();
 
-		const pageTwo = new MessageEmbed()
-			.setAuthor('Spotify Track Lyrics', 'https://cdn.discordapp.com/emojis/653135129870336031.png?v=1');
+		try {
+			pageOne.setThumbnail(`https://i.scdn.co/image/${spotifyObj.assets.largeImage.slice(8)}`);
+		} catch {
+			pageOne.setThumbnail('https://imgur.com/ulUV1l6.png');
+		} finally {
+			message.channel.send(pageOne);
+		}
 
-
-		return message.channel.send(pageOne);
+		return;
 
 	} };

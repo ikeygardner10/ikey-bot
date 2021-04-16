@@ -18,7 +18,7 @@ module.exports = {
 		const checkRandom = 'SELECT `tag`, `content`, `imageURL` FROM `tags` WHERE BINARY `guildID` IS NULL OR `guildID`= ? ORDER BY RAND() LIMIT 1;';
 
 		const SQLpool = client.conPool.promise();
-		console.info('[VIEW TAG] Querying database for random tag');
+		console.info('[RANDOM TAG] Querying database for random tag');
 		return SQLpool.query(checkRandom, [message.guild.id])
 			.then(([rows]) => {
 				if(rows[0].imageURL !== null) {
