@@ -131,7 +131,12 @@ module.exports = {
 			await client.users.fetch(tagRows[0].userID);
 			await tagRows.forEach(tag => {
 				ntn = txtFormatter(tag.tag);
-				let user = client.users.cache.get(tag.userID).tag || 'Unknown User';
+				let user;
+				try {
+					user = client.users.cache.get(tag.userID).tag;
+				} catch {
+					user = 'Unknown User';
+				}
 				if(tag.guildID !== null) {
 					if(tag.guildID !== message.guild.id) return;
 					tagArray.push(`${ntn} *(Server)*\nOwner: ${user}\n`);

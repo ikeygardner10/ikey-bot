@@ -7,11 +7,11 @@ module.exports = {
 	config: {
 		name: 'divorce',
 		aliases: ['dv'],
-		usage: '<@user>',
+		usage: '',
 		cooldown: 10,
 		category: 'family',
 		permissions: '',
-		args: true,
+		args: false,
 		description: 'Divorce your spouse',
 	},
 	execute: async (client, message, args) => {
@@ -19,7 +19,7 @@ module.exports = {
 		const author = message.author; const member = message.mentions.members.first(); const guild = message.guild;
 		let partnerOne; let partnerTwo; let familyID;
 
-		const checkMarriages = 'SELECT * FROM `marriages` WHERE (`userID`=? OR `partnerID`=?) AND (`userID`=? OR `partnerID`=?) AND `guildID`=?;';
+		const checkMarriages = 'SELECT * FROM `marriages` WHERE (`userID`=? OR `partnerID`=?) AND `guildID`=?;';
 		const deleteMarriage = 'SET SQL_SAFE_UPDATES=0; DELETE FROM `marriages` WHERE `familyID`=? AND `guildID`=?;';
 		const checkAdoption = 'SELECT * FROM `adoptions` WHERE `familyID`=? AND `guildID`=?;';
 		const deleteAdoption = 'SET SQL_SAFE_UPDATES=0; DELETE FROM `adoptions` WHERE `familyID`=? AND `guildID`=?;';
@@ -28,11 +28,11 @@ module.exports = {
 
 		try {
 
-			const [authorRows] = await SQLpool.query(checkMarriages, [author.id, author.id, member.id, member.id, guild.id]);
+			const [authorRows] = await SQLpool.query(checkMarriages, [author.id, author.id, guild.id]);
 			console.info(`[DIVORCE CMD] Querying database for user: ${author.id} in guild: ${guild.id}`);
 			if(authorRows[0] === undefined) {
 				console.info(`[DIVORCE CMD] No entry found for user: ${author.id} in guild: ${guild.id}, cancelling divorce`);
-				return message.channel.send('`Invalid Divorce (YOU\'RE NOT MARRIED TO THEM)`');
+				return message.channel.send('`Invalid Divorce (YOU\'RE NOT MARRIED)`');
 			}
 
 			switch(authorRows[0].userID) {
@@ -63,8 +63,6 @@ module.exports = {
 			message.channel.awaitMessages(responseFilter, { max: 1, time: 15000, errors: ['time'] })
 				.then(collected => {
 					if(yes.includes(collected.first().content.toLowerCase())) {
-						console.warn(JSON.stringify(partnerOne));
-						console.warn(JSON.stringify(partnerTwo));
 						return SQLpool.query(deleteMarriage, [familyID, guild.id])
 							.then(async () => {
 								console.success(`[DIVORCE CMD] Marriage removed for users: ${author.id} & ${partnerTwo} in guild: ${guild.id}`);

@@ -2,7 +2,7 @@
 const config = require('../data/owner/config.json');
 const userBL = require('../data/owner/userBlacklist.json');
 const active = new Map(); const ops = { active: active };
-const { Collection } = require('discord.js'); const cooldowns = new Collection();
+const { Collection, MessageEmbed } = require('discord.js'); const cooldowns = new Collection();
 const { botPerms } = require('../data/arrayData.json');
 const prefixReset = require('../functions/prefixReset');
 const checkDisabledCmds = 'SELECT * FROM `disabledcommands` WHERE (`command`=? OR `command`=?) AND `guildID`= ? AND `channelID`= ?';
@@ -23,6 +23,13 @@ module.exports = async (client, message) => {
 	const clientRegex = RegExp(`^<@!${client.user.id}>$`);
 	if(message.content.match(clientRegex)) return message.channel.send(`Prefix for \`${message.guild.name}\` is \`${prefix}\``);
 	if(message.content.startsWith(`${config.defaultPrefix}prefixreset`)) return prefixReset(client, message);
+
+	if(message.content.startsWith('$pay')) {
+		const embed = new MessageEmbed()
+			.setDescription('[Paypal](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CXU2L6XUT2YWN&source=url) :flushed:')
+			.setColor(0xFFFFFA);
+		return message.channel.send(embed);
+	}
 
 	// If first char of message isn't prefix, ignore it
 	if(message.content.indexOf(prefix) !== 0) return;

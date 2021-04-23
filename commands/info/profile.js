@@ -31,7 +31,7 @@ module.exports = {
 		const roleList = roles.replace(/@everyone/g, '');
 
 		// Create array, define list
-		const actArray = []; let actList = 'None'; let emoji; let customEmoji = false;
+		const actArray = []; let actList = 'None';
 		if(user.presence.activities) {
 
 			// Wait to push activities to array
@@ -117,8 +117,4 @@ module.exports = {
 			});
 		});
 
-		if(customEmoji === true) {
-			customEmoji = false;
-			return emoji.delete();
-		}
 	} };

@@ -1,8 +1,11 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
 /* eslint-disable prefer-const */
+const { Collection } = require('discord.js');
 const shortid = require('shortid');
 const YesNo = require('../../data/YesNo.json');
+const currentProposals = new Collection();
+
 
 module.exports = {
 	config: {
@@ -22,18 +25,19 @@ module.exports = {
 		const author = message.author; const member = message.mentions.members.first(); const guild = message.guild;
 		if(!member) return message.channel.send('`Invalid Proposal (NO USER MENTIONED)`'); if(author.id === member.id) return message.channel.send('`Invalid Proposal (NO SOLOGAMY)`');
 
-		const addMarriage = 'INSERT INTO `marriages` (`userID`, `partnerID`, `familyID`, `guildID`, `createdAt`) VALUES (?, ?, ?, ?, ?);';
-
 		const SQLpool = client.conPool.promise(); let eligible = true;
 
 		const sqlFunc = async (stmt, vars, column, ID, guildID, errorMsg, returnResult) => {
 			const [rows] = await SQLpool.query(stmt, vars);
 			console.info(`[MARRY CMD] Querying database for ${column}: ${ID} in guild: ${guildID}`);
-			if(rows[0]) {
+			if(returnResult === false && rows[0] || returnResult === true && !rows[0]) {
 				eligible = false;
-				if(returnResult === true) return rows[0];
 				console.info(`[MARRY CMD] Entry found for ${column}: ${ID} in guild: ${guildID}, proposal cancelled`);
 				return message.channel.send(`\`Invalid Proposal (${errorMsg})\``);
+			}
+			if(returnResult === true && rows[0]) {
+				eligible = false;
+				return rows[0];
 			}
 			return eligible = true;
 		};
@@ -61,17 +65,19 @@ module.exports = {
 
 		const yes = YesNo.yes; const no = YesNo.no;
 		const filter = response => {
-			return yes.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === member.id && response.author.id !== client.user.id) || no.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === member.id && response.author.id !== client.user.id);
+			return yes.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === member.id) || no.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === member.id);
 		};
 		shortid.characters('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$@');
 		const familyID = shortid.generate(); const createdAt = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
 
+		stmt = 'INSERT INTO `marriages` (`userID`, `partnerID`, `familyID`, `guildID`, `createdAt`) VALUES (?, ?, ?, ?, ?);';
+		vars = [author.id, member.id, familyID, guild.id, createdAt];
 		console.info(`[MARRY CMD] No existing entries, sending proposal for ${author.id} & ${member.id}`);
 		message.channel.send(`${member}, ${author} is proposing! :ring:\n\n**What do you say?**`).then(() => {
 			message.channel.awaitMessages(filter, { max: 1, time: 15000, errors: ['time'] })
 				.then(collected => {
 					if(yes.includes(collected.first().content.toLowerCase())) {
-						return SQLpool.execute(addMarriage, [author.id, member.id, familyID, guild.id, createdAt])
+						return SQLpool.execute(stmt, vars)
 							.then(() => {
 								console.success(`[MARRY CMD] Marraige added for users: ${author.id} & ${member.id}`);
 								return message.channel.send(`The wedding is to be held immediately.\n\n**Congratulations ${author} & ${member}! 🤵 👰**\n\nYou may now kiss :flushed:`);
@@ -89,4 +95,5 @@ module.exports = {
 					return message.channel.send(`${author}, no response! :sob:`);
 				});
 		});
+
 	} };
