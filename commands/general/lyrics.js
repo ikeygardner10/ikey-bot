@@ -49,18 +49,21 @@ module.exports = {
 			.then(song => {
 				try {
 					author = `Lyrics for ${song.title}`;
-				}
-				catch {
-					author = `Lyrics for ${title} by ${artist}`
+				} catch {
+					author = `Lyrics for ${title} by ${artist}`;
 				}
 				async function createArray(text) {
+					await text.replace(/\[.*\]\n?/g, '');
 					const arr = text.match(/[\s\S]{1,1024}(?=(\[|$))/g);
 					for(const list of arr) {
-						lyricArray.push(list);
+						lyricArray.push(`[Genius Lyrics](${song.url})\n\n${list}`);
 					}
 				}
 				if(song === null) return message.channel.send('`Invalid (NO SONG FOUND)`');
+				const ly = song.lyrics.replace(/\[.*\]?/g, '');
 				createArray(song.lyrics);
+				const lyArray = ly.split('\n\n');
+				console.warn(lyArray[0]);
 				lyricArray.forEach(lyric => {
 					lyric.replace('-', '\n');
 					return lyric;

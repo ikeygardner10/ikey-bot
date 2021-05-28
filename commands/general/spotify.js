@@ -28,9 +28,9 @@ module.exports = {
 
 		// const trackIMG = `https://i.scdn.co/image/${spotifyObj.assets.largeImage.slice(8)}`;
 		const trackURL = `https://open.spotify.com/track/${spotifyObj.syncID}`;
-		const trackName = spotifyObj.details;
-		const trackAuthor = spotifyObj.state;
-		const trackAlbum = spotifyObj.assets.largeText || 'Discord Broke Mobile Integration';
+		const trackName = spotifyObj.details.replace(/\*/g, '#');
+		const trackAuthor = spotifyObj.state.replace(/\*/g, '#');
+		const trackAlbum = spotifyObj.assets.largeText.replace(/\*/g, '#') || 'Discord Broke Mobile Integration';
 
 		const pageOne = new MessageEmbed()
 			.setAuthor('Spotify Track Info', 'https://cdn.discordapp.com/emojis/653135129870336031.png?v=1')

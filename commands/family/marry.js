@@ -4,8 +4,8 @@
 const { Collection } = require('discord.js');
 const shortid = require('shortid');
 const YesNo = require('../../data/YesNo.json');
-const currentProposals = new Collection();
-
+const MapCache = require('map-cache');
+const cache = new MapCache();
 
 module.exports = {
 	config: {
@@ -25,13 +25,21 @@ module.exports = {
 		const author = message.author; const member = message.mentions.members.first(); const guild = message.guild;
 		if(!member) return message.channel.send('`Invalid Proposal (NO USER MENTIONED)`'); if(author.id === member.id) return message.channel.send('`Invalid Proposal (NO SOLOGAMY)`');
 
+		const cacheCheck = cache.has(member.id);
+		if(cacheCheck === true) {
+			return message.channel.send('`Invalid Marraige (MEMBER ALREADY HAS PENDING MARRIAGE)`');
+		} else {
+			await cache.set(member.id, {});
+		}
+
 		const SQLpool = client.conPool.promise(); let eligible = true;
 
 		const sqlFunc = async (stmt, vars, column, ID, guildID, errorMsg, returnResult) => {
 			const [rows] = await SQLpool.query(stmt, vars);
 			console.info(`[MARRY CMD] Querying database for ${column}: ${ID} in guild: ${guildID}`);
-			if(returnResult === false && rows[0] || returnResult === true && !rows[0]) {
+			if(returnResult === false && rows[0]) {
 				eligible = false;
+				cache.del(member.id);
 				console.info(`[MARRY CMD] Entry found for ${column}: ${ID} in guild: ${guildID}, proposal cancelled`);
 				return message.channel.send(`\`Invalid Proposal (${errorMsg})\``);
 			}
@@ -45,11 +53,11 @@ module.exports = {
 		let stmt = 'SELECT * FROM `marriages` WHERE (`userID`=? OR `partnerID`=?) AND `guildID`=?;';
 		let vars = [author.id, author.id, guild.id]; let errorMsg = 'YOU\'RE ALREADY MARRIED';
 		await sqlFunc(stmt, vars, 'userID', author.id, guild.id, errorMsg, false);
-		if(eligible === false) return;
+		if(eligible === false) return cache.del(member.id);
 
 		vars = [member.id, member.id, guild.id]; errorMsg = 'MEMBER ALREADY MARRIED';
 		await sqlFunc(stmt, vars, 'partnerID', member.id, guild.id, errorMsg, false);
-		if(eligible === false) return;
+		if(eligible === false) return cache.del(member.id);
 
 		stmt = 'SELECT * FROM `adoptions` WHERE `childID`=? AND `guildID`=?;';
 		vars = [author.id, guild.id]; errorMsg = '';
@@ -61,7 +69,7 @@ module.exports = {
 				vars = [member.id, familyID, guild.id]; errorMsg = 'RELATED THROUGH ADOPTION';
 				return sqlFunc(stmt, vars, 'matching familyID', familyID, guild.id, errorMsg, false);
 			});
-		if(eligible === false) return;
+		if(eligible === false) return cache.del(member.id);
 
 		const yes = YesNo.yes; const no = YesNo.no;
 		const filter = response => {
@@ -80,19 +88,23 @@ module.exports = {
 						return SQLpool.execute(stmt, vars)
 							.then(() => {
 								console.success(`[MARRY CMD] Marraige added for users: ${author.id} & ${member.id}`);
-								return message.channel.send(`The wedding is to be held immediately.\n\n**Congratulations ${author} & ${member}! 🤵 👰**\n\nYou may now kiss :flushed:`);
+								message.channel.send(`The wedding is to be held immediately.\n\n**Congratulations ${author} & ${member}! 🤵 👰**\n\nYou may now kiss :flushed:`);
+								return cache.del(member.id);
 							})
 							.catch((error) => {
 								console.error(`[MARRY CMD] ${error.stack}`);
-								return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+								message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+								return cache.del(member.id);
 							});
 					} else if(no.includes(collected.first().content.toLowerCase())) {
 						console.info(`[MARRY CMD] ${member.id} declined the proposal`);
-						return message.channel.send(`${author}, ${member} declined the proposal! :sob:`);
+						message.channel.send(`${author}, ${member} declined the proposal! :sob:`);
+						return cache.del(member.id);
 					}
 				}).catch((timeout) => {
 					console.info(`[MARRY CMD] Timed out for user: ${author.id} in guild: ${guild.id}`);
-					return message.channel.send(`${author}, no response! :sob:`);
+					message.channel.send(`${author}, no response! :sob:`);
+					return cache.del(member.id);
 				});
 		});
 

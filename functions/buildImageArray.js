@@ -1,17 +1,18 @@
 const fs = require('fs-extra');
 
 module.exports = {
-	execute: async (client) => {
+	execute: (client) => {
 		const imageArrays = {
 			choke: [], crazimo: [],
 			dodgefail: [], dodgesuccess: [],
-			fuck: [], handhold: [],
-			highfive: [], hug: [],
-			kiss: [], pat: [],
-			punch: [], shoot: [],
-			slap: [], spank: [],
-			stab: [], tights: [],
-			waifu: [], responseEmojis: [],
+			doubledance: [], fuck: [],
+			handhold: [], highfive: [],
+			hug: [], kiss: [],
+			pat: [], punch: [],
+			shoot: [], shootself: [],
+			singledance: [], slap: [],
+			spank: [], stab: [],
+			tights: [], waifu: [],
 		};
 		client.imageArrays = imageArrays;
 
@@ -31,7 +32,7 @@ module.exports = {
 					} else {
 						images.forEach(image => {
 							imageArrays[folder].push(image);
-							console.info(`[IMG ARRAYS] ./commands/${folder}/${image} added!`);
+							console.info(`[IMG ARRAYS] ./images/${folder}/${image} added!`);
 						});
 					}
 				});

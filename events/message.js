@@ -9,7 +9,6 @@ const checkDisabledCmds = 'SELECT * FROM `disabledcommands` WHERE (`command`=? O
 
 module.exports = async (client, message) => {
 
-
 	// Ignore all bots, to stop looping or worse, ignore non guild message, or non text channels
 	if(message.author.bot || !message.guild || message.channel.type !== 'text') return;
 
@@ -57,9 +56,9 @@ module.exports = async (client, message) => {
 		if(!message.member.hasPermission(botPerms[command.config.permissions]) && message.author.id !== config.ownerID) return message.channel.send(`\`Requires ${command.config.permissions} Permission\``);
 	}
 
-	// If someone uses bot against owner, return
+	// If someone uses bot against owner, return :)
 	const ownerRegex = RegExp(`<@${config.ownerID}>`);
-	if(message.content.match(ownerRegex) && command.config.category === 'admin') return;
+	if(message.content.match(ownerRegex) && command.config.category === 'admin' && message.author.id !== config.ownerID) return;
 
 	// Temp setting for alt accounts and tag features
 	if(Date.now() - message.author.createdAt < 1000 * 60 * 60 * 24 * 7 && command.config.category === 'tag') return message.channel.send('`Invalid (ACC NEWER THAN 7 DAYS)`');

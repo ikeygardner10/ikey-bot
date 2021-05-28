@@ -17,11 +17,7 @@ module.exports = {
 
 		// Define member, return if no member mentioned
 		const member = message.mentions.members.first();
-		if(!member) return('`Invalid (NO USER)`');
-
-		// Define imageArray, select random image URL
-		const shootArray = client.imageArrays.shoot;
-		const file = shootArray[(Math.floor(Math.random() * shootArray.length))];
+		if(!member) return message.channel.send('`Invalid (NO USER)`');
 
 		// Create basic embed
 		const sEmbed = new MessageEmbed()
@@ -34,15 +30,22 @@ module.exports = {
 
 		// Switch for self mentions
 		switch(member.id) {
-		case message.author.id:
+		case message.author.id: {
+			const shootselfArray = client.imageArrays.shootself;
+			const fileTwo = shootselfArray[(Math.floor(Math.random() * shootselfArray.length))];
 			sEmbed.setDescription(`${message.author}... but why?`);
-			sEmbed.attachFiles('./images/self/shoot.gif');
-			sEmbed.setImage('attachment://shoot.gif');
+			sEmbed.attachFiles(`./images/shootself/${fileTwo}`);
+			sEmbed.setImage(`attachment://${fileTwo}`);
 			break;
-		default:
+		}
+		default: {
+			// Define imageArray, select random image URL
+			const shootArray = client.imageArrays.shoot;
+			const fileOne = shootArray[(Math.floor(Math.random() * shootArray.length))];
 			sEmbed.setDescription(`${message.author} shot ${member}`);
-			sEmbed.attachFiles(`./images/shoot/${file}`);
-			sEmbed.setImage(`attachment://${file}`);
+			sEmbed.attachFiles(`./images/shoot/${fileOne}`);
+			sEmbed.setImage(`attachment://${fileOne}`);
+		}
 		}
 
 		// Define SQLpool, define SQL query

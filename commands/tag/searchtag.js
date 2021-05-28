@@ -9,7 +9,7 @@ const sendEmbed = require('../../functions/sendEmbed.js');
 module.exports = {
 	config: {
 		name: 'searchtag',
-		aliases: ['st', 'listtag', 'lt'],
+		aliases: ['st'],
 		usage: '<tag name>/<@user>/server',
 		cooldown: 5,
 		category: 'tag',

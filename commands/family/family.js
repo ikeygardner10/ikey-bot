@@ -2,7 +2,9 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable prefer-const */
 const { MessageEmbed } = require('discord.js');
+const { close } = require('fs');
 const wait = require('util').promisify(setTimeout);
+const paginationEmbed = require('discord.js-pagination');
 
 module.exports = {
 	config: {
@@ -17,7 +19,206 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
-		const member = message.mentions.members.first() || message.member; const guild = message.guild;
+		let member = message.mentions.members.first() || message.member;
+		const guild = message.guild;
+		const SQLpool = client.conPool.promise();
+
+		let [descOne, descTwo, descThree] = ['', '', ''];
+		let [married, adopted] = [false, false];
+		let partnerID;
+		let nuclearFamilyID;
+		let closeFamilyID;
+		let parentOneFamilyID;
+		let parentTwoFamilyID;
+		let inLawFamilyID;
+		let displayNameOne;
+		let displayNameTwo;
+		let parentOneID;
+		let parentTwoID;
+
+		const dateCleaner = async (yuckDate) => {
+			const cleanDate = await yuckDate.match(/(\s[a-zA-Z0-9]*){3}/);
+			return cleanDate[0];
+		};
+
+		const grabMember = async (id) => {
+			let name = await guild.members.fetch(id);
+			if(name) {
+				name = name.displayName;
+			} else {
+				name = `<@${id}>`;
+			}
+			return name;
+		};
+
+		// Check for marriage, define partner, format date, grab member, append descOne
+		let stmt = 'SELECT `userID`, `partnerID`, `familyID`, `createdAt` FROM `marriages` WHERE (`userID`=? OR `partnerID`=?) AND `guildID`=?;';
+		const [marriedRow] = await SQLpool.query(stmt, [member.id, member.id, guild.id]);
+		console.info(`[FAMILY CMD] Querying database for marriages: ${member.id} in guild: ${guild.id}`);
+		if(marriedRow[0]) {
+			married = true;
+			nuclearFamilyID = marriedRow[0].familyID;
+			partnerID = marriedRow[0].userID;
+			if(member.id === partnerID) partnerID = marriedRow[0].partnerID;
+			formattedDate = await dateCleaner(marriedRow[0].createdAt.toString());
+			displayNameOne = await grabMember(partnerID);
+			descOne += `**:couple: Partner:** ${displayNameOne}\n**:calendar: Married:** ${formattedDate}\n`;
+
+			// Check for adoptions, format date, grab member, append descOne
+			stmt = 'SELECT `childID`, `createdAt` FROM `adoptions` WHERE `familyID`=? AND `guildID`=?;';
+			const [childrenRows] = await SQLpool.query(stmt, [nuclearFamilyID, guild.id]);
+			console.info(`[FAMILY CMD] Querying database for adoptions: ${nuclearFamilyID} in guild: ${guild.id}`);
+			if(childrenRows[0]) {
+				await childrenRows.forEach(async row => {
+					formattedDate = await dateCleaner(row.createdAt.toString());
+					displayNameOne = await grabMember(row.childID);
+					descOne += `\n**:child: Child:** ${displayNameOne}\n**:calendar: Adopted:** ${formattedDate}`;
+				});
+			} else {
+				console.info(`[FAMILY CMD] No entry found for adoptions: ${nuclearFamilyID} in guild: ${guild.id}`);
+			}
+		} else {
+			console.info(`[FAMILY CMD] No entry found for marriages: ${member.id} in guild: ${guild.id}`);
+		}
+
+		stmt = 'SELECT `familyID` FROM `adoptions` WHERE `childID`=? AND `guildID`=?;';
+		const [adoptedRow] = await SQLpool.query(stmt, [member.id, guild.id]);
+		console.info(`[FAMILY CMD] Querying database for adoptions: ${member.id} in guild: ${guild.id}`);
+		if(adoptedRow[0]) {
+			closeFamilyID = adoptedRow[0].familyID;
+			stmt = 'SELECT `userID`, `partnerID` FROM `marriages` WHERE `familyID`=? AND `guildID`=?;';
+			const [parentsRow] = await SQLpool.query(stmt, [closeFamilyID, guild.id]);
+			console.info(`[FAMILY CMD] Querying database for marriages: ${closeFamilyID} in guild: ${guild.id}`);
+			if(parentsRow[0]) {
+				adopted = true;
+				parentOneID = parentsRow[0].userID;
+				parentTwoID = parentsRow[0].partnerID;
+				displayNameOne = await grabMember(parentOneID);
+				displayNameTwo = await grabMember(parentTwoID);
+				descOne += `\n\n**:people_holding_hands: Parents:** ${displayNameOne} & ${displayNameTwo}\n`;
+
+				stmt = 'SELECT `childID` FROM `adoptions` WHERE `familyID`=? AND `guildID`=?;';
+				const [siblingRows] = await SQLpool.query(stmt, [closeFamilyID, guild.id]);
+				console.info(`[FAMILY CMD] Querying database for adoptions: ${closeFamilyID} in guild: ${guild.id}`);
+				if(siblingRows[0]) {
+					await siblingRows.forEach(async row => {
+						if(member.id === row.childID) return;
+						displayNameOne = await grabMember(row.childID);
+						descOne += `\n**:child: Sibling:** ${displayNameOne}`;
+					});
+				} else {
+					console.info(`[FAMILY CMD] No entry found for adoptions: ${closeFamilyID} in guild: ${guild.id}`);
+				}
+			} else {
+				console.info(`[FAMILY CMD] No entry found for marriages: ${closeFamilyID} in guild: ${guild.id}`);
+			}
+		} else {
+			console.info(`[FAMILY CMD] No entry found for adoptions: ${member.id} in guild: ${guild.id}`);
+		}
+
+		if(adopted === true) {
+			stmt = 'SELECT `familyID` FROM `adoptions` WHERE `childID`=? AND `guildID`=?;';
+			const [parentOneAdoptionRow] = await SQLpool.query(stmt, [parentOneID, guild.id]);
+			console.info(`[FAMILY CMD] Querying database for adoptions: ${parentOneID} in guild: ${guild.id}`);
+			if(parentOneAdoptionRow[0]) {
+				parentOneFamilyID = parentOneAdoptionRow[0].familyID;
+				stmt = 'SELECT `userID`, `partnerID` FROM `marriages` WHERE `familyID`=? AND `guildID`=?;';
+				const [grandParentsOneRow] = await SQLpool.query(stmt, [parentOneFamilyID, guild.id]);
+				console.info(`[FAMILY CMD] Querying database for marriages: ${parentOneFamilyID} in guild: ${guild.id}`);
+				if(grandParentsOneRow[0]) {
+					displayNameOne = await grabMember(grandParentsOneRow[0].userID);
+					displayNameTwo = await grabMember(grandParentsOneRow[0].partnerID);
+					descTwo += `**:older_adult: Grandparents:** ${displayNameOne} & ${displayNameTwo}\n`;
+
+					stmt = 'SELECT `childID` FROM `adoptions` WHERE `familyID`=? AND `guildID`=?;';
+					const [extendFamilyOneRows] = await SQLpool.query(stmt, [parentOneFamilyID, guild.id]);
+					console.info(`[FAMILY CMD] Querying database for adoptions: ${parentOneFamilyID} in guild: ${guild.id}`);
+					if(extendFamilyOneRows[0]) {
+						await extendFamilyOneRows.forEach(async row => {
+							if(parentOneID === row.childID || parentTwoID === row.childID) return;
+							displayNameOne = await grabMember(row.childID);
+							descTwo += `\n**:adult: Aunt/Uncle:** ${displayNameOne}`;
+						});
+
+					} else {
+						console.info(`[FAMILY CMD] No entry found for adoptions: ${parentOneFamilyID} in guild: ${guild.id}`);
+					}
+				} else {
+					console.info(`[FAMILY CMD] No entry found for marriages: ${parentOneFamilyID} in guild: ${guild.id}`);
+				}
+			} else {
+				console.info(`[FAMILY CMD] No entry found for adoptions: ${parentOneID} in guild: ${guild.id}`);
+			}
+
+			stmt = 'SELECT `familyID` FROM `adoptions` WHERE `childID`=? AND `guildID`=?;';
+			const [parentTwoAdoptionRow] = await SQLpool.query(stmt, [parentTwoID, guild.id]);
+			console.info(`[FAMILY CMD] Querying database for adoptions: ${parentTwoID} in guild: ${guild.id}`);
+			if(parentTwoAdoptionRow[0]) {
+				parentTwoFamilyID = parentTwoAdoptionRow[0].familyID;
+				stmt = 'SELECT `userID`, `partnerID` FROM `marriages` WHERE `familyID`=? AND `guildID`=?;';
+				const [grandParentsTwoRow] = await SQLpool.query(stmt, [parentTwoFamilyID, guild.id]);
+				console.info(`[FAMILY CMD] Querying database for marriages: ${parentTwoFamilyID} in guild: ${guild.id}`);
+				if(grandParentsTwoRow[0]) {
+					displayNameOne = await grabMember(grandParentsTwoRow[0].userID);
+					displayNameTwo = await grabMember(grandParentsTwoRow[0].partnerID);
+					descTwo += `\n\n**:older_adult: Grandparents:** ${displayNameOne} & ${displayNameTwo}\n`;
+
+					stmt = 'SELECT `childID` FROM `adoptions` WHERE `familyID`=? AND `guildID`=?;';
+					const [extendFamilyTwoRows] = await SQLpool.query(stmt, [parentTwoFamilyID, guild.id]);
+					console.info(`[FAMILY CMD] Querying database for adoptions: ${parentTwoFamilyID} in guild: ${guild.id}`);
+					if(extendFamilyTwoRows[0]) {
+						await extendFamilyTwoRows.forEach(async row => {
+							if(parentOneID === row.childID || parentTwoID === row.childID) return;
+							displayNameOne = await grabMember(row.childID);
+							descTwo += `\n**:adult: Aunt/Uncle:** ${displayNameOne}`;
+						});
+
+					} else {
+						console.info(`[FAMILY CMD] No entry found for adoptions: ${parentTwoFamilyID} in guild: ${guild.id}`);
+					}
+				} else {
+					console.info(`[FAMILY CMD] No entry found for marriages: ${parentTwoFamilyID} in guild: ${guild.id}`);
+				}
+			} else {
+				console.info(`[FAMILY CMD] No entry found for adoptions: ${parentTwoID} in guild: ${guild.id}`);
+			}
+		}
+
+		if(married === true) {
+			stmt = 'SELECT `familyID` FROM `adoptions` WHERE `childID`=? AND `guildID`=?;';
+			const [parterAdoptionRow] = await SQLpool.query(stmt, [partnerID, guild.id]);
+			console.info(`[FAMILY CMD] Querying database for adoptions: ${partnerID} in guild: ${guild.id}`);
+			if(parterAdoptionRow[0]) {
+				inLawFamilyID = parterAdoptionRow[0].familyID;
+				stmt = 'SELECT `userID`, `partnerID` FROM `marriages` WHERE `familyID`=? AND `guildID`=?;';
+				const [partnerParentsRow] = await SQLpool.query(stmt, [inLawFamilyID, guild.id]);
+				console.info(`[FAMILY CMD] Querying database for marriages: ${inLawFamilyID} in guild: ${guild.id}`);
+				if(partnerParentsRow[0]) {
+					displayNameOne = await grabMember(partnerParentsRow[0].userID);
+					displayNameTwo = await grabMember(partnerParentsRow[0].partnerID);
+					descThree += `**:people_holding_hands: Parents In-Law:** ${displayNameOne} & ${displayNameTwo}\n`;
+
+					stmt = 'SELECT `childID` FROM `adoptions` WHERE `familyID`=? AND `guildID`=?;';
+					const [partnerSiblingsRows] = await SQLpool.query(stmt, [inLawFamilyID, guild.id]);
+					console.info(`[FAMILY CMD] Querying database for adoptions: ${inLawFamilyID} in guild: ${guild.id}`);
+					if(partnerSiblingsRows[0]) {
+						await partnerSiblingsRows.forEach(async row => {
+							if(row.childID === partnerID) return;
+							displayNameOne = await grabMember(row.childID);
+							descThree += `\n**:adult: Sibling In-Law:** ${displayNameOne}`;
+						});
+					} else {
+						console.info(`[FAMILY CMD] No entry found for adoptions: ${inLawFamilyID} in guild: ${guild.id}`);
+					}
+				} else {
+					console.info(`[FAMILY CMD] No entry found for marriages: ${inLawFamilyID} in guild: ${guild.id}`);
+				}
+			} else {
+				console.info(`[FAMILY CMD] No entry found for adoptions: ${partnerID} in guild: ${guild.id}`);
+			}
+		}
+
+		if(descOne.length === 0) return message.channel.send('`Invalid (NO FAMILY)`');
 
 		const pageOne = new MessageEmbed()
 			.setAuthor(`${member.user.tag}'s Close Family`, member.user.avatarURL())
@@ -29,189 +230,47 @@ module.exports = {
 			.setColor(0xFFFFFA)
 			.setTimestamp();
 
-		const SQLpool = client.conPool.promise();
+		const pageThree = new MessageEmbed()
+			.setAuthor(`${member.user.tag}'s In-Law Family`, member.user.avatarURL())
+			.setColor(0xFFFFFA)
+			.setTimestamp();
 
-		let descOne = ''; let descTwo = '';
-		let formattedDate; let adoptedDate;
-		let nuclearFamilyID; let parentsFamilyID;
-		let parentOne; let parentTwo;
-		let parentOneID; let parentTwoID;
-		let parentOneFamilyID; let parentTwoFamilyID;
-		let adopted = false; let married = false;
+		let pageCount = 0;
+		let pages = [];
 
-		const dateCleaner = (yuckDate) => {
-			const cleanDate = yuckDate.match(/(\s[a-zA-Z0-9]*){3}/);
-			return cleanDate[0];
-		};
+		await message.channel.send('`Building family tree...`').then(async msg => {
+			await wait(3000);
 
-		const sqlFunc = async (stmt, vars, column, ID, guildID, descType, dateType) => {
-			const [rows] = await SQLpool.query(stmt, vars);
-			console.info(`[FAMILY CMD] Querying database for ${column}: ${ID} in guild: ${guildID}`);
-			if(rows[0]) {
-				switch(column) {
-				case 'partner': {
-					nuclearFamilyID = rows[0].familyID;
-					formattedDate = await dateCleaner(rows[0].createdAt.toString());
-					let partnerID = rows[0].userID; if(member.id === partnerID) partnerID = rows[0].partnerID;
-					let partner = await guild.members.fetch(partnerID).catch(() => partner = `<@${partnerID}>`);
-					return descOne += `**${descType}:** ${partner.displayName ? partner.displayName : partner}\n**${dateType}:** ${formattedDate}\n`;
-				}
-				case 'children': {
-					await rows.forEach(async row => {
-						formattedDate = await dateCleaner(row.createdAt.toString());
-						let childID = row.childID;
-						let child = await guild.members.fetch(childID).catch(() => child = `<@${childID}>`);
-						return descOne += `\n**${descType}:** ${child.displayName ? child.displayName : child}\n**${dateType}:** ${formattedDate}`;
-					});
-					break;
-				}
-				case 'parents': {
-					formattedDate = await dateCleaner(adoptedDate);
-					parentOneID = rows[0].userID;
-					parentTwoID = rows[0].partnerID;
-					parentOne = await guild.members.fetch(parentOneID).displayName; if(parentOne === undefined) parentOne = `<@${parentOneID}>`;
-					parentTwo = await guild.members.fetch(parentTwoID).displayName; if(parentTwo === undefined) parentTwo = `<@${parentTwoID}>`;
-					return descOne += `\n\n**${descType}:** ${parentOne} & ${parentTwo}\n**${dateType}:** ${formattedDate}\n`;
-				}
-				case 'siblings': {
-					await rows.forEach(async row => {
-						let childID = row.childID; if(childID === member.id) return;
-						let child = await guild.members.fetch(childID).catch(() => child = `<@${childID}>`);
-						return descOne += `\n**${descType}:** ${child.displayName ? child.displayName : child}`;
-					});
-					break;
-				}
-				case 'parentOne parents': {
-					let gParentOneID = rows[0].userID; let gParentTwoID = rows[0].partnerID;
-					let gParentOne = await guild.members.fetch(gParentOneID).catch(() => gParentOne = `<@${gParentOneID}>`);
-					let gParentTwo = await guild.members.fetch(gParentTwoID).catch(() => gParentTwo = `<@${gParentTwoID}>`);
-					return descTwo += `**${descType}:** ${gParentOne.displayName ? gParentOne.displayName : gParentOne} & ${gParentTwo.displayName ? gParentTwo.displayName : gParentTwo}\n`;
-				}
-				case 'parentTwo parents': {
-					let gParentOneID = rows[0].userID; let gParentTwoID = rows[0].partnerID;
-					let gParentOne = await guild.members.fetch(gParentOneID).catch(() => gParentOne = `<@${gParentOneID}>`);
-					let gParentTwo = await guild.members.fetch(gParentTwoID).catch(() => gParentTwo = `<@${gParentTwoID}>`);
-					return descTwo += `\n\n**${descType}:** ${gParentOne.displayName ? gParentOne.displayName : gParentOne} & ${gParentTwo.displayName ? gParentTwo.displayName : gParentTwo}\n`;
-				}
-				case 'parentOne siblings': {
-					await rows.forEach(async row => {
-						let childID = row.childID; if(childID === parentOneID || childID === parentTwoID) return;
-						let child = await guild.members.fetch(childID).catch(() => child = `<@${childID}>`);
-						return descTwo += `\n**${descType}:** ${child.displayName ? child.displayName : child}`;
-					});
-					break;
-				}
-				case 'parentTwo siblings': {
-					await rows.forEach(async row => {
-						let childID = row.childID; if(childID === parentOneID || childID === parentTwoID) return;
-						let child = await guild.members.fetch(childID).catch(() => child = `<@${childID}>`);
-						return descTwo += `\n**${descType}:** ${child.displayName ? child.displayName : child}`;
-					});
-					break;
-				}
-				case 'child': {
-					adoptedDate = rows[0].createdAt.toString();
-					return parentsFamilyID = rows[0].familyID;
-				}
-				case 'parentOne adoption': {
-					return parentOneFamilyID = rows[0].familyID;
-				}
-				case 'parentTwo adoption': {
-					return parentTwoFamilyID = rows[0].familyID;
-				}
-				}
-			} else {
-				return console.info(`[FAMILY CMD] No entry found for ${column}: ${ID} in guild: ${guildID}`);
-			}
-		};
-
-		// Check to see if married
-		let stmt = 'SELECT `userID`, `partnerID`, `familyID`, `createdAt` FROM `marriages` WHERE (`userID`=? OR `partnerID`=?) AND `guildID`=?;';
-		let vars = [member.id, member.id, guild.id];
-		await sqlFunc(stmt, vars, 'partner', member.id, guild.id, ':couple: Partner', ':calendar: Married');
-		if(nuclearFamilyID) {
-			married = true;
-			// If married, check for adopted kids
-			stmt = 'SELECT `childID`, `createdAt` FROM `adoptions` WHERE `familyID`=? AND `guildID`=?;';
-			vars = [nuclearFamilyID, guild.id];
-			await sqlFunc(stmt, vars, 'children', nuclearFamilyID, guild.id, ':child: Child', ':calendar: Adopted');
-		}
-
-		// Check to see if member adopted
-		stmt = 'SELECT `familyID`, `createdAt` FROM `adoptions` WHERE `childID`=? AND `guildID`=?;';
-		vars = [member.id, guild.id];
-		await sqlFunc(stmt, vars, 'child', member.id, guild.id, '', '');
-		if(parentsFamilyID) {
-			// If they are adopted, grab parents
-			stmt = 'SELECT `userID`, `partnerID`, `createdAt` FROM `marriages` WHERE `familyID`=? AND `guildID`=?;';
-			vars = [parentsFamilyID, guild.id];
-			await sqlFunc(stmt, vars, 'parents', parentsFamilyID, guild.id, ':people_holding_hands: Parents', ':calendar:  Adopted');
-			// Check for adopted siblings
-			stmt = 'SELECT `childID` FROM `adoptions` WHERE `familyID`=? AND `guildID`=?;';
-			vars = [parentsFamilyID, guild.id];
-			await sqlFunc(stmt, vars, 'siblings', parentsFamilyID, guild.id, ':child: Sibling', '');
-		}
-
-		if(parentsFamilyID) {
-			// Check for parentOne family
-			stmt = 'SELECT `familyID` FROM `adoptions` WHERE `childID`=? AND `guildID`=?;';
-			vars = [parentOneID, guild.id];
-			await sqlFunc(stmt, vars, 'parentOne adoption', parentOneID, guild.id, '', '');
-			if(parentOneFamilyID) {
-				stmt = 'SELECT `userID`, `partnerID` FROM `marriages` WHERE `familyID`=? AND `guildID`=?;';
-				vars = [parentOneFamilyID, guild.id];
-				await sqlFunc(stmt, vars, 'parentOne parents', parentOneFamilyID, guild.id, ':older_adult: Grandparents', '');
-				stmt = 'SELECT `childID` FROM `adoptions` WHERE `familyID`=? AND `guildID`=?';
-				vars = [parentOneFamilyID, guild.id];
-				await sqlFunc(stmt, vars, 'parentOne siblings', parentOneFamilyID, guild.id, ':adult: Aunt/Uncle', '');
-			}
-			stmt = 'SELECT `familyID` FROM `adoptions` WHERE `childID`=? AND `guildID`=?;';
-			vars = [parentTwoID, guild.id];
-			await sqlFunc(stmt, vars, 'parentTwo adoption', parentTwoID, guild.id, '', '');
-			if(parentTwoFamilyID) {
-				stmt = 'SELECT `userID`, `partnerID` FROM `marriages` WHERE `familyID`=? AND `guildID`=?;';
-				vars = [parentTwoFamilyID, guild.id];
-				await sqlFunc(stmt, vars, 'parentTwo parents', parentTwoFamilyID, guild.id, ':older_adult: Grandparents', '');
-				stmt = 'SELECT `childID` FROM `adoptions` WHERE `familyID`=? AND `guildID`=?';
-				vars = [parentTwoFamilyID, guild.id];
-				await sqlFunc(stmt, vars, 'parentTwo siblings', parentTwoFamilyID, guild.id, ':adult: Aunt/Uncle', '');
-			}
-		}
-
-		if(descOne.length === 0 && descTwo.length === 0) return message.channel.send('`Invalid (NO FAMILY)`');
-
-		await message.channel.send('`Building family tree...`')
-			.then(async msg => {
-				await wait(1000);
-				msg.delete();
-			});
-
-		let multiPage = false;
-		if(descOne.length > 0 && descTwo.length > 0) {
+			pageCount++;
 			pageOne.setDescription(descOne);
-			pageTwo.setDescription(descTwo);
-			multiPage = true;
-		}
-		if(descOne.length > 0 && descTwo.length === 0) {
-			pageOne.setDescription(descOne);
-		}
-		if(descOne.length === 0 && descTwo.length > 0) {
-			pageOne.setDescription(descTwo);
-		}
+			pages.push(pageOne);
 
-		let currentPage = pageOne;
-		return message.channel.send(currentPage).then(msg => {
-			if(multiPage === false) return;
-			msg.react('➡️');
-			const collector = msg.createReactionCollector((reaction, author) => ['⬅️', '➡️'].includes(reaction.emoji.name) && author.id === message.author.id, { time: 60000 });
-			collector.on('collect', reaction => {
-				msg.reactions.removeAll().then(async () => {
-					if(reaction.emoji.name === '⬅️') currentPage = pageOne;
-					if(reaction.emoji.name === '➡️') currentPage = pageTwo;
-					msg.edit(currentPage);
-					if(currentPage === pageTwo) await msg.react('⬅️');
-					if(currentPage === pageOne) await msg.react('➡️');
-				});
-			});
+			switch(descTwo.length) {
+			case 0:
+				if(descThree.length > 0) {
+					pageCount++;
+					pageTwo.setDescription(descThree);
+					pages.push(pageTwo);
+				}
+				break;
+			default:
+				pageCount++;
+				pageTwo.setDescription(descTwo);
+				pages.push(pageTwo);
+				if(descThree.length > 0) {
+					pageCount++;
+					pageThree.setDescription(descThree);
+					pages.push(pageThree);
+				}
+				break;
+			}
+
+			msg.delete();
 		});
+
+
+		if(pageCount === 1) return message.channel.send(pageOne);
+
+		return paginationEmbed(message, pages, ['⬅️', '➡️'], 60000);
+
 	} };
