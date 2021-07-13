@@ -15,7 +15,7 @@ module.exports = {
 		const crazimoArray = client.imageArrays.crazimo; const file = crazimoArray[(Math.floor(Math.random() * crazimoArray.length))];
 
 		try {
-			return message.channel.send({ files: [{ attachment: './images/crazimo/' + file, name: file }] });
+			return message.channel.send({ files: [{ attachment: 'D:/images/crazimo/' + file, name: file }] });
 		} catch(error) {
 			console.error(`[CRAZIMO CMD] ${error.stack}`);
 			return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);

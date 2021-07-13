@@ -42,6 +42,7 @@ module.exports = {
 			member = message.guild.members.cache.get(args[0]);
 		}
 		if(!member) return message.channel.send('`Invalid (MENTION USER/USER ID)`');
+		if(member.id === message.author.id) return message.channel.send('`Invalid (REALLY..?)`');
 
 		// A few role checks, first define author, member & bot highest roles
 		// Checks if member has admin/mod perms, return if true

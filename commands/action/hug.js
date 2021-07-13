@@ -36,12 +36,12 @@ module.exports = {
 		switch(member.id) {
 		case message.author.id:
 			hEmbed.setDescription(`${message.author}... :pensive:`);
-			hEmbed.attachFiles('./images/self/hug.gif');
+			hEmbed.attachFiles('D:/images/self/hug.gif');
 			hEmbed.setImage('attachment://hug.gif');
 			break;
 		default:
 			hEmbed.setDescription(`${message.author} hugged ${member}`);
-			hEmbed.attachFiles(`./images/hug/${file}`);
+			hEmbed.attachFiles(`D:/images/hug/${file}`);
 			hEmbed.setImage(`attachment://${file}`);
 		}
 

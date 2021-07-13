@@ -34,12 +34,12 @@ module.exports = {
 		// Define rest of embed based on results
 		if(dodge < 0.5) {
 			dEmbed.setDescription(`${message.author} successfully dodged the attack!`);
-			dEmbed.attachFiles(`./images/dodgesuccess/${fileS}`);
+			dEmbed.attachFiles(`D:/images/dodgesuccess/${fileS}`);
 			dEmbed.setImage(`attachment://${fileS}`);
 			return message.channel.send(dEmbed);
 		} else if(dodge > 0.5) {
 			dEmbed.setDescription(`${message.author} failed to dodge the attack! :open_mouth:`);
-			dEmbed.attachFiles(`./images/dodgefail/${fileF}`);
+			dEmbed.attachFiles(`D:/images/dodgefail/${fileF}`);
 			dEmbed.setImage(`attachment://${fileF}`);
 			return message.channel.send(dEmbed);
 		}

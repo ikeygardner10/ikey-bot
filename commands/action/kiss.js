@@ -36,12 +36,12 @@ module.exports = {
 		switch(member.id) {
 		case message.author.id:
 			kEmbed.setDescription(`${message.author}... :clown:`);
-			kEmbed.attachFiles('./images/self/kiss.gif');
+			kEmbed.attachFiles('D:/images/self/kiss.gif');
 			kEmbed.setImage('attachment://kiss.gif');
 			break;
 		default:
 			kEmbed.setDescription(`${message.author} kissed ${member}`);
-			kEmbed.attachFiles(`./images/kiss/${file}`);
+			kEmbed.attachFiles(`D:/images/kiss/${file}`);
 			kEmbed.setImage(`attachment://${file}`);
 		}
 

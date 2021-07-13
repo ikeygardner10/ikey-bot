@@ -35,7 +35,7 @@ module.exports = {
 		if(message.author.id !== client.config.ownerID) {
 			const authorrole = message.member.roles.highest; const botrole = message.guild.me.roles.highest;
 			if(authorrole.position <= role.position) return message.channel.send('`Invalid Permission (ROLE IS HIGHER/EQUAL TO YOURS)`');
-			if(role.position <= botrole.position) return message.channel.send('`Invalid Permission (ROLE IS HIGHER/EQUAL TO MINE)`');
+			if(role.position <= botrole.position) return message.channel.send('`Invalid Permission (ROLE IS HIGHER/EQUAL THAN MINE)`');
 		}
 
 		if(member.roles.cache.has(role.id)) {

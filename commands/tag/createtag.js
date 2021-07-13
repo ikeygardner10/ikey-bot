@@ -23,7 +23,7 @@ module.exports = {
 		if(!tag) return message.channel.send('`Invalid tag (NO TAG NAME)`'); if(!content && !message.attachments.first()) return message.channel.send('`Invalid Tag (NO TAG CONTENT)`');
 		if(tag.length > 30) return message.channel.send('`Invalid tag (MAX. 30 CHAR TAG NAME)`'); if(content.length > 1950) return message.channel.send('`Invalid tag (MAX. 1950 CHAR CONTENT)`');
 		const ntn = txtFormatter(tag); const ntc = txtFormatter(content);
-		let fileName; const filePath = './images/tags/'; let URI;
+		let fileName; const filePath = 'D:/images/tags/'; let URI;
 
 		const checkGlobal = 'SELECT `tag` FROM `tags` WHERE BINARY `tag`=? AND `guildID` IS NULL;';
 		const checkServer = 'SELECT `tag` FROM `tags` WHERE BINARY `tag`=? AND `guildID`=?;';
@@ -37,7 +37,7 @@ module.exports = {
 			attachment = message.attachments.first().name;
 			const extension = attachment.substring(attachment.lastIndexOf('.'), attachment.length);
 			switch(extension) {
-			case '.png': case '.gif': case '.jpg': case '.jpeg': case '.mp4': case '.webm':
+			case '.png': case '.gif': case '.jpg': case '.jpeg': case '.mp4': case '.webm': case '.mp3': case '.wav':
 				break;
 			default:
 				if(message.author.id !== config.ownerID) return message.channel.send('`Invalid attachment (PNG/GIF/JPG/WEBM/MP4 ONLY)`');

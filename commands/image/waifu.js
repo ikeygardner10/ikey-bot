@@ -15,7 +15,7 @@ module.exports = {
 		const waifuArray = client.imageArrays.waifu; const file = waifuArray[(Math.floor(Math.random() * waifuArray.length))];
 
 		try {
-			return message.channel.send({ files: [{ attachment: './images/waifu/' + file, name: file }] });
+			return message.channel.send({ files: [{ attachment: 'D:/images/waifu/' + file, name: file }] });
 		} catch(error) {
 			console.error(`[WAIFU CMD] ${error.stack}`);
 			return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);

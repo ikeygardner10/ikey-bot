@@ -1,4 +1,3 @@
-const { MessageEmbed } = require('discord.js');
 const txtFormatter = require('../../functions/txtFormatter.js');
 
 module.exports = {
@@ -17,7 +16,7 @@ module.exports = {
 		try {
 			const string = args.join(' '); if(!string) return message.channel.send('`Invalid (NO STRING)`');
 			const newStr = txtFormatter(string);
-			console.info(newStr);
+			console.info(`[STRING CMD] ${newStr}`);
 			return message.channel.send((newStr));
 		} catch(error) {
 			console.error(`[STRING CMD] ${error.stack}`);

@@ -36,12 +36,12 @@ module.exports = {
 		switch(member.id) {
 		case message.author.id:
 			pEmbed.setDescription(`${message.author}... :clown:`);
-			pEmbed.attachFiles('./images/self/punch.gif');
+			pEmbed.attachFiles('D:/images/self/punch.gif');
 			pEmbed.setImage('attachment://punch.gif');
 			break;
 		default:
 			pEmbed.setDescription(`${message.author} punched ${member}`);
-			pEmbed.attachFiles(`./images/punch/${file}`);
+			pEmbed.attachFiles(`D:/images/punch/${file}`);
 			pEmbed.setImage(`attachment://${file}`);
 		}
 

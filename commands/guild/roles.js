@@ -26,6 +26,10 @@ module.exports = {
 			rolesArray.push(role);
 		});
 
+		rolesArray.sort((a, b) => {
+			return b.rawPosition - a.rawPosition;
+		});
+
 		// If no server roles, return, else pass to embed function
 		if(!rolesArray[0]) return message.channel.send('`Invalid (NO SERVER ROLES)`');
 		return sendEmbed(message, rolesArray, author, 15, '\n');

@@ -22,7 +22,7 @@ module.exports = {
 		if(!tag) return message.channel.send('`Invalid tag (NO TAG NAME)`'); if(!content && !message.attachments.first()) return message.channel.send('`Invalid Tag (NO TAG CONTENT)`');
 		if(tag.length > 30) return message.channel.send('`Invalid tag (MAX. 30 CHAR TAG NAME)`'); if(content.length > 1950) return message.channel.send('`Invalid tag (MAX. 1950 CHAR CONTENT)`');
 		const ntn = txtFormatter(tag); const ntc = txtFormatter(content) || '';
-		let fileName; const filePath = './images/tags/'; let URI;
+		let fileName; const filePath = 'D:/images/tags/'; let URI;
 
 		const checkGlobal = 'SELECT `tag`, `userID`, `imageURL` FROM `tags` WHERE BINARY `tag`=? AND `guildID` IS NULL';
 		const checkServer = 'SELECT `tag`, `userID`, `imageURL` FROM `tags` WHERE BINARY `tag`=? AND `guildID`=?';

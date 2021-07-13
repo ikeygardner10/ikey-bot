@@ -30,7 +30,7 @@ module.exports = {
 			input = args[0];
 		}
 		// if(!input.includes('.png' || '.gif' || '.jpg' || '.jpeg', '.mp4', '.webm')) return message.channel.send('`Invalid Image Name (PLEASE INCLUDE FILE EXTENSION)`');
-		const imageURL = `./images/tags/${input}`;
+		const imageURL = `D:/images/tags/${input}`;
 
 		const [rows] = await SQLpool.query(getTag, [imageURL]);
 		if(!rows[0]) return message.channel.send('`Invalid Tag (NO TAG FOUND)`');

@@ -35,12 +35,12 @@ module.exports = {
 		switch(member.id) {
 		case message.author.id:
 			pEmbed.setDescription(`${message.author}... :clown:`);
-			pEmbed.attachFiles('./images/self/pat.gif');
+			pEmbed.attachFiles('D:/images/self/pat.gif');
 			pEmbed.setImage('attachment://pat.gif');
 			break;
 		default:
 			pEmbed.setDescription(`${message.author} pat ${member}`);
-			pEmbed.attachFiles(`./images/pat/${file}`);
+			pEmbed.attachFiles(`D:/images/pat/${file}`);
 			pEmbed.setImage(`attachment://${file}`);
 		}
 

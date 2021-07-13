@@ -36,12 +36,12 @@ module.exports = {
 		switch(member.id) {
 		case message.author.id:
 			sEmbed.setDescription(`${message.author}... :clown:`);
-			sEmbed.attachFiles('./images/self/stab.gif');
+			sEmbed.attachFiles('D:/images/self/stab.gif');
 			sEmbed.setImage('attachment://stab.gif');
 			break;
 		default:
 			sEmbed.setDescription(`${message.author} stabbed ${member}`);
-			sEmbed.attachFiles(`./images/stab/${file}`);
+			sEmbed.attachFiles(`D:/images/stab/${file}`);
 			sEmbed.setImage(`attachment://${file}`);
 		}
 

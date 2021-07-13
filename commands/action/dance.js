@@ -30,7 +30,7 @@ module.exports = {
 			danceArray = client.imageArrays.singledance;
 			file = danceArray[(Math.floor(Math.random() * danceArray.length))];
 			cEmbed.setDescription(`${message.author} dancing at da club :sunglasses:`);
-			cEmbed.attachFiles(`./images/singledance/${file}`);
+			cEmbed.attachFiles(`D:/images/singledance/${file}`);
 			cEmbed.setImage(`attachment://${file}`);
 			break;
 		}
@@ -38,7 +38,7 @@ module.exports = {
 			danceArray = client.imageArrays.doubledance;
 			file = danceArray[(Math.floor(Math.random() * danceArray.length))];
 			cEmbed.setDescription(`${message.author} dancing with ${member} :smiling_face_with_3_hearts:`);
-			cEmbed.attachFiles(`./images/doubledance/${file}`);
+			cEmbed.attachFiles(`D:/images/doubledance/${file}`);
 			cEmbed.setImage(`attachment://${file}`);
 		}
 		}
@@ -79,7 +79,7 @@ module.exports = {
 								.catch((error) => console.error(`[DANCE CMD] ${error.stack}`));
 						} else if(no.includes(collected.first().content.toLowerCase())) {
 							cEmbed.setDescription(`${member} said no! :sob:`);
-							cEmbed.attachFiles('./images/self/doubledanceno.gif');
+							cEmbed.attachFiles('D:/images/self/doubledanceno.gif');
 							cEmbed.setImage('attachment://doubledanceno.gif');
 							return message.channel.send(cEmbed);
 						}

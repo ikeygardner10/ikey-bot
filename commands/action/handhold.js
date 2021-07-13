@@ -36,12 +36,12 @@ module.exports = {
 		switch(member.id) {
 		case message.author.id:
 			hEmbed.setDescription(`${message.author}... :pensive:`);
-			hEmbed.attachFiles('./images/self/handhold.gif');
+			hEmbed.attachFiles('D:/images/self/handhold.gif');
 			hEmbed.setImage('attachment://handhold.gif');
 			break;
 		default:
 			hEmbed.setDescription(`${message.author} and ${member}`);
-			hEmbed.attachFiles(`./images/handhold/${file}`);
+			hEmbed.attachFiles(`D:/images/handhold/${file}`);
 			hEmbed.setImage(`attachment://${file}`);
 		}
 
@@ -80,7 +80,7 @@ module.exports = {
 						}
 					} else if(no.includes(collected.first().content.toLowerCase())) {
 						hEmbed.setDescription(`${member} said no! :sob:`);
-						hEmbed.attachFiles('./images/self/handholdno.gif');
+						hEmbed.attachFiles('D:/images/self/handholdno.gif');
 						hEmbed.setImage('attachment://handholdno.gif');
 						return message.channel.send(hEmbed);
 					}

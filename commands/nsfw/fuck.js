@@ -41,12 +41,12 @@ module.exports = {
 							switch(member.id) {
 							case message.author.id:
 								fEmbed.setDescription(`${message.author}... :clown:`);
-								fEmbed.attachFiles('./images/Self/fuck.gif');
+								fEmbed.attachFiles('D:/images/Self/fuck.gif');
 								fEmbed.setImage('attachment://fuck.gif');
 								break;
 							default:
 								fEmbed.setDescription(`${message.author} and ${member}`);
-								fEmbed.attachFiles(`./images/Fuck/${file}`);
+								fEmbed.attachFiles(`D:/images/Fuck/${file}`);
 								fEmbed.setImage(`attachment://${file}`);
 							}
 							if(rows[0] !== undefined) {
@@ -65,7 +65,7 @@ module.exports = {
 							}
 						} else if(no.includes(collected.first().content.toLowerCase())) {
 							fEmbed.setDescription(`${member} said no! :sob:`);
-							fEmbed.attachFiles('./images/Self/fuckno.gif');
+							fEmbed.attachFiles('D:/images/Self/fuckno.gif');
 							fEmbed.setImage('attachment://fuckno.gif');
 							return message.channel.send(fEmbed);
 						}

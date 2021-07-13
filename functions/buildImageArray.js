@@ -16,13 +16,13 @@ module.exports = {
 		};
 		client.imageArrays = imageArrays;
 
-		fs.readdir('./images/', (error, folders) => {
+		fs.readdir('D:/images/', (error, folders) => {
 			if(error) return console.error(`[IMG ARRAYS] ${error.stack}`);
 			folders.forEach(folder => {
 				switch(folder) {
 				case 'self': case 'tags': return;
 				}
-				fs.readdir(`./images/${folder}`, (err, images) => {
+				fs.readdir(`D:/images/${folder}`, (err, images) => {
 					if(err) return console.error(`[IMG ARRAYS] ${err.stack}`);
 					if(images.length > 500) {
 						fs.writeFile(`./data/temp/${folder}.json`, JSON.stringify(images, null, ''), (err) => {
@@ -32,7 +32,7 @@ module.exports = {
 					} else {
 						images.forEach(image => {
 							imageArrays[folder].push(image);
-							console.info(`[IMG ARRAYS] ./images/${folder}/${image} added!`);
+							console.info(`[IMG ARRAYS] D:/images/${folder}/${image} added!`);
 						});
 					}
 				});

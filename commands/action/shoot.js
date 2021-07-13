@@ -34,7 +34,7 @@ module.exports = {
 			const shootselfArray = client.imageArrays.shootself;
 			const fileTwo = shootselfArray[(Math.floor(Math.random() * shootselfArray.length))];
 			sEmbed.setDescription(`${message.author}... but why?`);
-			sEmbed.attachFiles(`./images/shootself/${fileTwo}`);
+			sEmbed.attachFiles(`D:/images/shootself/${fileTwo}`);
 			sEmbed.setImage(`attachment://${fileTwo}`);
 			break;
 		}
@@ -43,7 +43,7 @@ module.exports = {
 			const shootArray = client.imageArrays.shoot;
 			const fileOne = shootArray[(Math.floor(Math.random() * shootArray.length))];
 			sEmbed.setDescription(`${message.author} shot ${member}`);
-			sEmbed.attachFiles(`./images/shoot/${fileOne}`);
+			sEmbed.attachFiles(`D:/images/shoot/${fileOne}`);
 			sEmbed.setImage(`attachment://${fileOne}`);
 		}
 		}

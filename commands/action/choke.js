@@ -30,12 +30,12 @@ module.exports = {
 		switch(member.id) {
 		case message.author.id:
 			cEmbed.setDescription(`${message.author}... but why?`);
-			cEmbed.attachFiles('./images/self/choke.gif');
+			cEmbed.attachFiles('D:/images/self/choke.gif');
 			cEmbed.setImage('attachment://choke.gif');
 			break;
 		default:
 			cEmbed.setDescription(`${message.author} choked ${member}`);
-			cEmbed.attachFiles(`./images/choke/${file}`);
+			cEmbed.attachFiles(`D:/images/choke/${file}`);
 			cEmbed.setImage(`attachment://${file}`);
 		}
 

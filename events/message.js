@@ -58,7 +58,7 @@ module.exports = async (client, message) => {
 
 	// If someone uses bot against owner, return :)
 	const ownerRegex = RegExp(`<@${config.ownerID}>`);
-	if(message.content.match(ownerRegex) && command.config.category === 'admin' && message.author.id !== config.ownerID) return;
+	if((message.content.match(ownerRegex) && command.config.category === 'admin' && message.author.id !== config.ownerID)) return;
 
 	// Temp setting for alt accounts and tag features
 	if(Date.now() - message.author.createdAt < 1000 * 60 * 60 * 24 * 7 && command.config.category === 'tag') return message.channel.send('`Invalid (ACC NEWER THAN 7 DAYS)`');

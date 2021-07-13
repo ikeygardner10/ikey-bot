@@ -35,12 +35,12 @@ module.exports = {
 		switch(member.id) {
 		case message.author.id:
 			hEmbed.setDescription(`${message.author}... but why?`);
-			hEmbed.attachFiles('./images/self/highfive.gif');
+			hEmbed.attachFiles('D:/images/self/highfive.gif');
 			hEmbed.setImage('attachment://highfive.gif');
 			break;
 		default:
 			hEmbed.setDescription(`${message.author} highfived ${member}`);
-			hEmbed.attachFiles(`./images/highfive/${file}`);
+			hEmbed.attachFiles(`D:/images/highfive/${file}`);
 			hEmbed.setImage(`attachment://${file}`);
 		}
 
