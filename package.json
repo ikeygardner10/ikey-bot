@@ -27,6 +27,7 @@
   "dependencies": {
     "@keyv/sqlite": "^2.0.2",
     "axios": "^0.21.1",
+    "azlyrics-scraper": "^1.0.6",
     "better-sqlite3": "^7.1.0",
     "bluebird": "^3.7.2",
     "chalk": "^4.1.0",

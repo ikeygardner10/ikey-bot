@@ -81,6 +81,7 @@ module.exports = {
 		stmt = 'INSERT INTO `marriages` (`userID`, `partnerID`, `familyID`, `guildID`, `createdAt`) VALUES (?, ?, ?, ?, ?);';
 		vars = [author.id, member.id, familyID, guild.id, createdAt];
 		console.info(`[MARRY CMD] No existing entries, sending proposal for ${author.id} & ${member.id}`);
+		console.warn(`${stmt} \n ${vars}`);
 		message.channel.send(`${member}, ${author} is proposing! :ring:\n\n**What do you say?**`).then(() => {
 			message.channel.awaitMessages(filter, { max: 1, time: 15000, errors: ['time'] })
 				.then(collected => {

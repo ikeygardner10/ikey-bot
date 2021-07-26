@@ -103,6 +103,7 @@ module.exports = {
 		stmt = 'INSERT INTO `adoptions` (`childID`, `parentID`, `familyID`, `guildID`, `createdAt`) VALUES (?, ?, ?, ?, ?);';
 		vars = [member.id, author.id, familyID, guild.id, createdAt];
 		console.info(`[ADOPT CMD] Found marriage for user: ${author.id} in guild: ${guild.id}, sending adoption`);
+		console.warn(`${stmt} \n ${vars}`);
 		message.channel.send(`${member}, ${author} wants to adopt you! :baby:\n\n**What do you say?**`).then(() => {
 			message.channel.awaitMessages(responseFilter, { max: 1, time: 15000, errors: ['time'] })
 				.then(collected => {

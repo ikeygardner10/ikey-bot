@@ -14,7 +14,7 @@ client.config = require('./data/owner/config.json');
 
 const mysql = require('mysql2');
 client.conPool = mysql.createPool({
-	connectionLimit: 10,
+	connectionLimit: 25,
 	multipleStatements: true,
 	host: 'localhost',
 	user: 'ikeybot',
