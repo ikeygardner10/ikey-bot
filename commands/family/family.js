@@ -4,7 +4,7 @@
 const { MessageEmbed } = require('discord.js');
 const { close } = require('fs');
 const wait = require('util').promisify(setTimeout);
-const paginationEmbed = require('discord.js-pagination');
+const paginationEmbed = require('../../functions/embedPagination.js');
 
 module.exports = {
 	config: {
@@ -272,6 +272,6 @@ module.exports = {
 
 		if(pageCount === 1) return message.channel.send(pageOne);
 
-		return paginationEmbed(message, pages, ['⬅️', '➡️'], 60000);
+		return paginationEmbed(message, pages, ['⬅️', '➡️', '⏹️'], 60000);
 
 	} };

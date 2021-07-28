@@ -119,27 +119,42 @@
         "10": ":keycap_ten:"
     },
     "prefix": [
-        "+", "-", "&",
-        "^", "%", "$",
-        "!", "=", "_",
-        "/", "?", ">",
-        ".", ",", ";"
+        "+",
+        "-",
+        "&",
+        "^",
+        "%",
+        "$",
+        "!",
+        "=",
+        "_",
+        "/",
+        "?",
+        ">",
+        ".",
+        ",",
+        ";"
     ],
     "addition": [
-        "+", "plus",
+        "+",
+        "plus",
         "add"
     ],
     "subtraction": [
-        "-", "minus",
+        "-",
+        "minus",
         "remove"
     ],
     "multiplication": [
-        "*", "x",
-        "times", "multiply",
+        "*",
+        "x",
+        "times",
+        "multiply",
         "×"
     ],
     "division": [
-        "/", "÷",
+        "/",
+        "÷",
         "divide"
     ],
     "botPerms": {
@@ -221,5 +236,19 @@
         "stop",
         "quit",
         "undo"
+    ],
+    "booleanToText": {
+        "1": "Enabled",
+        "0": "Disabled"
+    },
+    "loggingOptions": [
+        "channels",
+        "commands",
+        "invites",
+        "members",
+        "messages",
+        "roles",
+        "server",
+        "voice"
     ]
 }

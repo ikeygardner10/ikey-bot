@@ -2,24 +2,11 @@
 
 - [ ] Entire Rewrite
 
-- [x] Google Image Search (w Google Images URL?)
-
-- [ ] SFW/NSFW versions for fuck
-
-- [ ] Marriage Commands
-  - [ ] adopt
-  - [ ] marry
-  - [ ] divorce
-  - [ ] disown
-  - [ ] cache proposals
-
 - [ ] update server tracking
-  - [ ] track members
-  - [ ] track invites
   - [ ] track deleted messages
   - [ ] add switch for all options
 
-- [ ] better client logging
+- [ ] better logging
 
 - [ ] database updates
   - [ ] new backup system
