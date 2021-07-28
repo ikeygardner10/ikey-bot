@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable prefer-const */
 const { Collection } = require('discord.js');
-const YesNo = require('../../data/YesNo.json');
+const { yes, no, cancel } = require('../../data/arrayData.json');
 const MapCache = require('map-cache');
 const cache = new MapCache();
 
@@ -95,9 +95,11 @@ module.exports = {
 			});
 		if(eligible === false) return;
 
-		const yes = YesNo.yes; const no = YesNo.no; const createdAt = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+		const createdAt = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
 		const responseFilter = response => {
-			return yes.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === member.id) || no.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === member.id);
+			return yes.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === member.id) ||
+			no.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === member.id) ||
+			cancel.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === message.author.id);
 		};
 
 		stmt = 'INSERT INTO `adoptions` (`childID`, `parentID`, `familyID`, `guildID`, `createdAt`) VALUES (?, ?, ?, ?, ?);';
@@ -122,6 +124,10 @@ module.exports = {
 					} else if(no.includes(collected.first().content.toLowerCase())) {
 						console.info(`[ADOPT CMD] ${member.id} declined the adoption`);
 						message.channel.send(`${member} declined the adoption! :broken_heart:`);
+						return cache.del(member.id);
+					} else if(cancel.includes(collected.first().content.toLowerCase())) {
+						console.info(`[ADOPT CMD] ${message.author.id} cancelled the adoption`);
+						message.channel.send(`${message.author} cancelled the adoption! :broken_heart:`);
 						return cache.del(member.id);
 					}
 				}).catch((timeout) => {

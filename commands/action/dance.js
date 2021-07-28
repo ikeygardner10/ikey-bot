@@ -1,5 +1,5 @@
 const { MessageEmbed } = require('discord.js');
-const YesNo = require('../../data/YesNo.json');
+const { yes, no, cancel } = require('../../data/arrayData.json');
 
 module.exports = {
 	config: {
@@ -43,9 +43,10 @@ module.exports = {
 		}
 		}
 
-		const yes = YesNo.yes; const no = YesNo.no;
 		const filter = response => {
-			return yes.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === member.id) || no.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === member.id);
+			return yes.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === member.id) ||
+			no.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === member.id) ||
+			cancel.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === message.author.id);
 		};
 
 		const SQLpool = client.conPool.promise();
@@ -82,6 +83,9 @@ module.exports = {
 							cEmbed.attachFiles('D:/images/self/doubledanceno.gif');
 							cEmbed.setImage('attachment://doubledanceno.gif');
 							return message.channel.send(cEmbed);
+						} else if(cancel.includes(collected.first().content.toLowerCase())) {
+							console.info(`[DANCE CMD] ${message.author.id} cancelled`);
+							return message.channel.send(`${message.author} cancelled! :sob:`);
 						}
 					}).catch(() => {
 						return message.channel.send(`${message.author}, no response :pensive:`);

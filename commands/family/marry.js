@@ -3,7 +3,7 @@
 /* eslint-disable prefer-const */
 const { Collection } = require('discord.js');
 const shortid = require('shortid');
-const YesNo = require('../../data/YesNo.json');
+const { yes, no, cancel } = require('../../data/arrayData.json');
 const MapCache = require('map-cache');
 const cache = new MapCache();
 
@@ -71,12 +71,14 @@ module.exports = {
 			});
 		if(eligible === false) return cache.del(member.id);
 
-		const yes = YesNo.yes; const no = YesNo.no;
 		const filter = response => {
-			return yes.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === member.id) || no.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === member.id);
+			return yes.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === member.id) ||
+			no.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === member.id) ||
+			cancel.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === message.author.id);
 		};
 		shortid.characters('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$@');
-		const familyID = shortid.generate(); const createdAt = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+		const familyID = shortid.generate();
+		const createdAt = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
 
 		stmt = 'INSERT INTO `marriages` (`userID`, `partnerID`, `familyID`, `guildID`, `createdAt`) VALUES (?, ?, ?, ?, ?);';
 		vars = [author.id, member.id, familyID, guild.id, createdAt];
@@ -100,6 +102,10 @@ module.exports = {
 					} else if(no.includes(collected.first().content.toLowerCase())) {
 						console.info(`[MARRY CMD] ${member.id} declined the proposal`);
 						message.channel.send(`${author}, ${member} declined the proposal! :sob:`);
+						return cache.del(member.id);
+					} else if(cancel.includes(collected.first().content.toLowerCase())) {
+						console.info(`[MARRY CMD] ${message.author.id} cancelled the marraige`);
+						message.channel.send(`${message.author} cancelled the marraige! :sob:`);
 						return cache.del(member.id);
 					}
 				}).catch((timeout) => {

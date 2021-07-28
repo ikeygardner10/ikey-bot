@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable prefer-const */
 const { MessageEmbed } = require('discord.js');
-const YesNo = require('../../data/YesNo.json');
+const { yes, no, cancel } = require('../../data/arrayData.json');
 
 module.exports = {
 	config: {
@@ -36,9 +36,9 @@ module.exports = {
 		if(checkParentRows[0] === undefined) return message.channel.send('`Invalid (NOT ADOPTED)`');
 		const parentOne = checkParentRows[0].userID; const parentTwo = checkParentRows[0].partnerID;
 
-		const yes = YesNo.yes; const no = YesNo.no;
 		const responseFilter = response => {
-			return yes.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === author.id) || no.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === author.id);
+			return yes.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === author.id) ||
+			no.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === author.id);
 		};
 
 		let questionMessage = `${author}, you are about to disown your child ${member}...\n\n**Are you sure?**`;

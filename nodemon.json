@@ -8,8 +8,7 @@
     "jsonFiles/",
     "*.json",
     "images/",
-    "data/temp/",
-    "commands/family/*.js"
+    "data/temp/"
   ],
   "verbose": true
 }

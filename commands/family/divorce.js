@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
 /* eslint-disable prefer-const */
-const YesNo = require('../../data/YesNo.json');
+const { yes, no, cancel } = require('../../data/arrayData.json');
 
 module.exports = {
 	config: {
@@ -53,9 +53,9 @@ module.exports = {
 			return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
 		}
 
-		const yes = YesNo.yes; const no = YesNo.no;
 		const responseFilter = response => {
-			return yes.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === author.id && response.author.id !== client.user.id) || no.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === author.id);
+			return yes.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === author.id) ||
+			no.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === author.id);
 		};
 
 		console.info(`[DIVORCE CMD] Found marriage for user: ${author.id} in guild: ${guild.id}`);

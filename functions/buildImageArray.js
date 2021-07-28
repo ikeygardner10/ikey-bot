@@ -25,7 +25,7 @@ module.exports = {
 				fs.readdir(`D:/images/${folder}`, (err, images) => {
 					if(err) return console.error(`[IMG ARRAYS] ${err.stack}`);
 					if(images.length > 500) {
-						fs.writeFile(`./data/temp/${folder}.json`, JSON.stringify(images, null, ''), (err) => {
+						fs.writeFile(`./data/temp/${folder}.json`, JSON.stringify(images, null, '\t'), (err) => {
 							if(err) return console.error(`[IMG ARRAYS] ${err.stack}`);
 							console.info(`[IMG ARRAYS] Temp array written for ${folder}.json`);
 						});

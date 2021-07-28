@@ -42,10 +42,11 @@ module.exports = {
 		};
 
 		const grabMember = async (id) => {
-			let name = await guild.members.fetch(id);
-			if(name) {
+			let name;
+			try {
+				name = await guild.members.fetch(id);
 				name = name.displayName;
-			} else {
+			} catch {
 				name = `<@${id}>`;
 			}
 			return name;
