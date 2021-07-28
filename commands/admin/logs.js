@@ -13,7 +13,7 @@ module.exports = {
 		category: 'logs',
 		permissions: 'Manage Server',
 		args: false,
-		description: 'Disable/enable logs\n**Options:**\nchannels\ncommands\ninvites\nmembers\nmessages\nroles\nserver\nvoice',
+		description: 'Disable/enable logs\n**Options:**\nchannels\nemojis\ninvites\nmembers\nmessages\nroles\nserver\nvoicechannels',
 	},
 	execute: async (client, message, args) => {
 
@@ -21,7 +21,7 @@ module.exports = {
 
 		if(!args[0]) {
 
-			const stmt = 'SELECT `channels`, `commands`, `invites`, `members`, `messages`, `roles`, `server`, `voicechannels`, `logChannel` FROM `logsettings` WHERE `guildID`=?;';
+			const stmt = 'SELECT `channels`, `invites`, `members`, `messages`, `roles`, `server`, `voicechannels`, `logChannel` FROM `logsettings` WHERE `guildID`=?;';
 			const [rows] = await SQLpool.execute(stmt, [message.guild.id]);
 
 			const logChannel = rows[0].logChannel;

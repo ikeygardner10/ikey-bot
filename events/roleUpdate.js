@@ -11,8 +11,6 @@ module.exports = async (client, oldRole, newRole) => {
 	const [roles, channel] = [logRows[0].roles, logRows[0].logChannel];
 	if(roles === 0) return;
 
-	if(client.roleArray.includes(oldRole.id)) return;
-
 	const logsChannel = await oldRole.guild.channels.cache.find(ch => ch.name === channel);
 	if(!logsChannel) {
 		await createChannel(client, oldRole.guild, channel, 'text', 500, 'logs', oldRole.guild.id, ['VIEW_CHANNEL', 'SEND_MESSAGES'])
@@ -80,7 +78,7 @@ module.exports = async (client, oldRole, newRole) => {
 
 	if(Object.keys(differences).length === 0) return;
 
-	let desc = `**Role:** ${newRole.name}\n**ID:** ${newRole.id}\n\n`;
+	let desc = `**Role:** ${newRole.name}\n`;
 	Object.entries(differences).forEach(([key, value]) => {
 		const formatted = function(str) {
 			return str.replace(/\b(\w)/g, match => match.toUpperCase());
@@ -98,7 +96,7 @@ module.exports = async (client, oldRole, newRole) => {
 	const rEmbed = new MessageEmbed()
 		.setAuthor('Role Updated', newRole.guild.iconURL())
 		.setDescription(desc)
-		.setFooter(`${newRole.guild.name}`)
+		.setFooter(`ID: ${newRole.id}`)
 		.setTimestamp()
 		.setColor(newRole.hexColor);
 

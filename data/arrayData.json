@@ -249,6 +249,6 @@
         "messages",
         "roles",
         "server",
-        "voice"
+        "voicechannels"
     ]
 }

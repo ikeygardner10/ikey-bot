@@ -12,7 +12,7 @@ module.exports = async (client, role) => {
 	const [roles, channel] = [logRows[0].roles, logRows[0].logChannel];
 	if(roles === 0) return;
 
-	let roleObj = {};
+	const roleObj = {};
 	client.roleObj = roleObj;
 	roleObj[role.id];
 
@@ -28,6 +28,8 @@ module.exports = async (client, role) => {
 
 	const names = namer(role.hexColor);
 	const color = `${names.ntc[0].name} (${role.hexColor})`;
+
+	console.warn(JSON.stringify(role));
 
 	const perms = role.permissions.toArray().map(perm => {
 		const formatted = perm.split('_').map(x => x[0] + x.slice(1).toLowerCase());

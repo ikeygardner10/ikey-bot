@@ -10,6 +10,7 @@ module.exports = async (client, ready) => {
 	const selectJoinedGuilds = 'SELECT * FROM `guilds` WHERE `joined`=1;';
 	const selectGuildSettings = 'SELECT * FROM `guildsettings` WHERE `guildID`=?;';
 
+	const stmt = 'SELECT `guildID` FROM `logsettings` WHERE `messages`=?;';
 
 	await wait(1500);
 
@@ -26,6 +27,8 @@ module.exports = async (client, ready) => {
 			console.error(`[READY] ${error.stack}`);
 		});
 
+	await wait(1500);
+
 	const [guildRows] = await SQLpool.query(selectJoinedGuilds);
 	await guildRows.forEach(async guild => {
 		await SQLpool.query(selectGuildSettings, [guild.guildID])
@@ -39,7 +42,20 @@ module.exports = async (client, ready) => {
 			});
 	});
 
-	await wait(1000);
+	await wait(1500);
+
+	const [rows] = await SQLpool.execute(stmt, [true]);
+	await rows.forEach(async row => {
+		const guild = await client.guilds.fetch(row.guildID);
+		await guild.channels.cache.forEach(async channel => {
+			if(channel.type !== 'text') return;
+			if(channel.permissionsFor(client.user).has('VIEW_CHANNEL') === false) return;
+			await channel.messages.fetch({ limit: 100 }, true, true);
+			await wait(1000);
+		});
+	});
+
+	await wait(1500);
 
 	console.success(`Logged in as ${client.user.tag}!`);
 	console.success(`${client.guilds.cache.size} servers`);
