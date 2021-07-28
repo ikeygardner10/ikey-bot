@@ -44,7 +44,7 @@ module.exports = {
 		const filter = response => {
 			return yes.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === member.id) ||
 			no.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === member.id) ||
-			cancel.some(msg => msg.towLowerCase() === response.content.toLowerCase() && response.author.id === message.author.id);
+			cancel.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === message.author.id);
 		};
 
 		const SQLpool = client.conPool.promise();
@@ -75,8 +75,8 @@ module.exports = {
 						fEmbed.setImage('attachment://fuckno.gif');
 						return message.channel.send(fEmbed);
 					} else if(cancel.includes(collected.first().content.toLowerCase())) {
-						console.info(`[ADOPT CMD] ${message.author.id} cancelled the adoption`);
-						return message.channel.send(`${message.author} cancelled the adoption! :sob:`);
+						console.info(`[ADOPT CMD] ${message.author.id} cancelled`);
+						return message.channel.send(`${message.author} cancelled! :sob:`);
 					}
 				}).catch(() => {
 					return message.channel.send(`${message.author}, no response :pensive:`);
