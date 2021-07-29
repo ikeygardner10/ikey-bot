@@ -4,7 +4,7 @@ const ms = require('ms');
 
 module.exports = async (client, oldChannel, newChannel) => {
 
-	if(channel.type === 'dm') return;
+	if(newChannel.type === 'dm') return;
 
 	const stmt = 'SELECT `channels`, `logChannel` FROM `logsettings` WHERE `guildID`=?;';
 
