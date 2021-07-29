@@ -87,7 +87,8 @@ module.exports = async (client, oldGuild, newGuild) => {
 
 	let msg = `[GUILD UPDATE] ${oldGuild.name} (${oldGuild.id}) owned by ${oldGuild.owner.user.tag} (${oldGuild.owner.user.id}).`;
 	Object.entries(differences).forEach(([key, value]) => {
-		msg += `\t\n- New ${key}: *${value}*`;
+		if(key !== 'name' || key !== 'ownerID' || key !== 'region') return;
+		msg += `\t\n- ${key}: *${value}*`;
 	});
 
 	try {

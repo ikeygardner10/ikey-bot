@@ -2,6 +2,7 @@
 const { MessageEmbed } = require('discord.js');
 const moment = require('moment');
 const { status, permissions, flags, activity } = require('../../data/arrayData.json');
+const fetch = require('node-fetch');
 
 module.exports = {
 	config: {
@@ -90,6 +91,34 @@ module.exports = {
 			.setFooter(`ID: ${member.user.id}`)
 			.setTimestamp()
 			.setColor(member.displayHexColor || 0xFFFFFA);
+
+		let desc = `**:pencil: Username:** ${user.tag}\n**:robot: Bot:** ${user.bot ? 'Yes' : 'No'}\n**:satellite: Status:** ${status[user.presence.status]}\n**:beginner: Account Flags:** ${userFlags}\n**:video_game: __Activity:__** ${actList}\n\n**:calendar: Account Created:** ${moment(user.createdAt).format('MMMM Do YYYY')}\n**:calendar_spiral: Server Joined:** ${moment(member.joinedAt).format('MMMM Do YYYY')}\n\n**:gem: Boost:** ${member.premiumSinceTimestamp ? 'Yes' : 'No'}\n**:rainbow: Roles:** ${roleList || 'No Roles'}`;
+		let url = `https://discord.com/api/v8/users/${member.user.id}`;
+		let response = await fetch(`${url}`, { method: 'GET', headers: { Authorization: `Bot ${client.token}` } });
+		if(response.status !== 404) {
+
+			const data = await response.json();
+			const bannerID = data.banner;
+
+			if(bannerID !== null) {
+
+				url = `https://cdn.discordapp.com/banners/${member.user.id}/${bannerID}.gif`;
+				response = await fetch(`${url}`, { method: 'GET', headers: { Authorization: `Bot ${client.token}` } });
+				switch(response.status) {
+				case 415:
+					url = `https://cdn.discordapp.com/banners/${member.user.id}/${bannerID}.png?size=1024`;
+					break;
+				default:
+					url = `https://cdn.discordapp.com/banners/${member.user.id}/${bannerID}.gif?size=1024`;
+				}
+
+				desc += '\n\n**Banner:**';
+				pageOne.setImage(`${url}`);
+			}
+
+			pageOne.setDescription(desc);
+		}
+
 
 		// Create embed pageTwo
 		const pageTwo = new MessageEmbed()

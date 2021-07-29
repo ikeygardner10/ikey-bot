@@ -82,7 +82,8 @@ process.on('unhandledRejection', async (error) => {
 				console.error(`An error occured:\n${error.name}: ${error.message}`);
 			});
 		}
-	} else {
+	}
+	else {
 		client.channels.cache.get('784192991492702218').send(`__***ERROR***__\n\n**Name:** *${error.name}*\n**Method:** *${error.method}*\n**Code:** *${error.code}*\n**httpStatus:** *${error.httpStatus}*\n\n**Message:** \`${error.message}\``);
 	}
 });
