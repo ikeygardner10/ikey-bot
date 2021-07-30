@@ -41,9 +41,11 @@ module.exports = {
 
 		try {
 			pageOne.setThumbnail(`https://i.scdn.co/image/${spotifyObj.assets.largeImage.slice(8)}`);
-		} catch {
+		}
+		catch {
 			pageOne.setThumbnail('https://imgur.com/ulUV1l6.png');
-		} finally {
+		}
+		finally {
 			message.channel.send(pageOne);
 		}
 

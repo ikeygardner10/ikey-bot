@@ -21,18 +21,20 @@ module.exports = {
 		// If amount is lower than 100, bulk delete amount
 		// Finally, return success message, or return if error
 		if(amount > 100) {
-			await message.channel.send('`This while take a while`');
+			await message.channel.send('`This will take a while`');
 			for(let i = 0; i < amount; i = i + 50) {
 				try {
 					await message.channel.bulkDelete(50);
-				} catch(error) {
+				}
+				catch(error) {
 					console.error(`[PURGE CMD] ${error.stack}`);
 					i = amount;
 					return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
 				}
 			}
 			return message.channel.send(`\`Success\`\n\`${amount} deleted\``);
-		} else {
+		}
+		else {
 			await message.delete();
 			await message.channel.bulkDelete(amount)
 				.catch((error) => {

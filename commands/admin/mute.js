@@ -80,7 +80,8 @@ module.exports = {
 				message.guild.channels.cache.forEach(async (channel, id) => {
 					await channel.createOverwrite(muterole, { SEND_MESSAGES: false, ADD_REACTIONS: false });
 				});
-			} catch(error) {
+			}
+			catch(error) {
 				console.error(`[MUTE CMD] ${error.stack}`);
 				return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
 			}

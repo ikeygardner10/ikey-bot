@@ -2,6 +2,10 @@
 const wait = require('util').promisify(setTimeout);
 const addInvites = require('../functions/addInvites');
 const botStatus = require('../functions/botStatus');
+const { connect } = require('mongoose');
+const fetchAll = require('../functions/fetchAll');
+const pollModel = require('../data/pollModel');
+const { emojiArray } = require('../data/arrayData.json');
 
 module.exports = async (client, ready) => {
 
@@ -54,6 +58,46 @@ module.exports = async (client, ready) => {
 			await wait(1000);
 		});
 	});
+
+	await wait(1500);
+
+	await connect(client.config.mongoURL, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+	}).then(console.success('MongoDB Connected'));
+
+	setInterval(async () => {
+		for (const guild of client.guilds.cache) {
+			const pollArray = await pollModel.find({
+				guild: guild[0],
+			}).catch(err => console.log(err));
+
+			for (const poll of pollArray) {
+				if (Date.now() >= Number(poll.expiryDate)) {
+					const channel = client.channels.cache.get(poll.textChannel);
+					const msg = await channel.messages.fetch(poll.message).catch(err => console.log(err));
+
+					const resultsArr = [];
+
+					for (const e of emojiArray) {
+						const allReactions = await fetchAll(msg, e).catch(err => console.log(err));
+						resultsArr.push([e, typeof allReactions == 'object' ? allReactions.length : undefined]);
+					}
+
+					resultsArr.sort((a, b) => b[1] - a[1]);
+
+					if (resultsArr[0][1] == resultsArr[1][1]) {
+						channel.send('The poll was a tie!');
+					}
+					else {
+						channel.send(`The winner of the poll was ${resultsArr[0][0]}`);
+					}
+
+					await poll.deleteOne().catch(err => console.log(err));
+				}
+			}
+		}
+	}, 30000);
 
 	await wait(1500);
 
