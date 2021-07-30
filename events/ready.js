@@ -6,6 +6,7 @@ const { connect } = require('mongoose');
 const fetchAll = require('../functions/fetchAll');
 const pollModel = require('../data/pollModel');
 const { emojiArray } = require('../data/arrayData.json');
+const buildImageArray = require('../functions/buildImageArray');
 
 module.exports = async (client, ready) => {
 
@@ -15,6 +16,10 @@ module.exports = async (client, ready) => {
 	const selectGuildSettings = 'SELECT * FROM `guildsettings` WHERE `guildID`=?;';
 
 	const stmt = 'SELECT `guildID` FROM `logsettings` WHERE `messages`=?;';
+
+	await wait(1500);
+
+	buildImageArray(client);
 
 	await wait(1500);
 
@@ -48,8 +53,8 @@ module.exports = async (client, ready) => {
 
 	await wait(1500);
 
-	const [rows] = await SQLpool.execute(stmt, [true]);
-	await rows.forEach(async row => {
+	const [msgRows] = await SQLpool.execute(stmt, [true]);
+	await msgRows.forEach(async row => {
 		const guild = await client.guilds.fetch(row.guildID);
 		await guild.channels.cache.forEach(async channel => {
 			if(channel.type !== 'text') return;
@@ -81,18 +86,21 @@ module.exports = async (client, ready) => {
 
 					for (const e of emojiArray) {
 						const allReactions = await fetchAll(msg, e).catch(err => console.log(err));
+						if(!allReactions) break;
+						if(!allReactions.find(r => r.id === client.user.id)) break;
 						resultsArr.push([e, typeof allReactions == 'object' ? allReactions.length : undefined]);
 					}
 
 					resultsArr.sort((a, b) => b[1] - a[1]);
 
 					if (resultsArr[0][1] == resultsArr[1][1]) {
-						channel.send('The poll was a tie!');
+						await msg.reply('The poll was a tie!');
 					}
 					else {
-						channel.send(`The winner of the poll was ${resultsArr[0][0]}`);
+						await msg.reply(`The winner of the poll was ${resultsArr[0][0]}`);
 					}
 
+					await msg.reactions.removeAll().catch(err => console.log(err));
 					await poll.deleteOne().catch(err => console.log(err));
 				}
 			}
@@ -101,10 +109,13 @@ module.exports = async (client, ready) => {
 
 	await wait(1500);
 
-	console.success(`Logged in as ${client.user.tag}!`);
-	console.success(`${client.guilds.cache.size} servers`);
-	console.success(`Loaded invites for ${trckRows.length} guild(s)`);
-	console.success(`Loaded prefixes for ${guildRows.length} guild(s)`);
+	console.success(`Loaded ${client.commands.size} command(s)`);
+	console.success(`Loaded ${client.imageTotal} image(s)`);
+	console.success(`Cached prefixes for ${guildRows.length} guild(s)`);
+	console.success(`Cached messages for ${msgRows.length} guild(s)`);
+	console.success(`Cached invites for ${trckRows.length} guild(s)`);
+	console.success(`Joined to ${client.guilds.cache.size} guild(s)`);
+	console.success(`Logged in as ${client.user.tag}`);
 
 
 	botStatus(client);

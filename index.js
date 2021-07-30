@@ -35,9 +35,6 @@ logger.theme.warn = chalk.yellow;
 logger.theme.error = chalk.red;
 logger.theme.success = chalk.green;
 
-const buildImageArray = require('./functions/buildImageArray.js');
-buildImageArray.execute(client);
-
 fs.readdir('./events/', (error, files) => {
 	if(error) return console.error(`[CLIENT] ${error.stack}`);
 	files.forEach(file => {

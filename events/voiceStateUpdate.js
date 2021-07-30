@@ -29,20 +29,20 @@ module.exports = async (client, oldState, newState) => {
 		const newChannel = await newState.guild.channels.cache.get(newState.channel.id).name;
 		embed.setAuthor('User Joined VC', newState.guild.iconURL());
 		embed.setDescription(`**User:** ${user}\n**Channel:** ${newChannel}\n**Server Muted:** ${serverMuted}`);
-		embed.setFooter(`Author ID: ${newState.id}\nChannel ID: $${newState.channel.id}`);
+		embed.setFooter(`User ID: ${newState.id}\nChannel ID: ${newState.channel.id}`);
 	}
-	else if(oldState.channel !== null && newState.channel !== null) {
+	else if(oldState.channel !== null && newState.channel !== null && oldState.channel !== newState.channel) {
 		const oldChannel = await oldState.guild.channels.cache.get(oldState.channel.id).name;
 		const newChannel = await newState.guild.channels.cache.get(newState.channel.id).name;
 		embed.setAuthor('User Moved VC', newState.guild.iconURL());
 		embed.setDescription(`**User:** ${user}\n**Old Channel:** ${oldChannel}\n**New Channel:** ${newChannel}\n**Server Muted:** ${serverMuted}`);
-		embed.setFooter();
+		embed.setFooter(`User ID: ${newState.id}\nChannel ID: ${newState.channel.id}`);
 	}
 	else if(oldState.channel !== null && newState.channel === null) {
 		const oldChannel = await oldState.guild.channels.cache.get(oldState.channel.id).name;
 		embed.setAuthor('User Left VC', oldState.guild.iconURL());
 		embed.setDescription(`**User:** ${user}\n**Channel:** ${oldChannel}`);
-		embed.setFooter();
+		embed.setFooter(`User ID: ${oldState.id}\nChannel ID: ${oldState.channel.id}`);
 	}
 
 	return logChannel.send(embed);

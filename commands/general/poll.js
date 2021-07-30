@@ -38,7 +38,7 @@ module.exports = {
 		const formattedOptions = pollOptions.map(p => `${pollArray[i++]} ${p.replace(/\[|\]/g, '')}`).join('\n\n');
 
 		const embed = new MessageEmbed()
-			.setAuthor(`${title} Poll`, client.user.avatarURL())
+			.setAuthor(`${title}`, client.user.avatarURL())
 			.setDescription(formattedOptions)
 			.setFooter(timedPoll ? `Ends at: ${moment(Date.now() + ms(timedPoll)).format('LLLL')}` : '')
 			.setTimestamp()
