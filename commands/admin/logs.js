@@ -39,18 +39,18 @@ module.exports = {
 				embed.addField(`> ${key}`, `\`${booleanToText[value]}\``, true);
 			});
 
-			return message.channel.send(embed);
+			return message.lineReply(embed);
 		}
 
 		const updateFunc = async (statement, value, column) => {
 			return SQLpool.execute(statement, [message.guild.id])
 				.then(() => {
 					console.success(`[LOGS CMD] Successfully updated record for ${column} in guild: ${message.guild.id}`);
-					return message.channel.send(`Logging ${booleanToText[value].toLowerCase()} for: \`${column}\``);
+					return message.lineReply(`Logging ${booleanToText[value].toLowerCase()} for: \`${column}\``);
 				})
 				.catch((error) => {
 					console.error(`[LOGS CMD] ${error.stack}`);
-					return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+					return message.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
 				});
 		};
 
@@ -82,6 +82,6 @@ module.exports = {
 
 		}
 
-		return message.channel.send('`Invalid (USE $help logs FOR AVAILABLE OPTIONS)`');
+		return message.lineReply('`Invalid (USE $help logs FOR AVAILABLE OPTIONS)`');
 
 	} };

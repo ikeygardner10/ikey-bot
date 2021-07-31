@@ -1,5 +1,6 @@
 const { MessageEmbed } = require('discord.js');
 const { yes, no, cancel } = require('../../data/arrayData.json');
+const getMember = require('../../functions/getMember');
 
 module.exports = {
 	config: {
@@ -9,15 +10,14 @@ module.exports = {
 		cooldown: 5,
 		category: 'action',
 		permissions: '',
-		args: true,
+		args: false,
 		nsfw: false,
 		description: 'Ask a user to hold hands (15s timeout)',
 	},
-	execute: async (client, message) => {
+	execute: async (client, message, args) => {
 
 		// Define member, return if no member mentioned
-		const member = message.mentions.members.first();
-		if(!member) return message.channel.send('`Invalid (NO USER)');
+		const member = await getMember(message, args);
 
 		// Define imageArray, select random image URL
 		const handholdArray = client.imageArrays.handhold;
@@ -58,38 +58,50 @@ module.exports = {
 		const [rows] = await SQLpool.query(check, [message.author.id, member.id]);
 
 		let messageCount;
-		let msg;
+		let log;
 		if(!rows[0]) {
 			messageCount = 1;
-			msg = 'messageCount record added';
-		} else {
+			log = 'messageCount record added';
+		}
+		else {
 			messageCount = rows[0].messageCount + 1;
-			msg = 'messageCount record updated';
+			log = 'messageCount record updated';
 		}
 
 		// Send question to mentioned user, then create message collector
 		// If response is yes, check for existing record, if undefined, create new else update
 		// If response is no, redefine embed and return it, otherwise catch timeout (15s)
-		message.channel.send(`${member}, ${message.author} wants to hold hands... do you accept? :flushed:`).then(() => {
-			message.channel.awaitMessages(filter, { max: 1, time: 15000, errors: ['time'] })
-				.then(collected => {
-					if(yes.includes(collected.first().content.toLowerCase())) {
-						hEmbed.setFooter(`[${messageCount} times]`, client.user.avatarURL());
-						message.channel.send(hEmbed);
-						return SQLpool.execute(addUpdate, [message.author.id, member.id, 1])
-							.then(() => console.success(`[HANDHOLD CMD] ${msg}`))
-							.catch((error) => console.error(`[HANDHOLD CMD] ${error.stack}`));
-					} else if(no.includes(collected.first().content.toLowerCase())) {
-						hEmbed.setDescription(`${member} said no! :sob:`);
-						hEmbed.attachFiles('D:/images/self/handholdno.gif');
-						hEmbed.setImage('attachment://handholdno.gif');
-						return message.channel.send(hEmbed);
-					} else if(cancel.includes(collected.first().content.toLowerCase())) {
-						console.info(`[ADOPT CMD] ${message.author.id} cancelled`);
-						return message.channel.send(`${message.author} cancelled! :sob:`);
-					}
-				}).catch(() => {
-					return message.channel.send(`${message.author}, no response :pensive:`);
-				});
-		});
+		if(message.author.id === member.id) {
+			hEmbed.setFooter(`[${messageCount} times]`, client.user.avatarURL());
+			message.lineReply(hEmbed);
+			return SQLpool.execute(addUpdate, [message.author.id, member.id, 1])
+				.then(() => console.success(`[HANDHOLD CMD] ${log}`))
+				.catch((error) => console.error(`[HANDHOLD CMD] ${error.stack}`));
+		}
+		else {
+			await message.channel.send(`${member}, ${message.author} wants to hold hands... do you accept? :flushed:`).then((msg) => {
+				message.channel.awaitMessages(filter, { max: 1, time: 15000, errors: ['time'] })
+					.then(collected => {
+						if(yes.includes(collected.first().content.toLowerCase())) {
+							hEmbed.setFooter(`[${messageCount} times]`, client.user.avatarURL());
+							msg.lineReply(hEmbed);
+							return SQLpool.execute(addUpdate, [message.author.id, member.id, 1])
+								.then(() => console.success(`[HANDHOLD CMD] ${log}`))
+								.catch((error) => console.error(`[HANDHOLD CMD] ${error.stack}`));
+						}
+						else if(no.includes(collected.first().content.toLowerCase())) {
+							hEmbed.setDescription(`${member} said no! :sob:`);
+							hEmbed.attachFiles('D:/images/self/handholdno.gif');
+							hEmbed.setImage('attachment://handholdno.gif');
+							return msg.lineReply(hEmbed);
+						}
+						else if(cancel.includes(collected.first().content.toLowerCase())) {
+							console.info(`[ADOPT CMD] ${message.author.id} cancelled`);
+							return msg.lineReply(`${message.author} cancelled! :sob:`);
+						}
+					}).catch(() => {
+						return msg.lineReply(`${message.author}, no response :pensive:`);
+					});
+			});
+		}
 	} };

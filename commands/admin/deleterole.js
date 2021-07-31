@@ -15,12 +15,12 @@ module.exports = {
 
 		// Define input as args joined, return of no args
 		const input = args.join(' ');
-		if(!input) return message.channel.send('`Invalid (NO ROLE NAMED)`');
+		if(!input) return message.lineReply('`Invalid (SPECIFY ROLE)`');
 
 		// Wait for roles to fetch, search roles for input, return if no role found
 		await message.guild.roles.fetch();
 		const role = message.guild.roles.cache.find(r => r.name === input);
-		if(!role) return message.channel.send('`Invalid (NO ROLE FOUND)`');
+		if(!role) return message.lineReply('`Invalid (NO ROLE FOUND)`');
 
 		// Create basic embed
 		const dEmbed = new MessageEmbed()
@@ -35,18 +35,18 @@ module.exports = {
 		if(message.author.id !== client.config.ownerID) {
 			const authorrole = message.member.roles.highest;
 			const botrole = message.guild.me.roles.highest;
-			if(authorrole.position <= role.position) return message.channel.send('`Invalid Permission (ROLE IS HIGHER/EQUAL TO YOURS)`');
-			if(role.position >= botrole.position) return message.channel.send('`Invalid Permission (ROLE IS HIGHER/EQUAL TO MINE)`');
+			if(authorrole.position <= role.position) return message.lineReply('`Invalid (ROLE IS HIGHER/EQUAL TO YOURS)`');
+			if(role.position >= botrole.position) return message.lineReply('`Invalid (ROLE IS HIGHER/EQUAL TO MINE)`');
 		}
 
 		// Return role delete, then define embed desc and return, or return error
 		return role.delete()
 			.then((deleted) => {
 				dEmbed.setDescription(`**Result:** **${deleted.name}** role has been deleted\n\n**Deleted By:** <@${message.author.id}>`);
-				return message.channel.send(dEmbed);
+				return message.lineReply(dEmbed);
 			})
 			.catch((error) => {
 				console.error(`[DELROLE CMD] ${error.stack}`);
-				return message.channel.sned(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+				return message.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
 			});
 	} };

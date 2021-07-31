@@ -1,5 +1,6 @@
 const { MessageEmbed } = require('discord.js');
 const { yes, no, cancel } = require('../../data/arrayData.json');
+const getMember = require('../../functions/getMember');
 
 module.exports = {
 	config: {
@@ -13,10 +14,12 @@ module.exports = {
 		nsfw: false,
 		description: 'Dance with a user',
 	},
-	execute: async (client, message) => {
+	execute: async (client, message, args) => {
 
-		const member = message.mentions.members.first() || message.member; if(!member) return('`Invalid (NO USER)`');
-		let danceArray; let file;
+		const member = await getMember(message, args);
+
+		let danceArray;
+		let file;
 
 		const cEmbed = new MessageEmbed()
 			.setTimestamp()
@@ -53,42 +56,47 @@ module.exports = {
 		const [rows] = await SQLpool.query(check, [message.author.id, member.id]);
 
 		let messageCount;
-		let msg;
+		let log;
 		if(!rows[0]) {
 			messageCount = 1;
-			msg = 'messageCount record added';
-		} else {
+			log = 'messageCount record added';
+		}
+		else {
 			messageCount = rows[0].messageCount + 1;
-			msg = 'messageCount record updated';
+			log = 'messageCount record updated';
 		}
 
 		if(message.author.id === member.id) {
 			cEmbed.setFooter(`[${messageCount} times]`, client.user.avatarURL());
-			message.channel.send(cEmbed);
+			await message.lineReply(cEmbed);
 			return SQLpool.execute(addUpdate, [message.author.id, member.id, 1])
-				.then(() => console.success(`[DANCE CMD] ${msg}`))
+				.then(() => console.success(`[DANCE CMD] ${log}`))
 				.catch((error) => console.error(`[DANCE CMD] ${error.stack}`));
-		} else {
-			return message.channel.send(`${member}, ${message.author} wants to dance... do you accept? :flushed:`).then(() => {
+		}
+		else {
+			await message.channel.send(`${member}, ${message.author} wants to dance... do you accept? :flushed:`).then((msg) => {
 				message.channel.awaitMessages(filter, { max: 1, time: 15000, errors: ['time'] })
 					.then(collected => {
 						if(yes.includes(collected.first().content.toLowerCase())) {
 							cEmbed.setFooter(`[${messageCount} times]`, client.user.avatarURL());
-							message.channel.send(cEmbed);
+							msg.lineReply(cEmbed);
 							return SQLpool.execute(addUpdate, [message.author.id, member.id, 1])
-								.then(() => console.success(`[DANCE CMD] ${msg}`))
+								.then(() => console.success(`[DANCE CMD] ${log}`))
 								.catch((error) => console.error(`[DANCE CMD] ${error.stack}`));
-						} else if(no.includes(collected.first().content.toLowerCase())) {
+						}
+						else if(no.includes(collected.first().content.toLowerCase())) {
 							cEmbed.setDescription(`${member} said no! :sob:`);
 							cEmbed.attachFiles('D:/images/self/doubledanceno.gif');
 							cEmbed.setImage('attachment://doubledanceno.gif');
-							return message.channel.send(cEmbed);
-						} else if(cancel.includes(collected.first().content.toLowerCase())) {
-							console.info(`[DANCE CMD] ${message.author.id} cancelled`);
-							return message.channel.send(`${message.author} cancelled! :sob:`);
+							return msg.lineReply(cEmbed);
 						}
-					}).catch(() => {
-						return message.channel.send(`${message.author}, no response :pensive:`);
+						else if(cancel.includes(collected.first().content.toLowerCase())) {
+							console.info(`[DANCE CMD] ${message.author.id} cancelled`);
+							return msg.lineReply(`${message.author} cancelled! :sob:`);
+						}
+					}).catch((error) => {
+						console.error(`[DANCE CMD] ${error.stack}`);
+						return msg.lineReply(`${message.author}, no response :pensive:`);
 					});
 			});
 		}

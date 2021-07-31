@@ -24,27 +24,28 @@ module.exports = {
 		const pollParameters = args.join(' ');
 
 		const title = titleRegex.test(pollParameters) ? titleRegex.exec(pollParameters)[1] : null;
-		if(!title) return message.channel.send('`Invalid (NO POLL TITLE - FORMAT: {POLL TITLE})');
+		if(!title) return message.lineReply('`Invalid (NO POLL TITLE - FORMAT: {POLL TITLE})');
 
 		const pollOptions = pollParameters.match(optionRegex);
-		if(!pollOptions) return message.channel.send('`Invalid (NO POLL OPTIONS - FORMAT: [OPTION ONE] [OPTION TWO])`');
-		if(pollOptions.length < 2) return message.channel.send('`Invalid (2 OPTIONS MIN.)`');
-		if(pollOptions.length > 10) return message.channel.send('`Invalid (MAX. 10 OPTIONS)`');
+		if(!pollOptions) return message.lineReply('`Invalid (NO POLL OPTIONS - FORMAT: [OPTION ONE] [OPTION TWO])`');
+		if(pollOptions.length < 2) return message.lineReply('`Invalid (2 OPTIONS MIN.)`');
+		if(pollOptions.length > 10) return message.lineReply('`Invalid (MAX. 10 OPTIONS)`');
 
 		const timedPoll = timeRegex.test(pollParameters) ? timeRegex.exec(pollParameters)[1] : null;
-		if(typeof ms(timedPoll) !== 'number') return message.channel.send('`Invalid (TIME NOT VALID - FORMAT: (1s/1m/1h/1d/1w)');
+		if(typeof ms(timedPoll) !== 'number') return message.lineReply('`Invalid (TIME NOT VALID - FORMAT: (1s/1m/1h/1d/1w)');
 
 		let i = 0;
 		const formattedOptions = pollOptions.map(p => `${pollArray[i++]} ${p.replace(/\[|\]/g, '')}`).join('\n\n');
+		if(!formattedOptions) return message.lineReply('`Invalid (NO POLL OPTIONS - FORMAT: [OPTION ONE] [OPTION TWO])`');
 
 		const embed = new MessageEmbed()
-			.setAuthor(`${title}`, client.user.avatarURL())
+			.setAuthor(`${title}`)
 			.setDescription(formattedOptions)
 			.setFooter(timedPoll ? `Ends at: ${moment(Date.now() + ms(timedPoll)).format('LLLL')}` : '')
 			.setTimestamp()
 			.setColor(0xFFFFFA);
 
-		const msg = await message.channel.send(embed);
+		const msg = await message.lineReply(embed);
 
 		if(timedPoll) {
 			const pollDoc = new pollModel({

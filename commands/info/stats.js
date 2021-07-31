@@ -32,7 +32,7 @@ module.exports = {
 			let pageValue = 1;
 			if(args[0]) {
 				if(args[0] > 0 && args[0] < 11) pageValue = Number(args[0]);
-				else return message.channel.send('`Invalid (NOT A VALID NUMBER, 1 - 10)`');
+				else return message.lineReply('`Invalid (NOT A VALID NUMBER, 1 - 10)`');
 			}
 
 			const sliceTwo = 10 * pageValue;
@@ -52,12 +52,14 @@ module.exports = {
 					const userID = `${row.userID}`;
 					if(!commandTotal[table]) {
 						commandTotal[table] = row.messageCount;
-					} else {
+					}
+					else {
 						commandTotal[table] = commandTotal[table] + row.messageCount;
 					}
 					if(!userTotal[userID]) {
 						userTotal[userID] = row.messageCount;
-					} else {
+					}
+					else {
 						userTotal[userID] = userTotal[userID] + row.messageCount;
 					}
 				}
@@ -84,7 +86,8 @@ module.exports = {
 				const total = userTotals[u];
 				try {
 					user = await client.users.cache.get(user).username;
-				} catch {
+				}
+				catch {
 					user = `Unknown User (${user})`;
 				}
 				descTwo += `${numberToEmoji[u + 1]} **${user}**\n:white_small_square: ${total} times\n`;
@@ -93,7 +96,7 @@ module.exports = {
 			embed.setAuthor(`${client.user.username} Global Stats`, client.user.avatarURL());
 			embed.setThumbnail(client.user.avatarURL({ format: 'png', dynamic: true, size: 512 }));
 			embed.setDescription(`**Top Commands:**\n${descOne}\n**Top Users:**\n${descTwo}`);
-			return message.channel.send(embed);
+			return message.lineReply(embed);
 		}
 
 		if(tables.includes(args[0]) && !member) {
@@ -101,7 +104,7 @@ module.exports = {
 			let pageValue = 1;
 			if(args[1] && isNaN(args[1]) === false) {
 				if(args[1] > 0 && args[1] < 11) pageValue = Number(args[1]);
-				else return message.channel.send('`Invalid (NOT A VALID NUMBER, 1 - 10)`');
+				else return message.lineReply('`Invalid (NOT A VALID NUMBER, 1 - 10)`');
 			}
 
 			const sliceTwo = 10 * pageValue;
@@ -118,7 +121,8 @@ module.exports = {
 				const userID = `${row.userID}`;
 				if(!userTotal[userID]) {
 					userTotal[userID] = row.messageCount;
-				} else {
+				}
+				else {
 					userTotal[userID] = userTotal[userID] + row.messageCount;
 				}
 			}
@@ -133,7 +137,8 @@ module.exports = {
 				const total = userTotals[u];
 				try {
 					user = await client.users.cache.get(user).username;
-				} catch {
+				}
+				catch {
 					user = `Unknown User (${user})`;
 				}
 				desc += `${numberToEmoji[u + 1]} **${user}**\n:white_small_square: ${total} times\n`;
@@ -142,7 +147,7 @@ module.exports = {
 			embed.setAuthor(`${client.user.username} Command Stats`, client.user.avatarURL());
 			embed.setThumbnail(client.user.avatarURL({ format: 'png', dynamic: true, size: 512 }));
 			embed.setDescription(`:floppy_disk: **Command:** \`${table.slice(0, table.length - 5)}\`\n\n**Top Users:**\n${desc}`);
-			return message.channel.send(embed);
+			return message.lineReply(embed);
 		}
 
 		if(member && !args[1]) {
@@ -159,7 +164,8 @@ module.exports = {
 					userTotal = userTotal + row.messageCount;
 					if(!commandTotal[table]) {
 						commandTotal[table] = row.messageCount;
-					} else {
+					}
+					else {
 						commandTotal[table] = commandTotal[table] + row.messageCount;
 					}
 				}
@@ -181,7 +187,7 @@ module.exports = {
 			embed.setThumbnail(member.user.avatarURL({ format: 'png', dynamic: true, size: 512 }));
 			embed.setDescription(`**:bust_in_silhouette: User:** ${member.user.tag}\n\n${desc}`);
 			embed.setFooter(`ID: ${member.user.id} | Total Commands Used: ${userTotal}`);
-			return message.channel.send(embed);
+			return message.lineReply(embed);
 		}
 
 		if(tables.includes(args[1]) && member) {
@@ -189,7 +195,7 @@ module.exports = {
 			let pageValue = 1;
 			if(args[2] && isNaN(args[2]) === false) {
 				if(args[2] > 0 && args[2] < 11) pageValue = Number(args[2]);
-				else return message.channel.send('`Invalid (NOT A VALID NUMBER, 1 - 10)`');
+				else return message.lineReply('`Invalid (NOT A VALID NUMBER, 1 - 10)`');
 			}
 
 			const sliceTwo = 10 * pageValue;
@@ -207,7 +213,8 @@ module.exports = {
 				commandTotal = commandTotal + row.messageCount;
 				if(!userTotal[userID]) {
 					userTotal[userID] = row.messageCount;
-				} else {
+				}
+				else {
 					userTotal[userID] = userTotal[userID] + row.messageCount;
 				}
 			}
@@ -222,7 +229,8 @@ module.exports = {
 				const total = userTotals[m];
 				try {
 					user = await client.users.cache.get(user).username;
-				} catch {
+				}
+				catch {
 					user = `Unknown User (${user})`;
 				}
 				desc += `${numberToEmoji[m + 1]} **${user}**\n:white_small_square: ${total} times\n`;
@@ -231,7 +239,7 @@ module.exports = {
 			embed.setThumbnail(member.user.avatarURL({ format: 'png', dynamic: true, size: 512 }));
 			embed.setDescription(`**:bust_in_silhouette: User:** ${member.user.tag}\n:floppy_disk: **Command:** \`${table.slice(0, table.length - 5)}\`\n\n**Used On:**\n${desc}`);
 			embed.setFooter(`ID: ${member.user.id} | Total Commands Used: ${commandTotal}`);
-			return message.channel.send(embed);
+			return message.lineReply(embed);
 		}
 
 		if(tables.includes(args[0]) && member) {
@@ -239,7 +247,7 @@ module.exports = {
 			let pageValue = 1;
 			if(args[2] && isNaN(args[2]) === false) {
 				if(args[2] > 0 && args[2] < 11) pageValue = Number(args[2]);
-				else return message.channel.send('`Invalid (NOT A VALID NUMBER, 1 - 10)`');
+				else return message.lineReply('`Invalid (NOT A VALID NUMBER, 1 - 10)`');
 			}
 
 			const sliceTwo = 10 * pageValue;
@@ -257,7 +265,8 @@ module.exports = {
 				commandTotal = commandTotal + row.messageCount;
 				if(!userTotal[userID]) {
 					userTotal[userID] = row.messageCount;
-				} else {
+				}
+				else {
 					userTotal[userID] = userTotal[userID] + row.messageCount;
 				}
 			}
@@ -272,7 +281,8 @@ module.exports = {
 				const total = userTotals[m];
 				try {
 					user = await client.users.cache.get(user).username;
-				} catch {
+				}
+				catch {
 					user = `Unknown User (${user})`;
 				}
 				desc += `${numberToEmoji[m + 1]} **${user}**\n:white_small_square: ${total} times\n`;
@@ -281,9 +291,9 @@ module.exports = {
 			embed.setThumbnail(member.user.avatarURL({ format: 'png', dynamic: true, size: 512 }));
 			embed.setDescription(`**:bust_in_silhouette: User:** ${member.user.tag}\n:floppy_disk: **Command:** \`${table.slice(0, table.length - 5)}\`\n\n**Used By:**\n${desc}`);
 			embed.setFooter(`ID: ${member.user.id} | Total Commands Used: ${commandTotal}`);
-			return message.channel.send(embed);
+			return message.lineReply(embed);
 		}
 
-		return message.channel.send('`Usage:`\n`$top`\n`$top <@user>`\n`$top <command name + (page number optional)>`\n`$top <command name + @user + (page number optional)>`\n`$top <@user + command name + (page number optional)>`');
+		return message.lineReply('`Usage:`\n`$top`\n`$top <@user>`\n`$top <command name + (page number optional)>`\n`$top <command name + @user + (page number optional)>`\n`$top <@user + command name + (page number optional)>`');
 
 	} };

@@ -36,6 +36,6 @@ module.exports = {
 			.setTimestamp()
 			.setColor(0xFFFFFA);
 
-		return message.channel.send(iEmbed);
+		return message.lineReply(iEmbed);
 
 	} };

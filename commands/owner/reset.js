@@ -14,25 +14,25 @@ module.exports = {
 	execute: async (client, message, args, ready) => {
 
 		if(args[0].toLowerCase() === 'reset' || args[0].toLowerCase() === 'restart') {
-			message.channel.send('Restarting...')
+			message.lineReply('Restarting...')
 				.then(() => {
 					client.destroy();
 				}).then(() => {
-					client.login(config.botToken).then(() => {
-						return message.channel.send('Restarted!');
+					client.login(client.config.botToken).then(() => {
+						return message.lineReply('Restarted!');
 					}).catch((error) => {
 						console.error(`[RESET CMD] ${error.stack}`);
-						return message.channel.send('Failed to restart');
+						return message.lineReply('Failed to restart');
 					});
 				});
 		}
 		if(args[0].toLowerCase() === 'shutdown') {
-			message.channel.send('Shutting down...')
+			message.lineReply('Shutting down...')
 				.then(msg => {
 					client.destroy();
 				}).catch((error) => {
 					console.error(`[RESET CMD] ${error.stack}`);
-					return message.channel.send('Failed to restart');
+					return message.lineReply('Failed to restart');
 				});
 		}
 	},

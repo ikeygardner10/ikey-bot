@@ -23,11 +23,12 @@ module.exports = {
 			let evaled = eval(code);
 			if (typeof evaled !== 'string') evaled = require('util').inspect(evaled);
 
-			return message.channel.send(clean(evaled), { code:'xl' });
+			return message.lineReply(clean(evaled), { code:'xl' });
 
-		} catch(error) {
+		}
+		catch(error) {
 			console.error(`[EVAL CMD] ${error.stack}`);
-			return message.channel.send(`\`ERROR\` \`\`\`xl\n${clean(error)}\n\`\`\``);
+			return message.lineReply(`\`ERROR\` \`\`\`xl\n${clean(error)}\n\`\`\``);
 		}
 
 	},

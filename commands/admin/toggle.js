@@ -22,13 +22,13 @@ module.exports = {
 		const delDisabledCommand = 'DELETE FROM `disabledcommands` WHERE `command`=? AND `guildID`=? AND `channelID`=?;';
 		const selectAll = 'SELECT * FROM `disabledcommands` WHERE `guildID`=?;';
 
-		if(!args[0]) return message.channel.send('`Invalid (CHOOSE A COMMAND/ALL/LIST)`');
-		if(!message.channel) return message.channel.send('`Invalid (INVALID CHANNEL TYPE');
+		if(!args[0]) return message.lineReply('`Invalid (CHOOSE A COMMAND/ALL/LIST)`');
+		if(!message.channel) return message.lineReply('`Invalid (INVALID CHANNEL TYPE');
 
 		if(args[0].toLowerCase() === 'list') {
 
 			const [allRows] = await SQLpool.execute(selectAll, [guild.id]);
-			if(allRows[0] === undefined) return message.channel.send('`Invalid (NOTHING DISABLED)`');
+			if(allRows[0] === undefined) return message.lineReply('`Invalid (NOTHING DISABLED)`');
 
 			const tEmbed = new MessageEmbed()
 				.setAuthor(`${guild.name}'s Disabled List`, guild.iconURL())
@@ -52,7 +52,7 @@ module.exports = {
 				if(filtered.length === 0) return;
 				tEmbed.addField(`> ${chan.name}`, filtered.join(' '));
 			});
-			return message.channel.send(tEmbed);
+			return message.lineReply(tEmbed);
 		}
 
 		if(args[0].toLowerCase() === 'all') {
@@ -64,22 +64,22 @@ module.exports = {
 				return SQLpool.query(delDisabledCommand, [commandName, guild.id, channel.id])
 					.then(() => {
 						console.success(`[TOGGLE CMD] Successfully removed entry for command: ${commandName} in guild: ${guild.id} for channel: ${channel.id}`);
-						return message.channel.send(`\`All commands enabled for channel: ${channel.name}\``);
+						return message.lineReply(`\`All commands enabled for channel: ${channel.name}\``);
 					})
 					.catch((error) => {
 						console.error(`[TOGGLE CMD] ${error.stack}`);
-						return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+						return message.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
 					});
 			}
 			if(!checkAllRows[0]) {
 				return SQLpool.query(addDisabledCommand, [commandName, guild.id, channel.id])
 					.then(() => {
 						console.success(`[TOGGLE CMD] Successfully added entry for command: ${commandName} in guild: ${guild.id} for channel: ${channel.id}`);
-						return message.channel.send(`\`All commands disabled for channel: ${channel.name}\``);
+						return message.lineReply(`\`All commands disabled for channel: ${channel.name}\``);
 					})
 					.catch((error) => {
 						console.error(`[TOGGLE CMD] ${error.stack}`);
-						return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+						return message.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
 					});
 			}
 		}
@@ -95,22 +95,22 @@ module.exports = {
 				return SQLpool.query(delDisabledCommand, [commandName, guild.id, channel.id])
 					.then(() => {
 						console.success(`[TOGGLE CMD] Successfully removed entry for command: ${commandName} in guild: ${guild.id} for channel: ${channel.id}`);
-						return message.channel.send(`\`${commandName} enabled for channel: ${channel.name}\``);
+						return message.lineReply(`\`${commandName} enabled for channel: ${channel.name}\``);
 					})
 					.catch((error) => {
 						console.error(`[TOGGLE CMD] ${error.stack}`);
-						return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+						return message.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
 					});
 			}
 			if(!checkCmdRows[0]) {
 				return SQLpool.query(addDisabledCommand, [commandName, guild.id, channel.id])
 					.then(() => {
 						console.success(`[TOGGLE CMD] Successfully added entry for command: ${commandName} in guild: ${guild.id} for channel: ${channel.id}`);
-						return message.channel.send(`\`${commandName} disabled for channel: ${channel.name}\``);
+						return message.lineReply(`\`${commandName} disabled for channel: ${channel.name}\``);
 					})
 					.catch((error) => {
 						console.error(`[TOGGLE CMD] ${error.stack}`);
-						return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+						return message.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
 					});
 			}
 		}

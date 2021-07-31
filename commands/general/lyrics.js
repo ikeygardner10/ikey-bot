@@ -25,15 +25,17 @@ module.exports = {
 				actArray.push(activity);
 			});
 			const spotifyObj = actArray.find(act => act.name === 'Spotify');
-			if(!spotifyObj) return message.channel.send('`Invalid (NOTHING PLAYING)`');
+			if(!spotifyObj) return message.lineReply('`Invalid (NOTHING PLAYING)`');
 			artist = spotifyObj.state;
 			title = spotifyObj.details;
-		} else {
+		}
+		else {
 			try {
 				[artist, title] = getArtistTitle(args.join(' '));
-			} catch(error) {
+			}
+			catch(error) {
 				console.error(`[LYRICS CMD] ${error.stack}`);
-				return message.channel.send('`Invalid (SEARCH FORMAT: \'ARTIST - SONG NAME\')`');
+				return message.lineReply('`Invalid (SEARCH FORMAT: \'ARTIST - SONG NAME\')`');
 			}
 		}
 
@@ -49,7 +51,8 @@ module.exports = {
 			.then(song => {
 				try {
 					author = `Lyrics for ${song.title}`;
-				} catch {
+				}
+				catch {
 					author = `Lyrics for ${title} by ${artist}`;
 				}
 				async function createArray(text) {
@@ -59,7 +62,7 @@ module.exports = {
 						lyricArray.push(`[Genius Lyrics](${song.url})\n\n${list}`);
 					}
 				}
-				if(song === null) return message.channel.send('`Invalid (NO SONG FOUND)`');
+				if(song === null) return message.lineReply('`Invalid (NO SONG FOUND)`');
 				const ly = song.lyrics.replace(/\[.*\]?/g, '');
 				createArray(song.lyrics);
 				const lyArray = ly.split('\n\n');

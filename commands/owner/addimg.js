@@ -25,8 +25,8 @@ module.exports = {
 			shoot: './images/Shoot/', slap: './images/Slap/', spank: './images/Spank/',
 			stab: './images/Stab/', tights: './images/Tights/', waifu: './images/Waifu',
 		};
-		const attachment = message.attachments.first(); if(!attachment) return message.channel.send('No image attached');
-		const dir = args[0]; if(!dir) return message.channel.send('No cmd to add image to'); const newDir = dir.toLowerCase();
+		const attachment = message.attachments.first(); if(!attachment) return message.lineReply('No image attached');
+		const dir = args[0]; if(!dir) return message.lineReply('No cmd to add image to'); const newDir = dir.toLowerCase();
 
 		const extension = attachment.name.substring(attachment.name.lastIndexOf('.'), attachment.name.length);
 		const URI = message.attachments.first().url;
@@ -36,16 +36,16 @@ module.exports = {
 		case '.png': case '.gif': case '.jpg': case '.jpeg':
 			break;
 		default:
-			return message.channel.send('`Invalid attachment (PNG/GIF/JPG ONLY)`');
+			return message.lineReply('`Invalid attachment (PNG/GIF/JPG ONLY)`');
 		}
-		if(filePath === 'undefined') return message.channel.send('Invalid folder');
+		if(filePath === 'undefined') return message.lineReply('Invalid folder');
 
 		return fileDownload(URI, fileName, filePath)
 			.then(() => {
-				return message.channel.send('Image added :white_check_mark:');
+				return message.lineReply('Image added :white_check_mark:');
 			}).catch((error) => {
 				console.error(`[ADD IMG] ${error.stack}`);
-				return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+				return message.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
 			});
 
 

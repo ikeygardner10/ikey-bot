@@ -30,12 +30,12 @@ module.exports = {
 		default:
 		}
 
-		if(errors.length < 0) return message.channel.send(errors);
+		if(errors.length < 0) return message.lineReply(errors);
 
-		if(addition.includes(operand)) return message.channel.send(one + two);
-		if(subtraction.includes(operand)) return message.channel.send(one - two);
-		if(multiplication.includes(operand)) return message.channel.send(one * two);
-		if(division.includes(operand)) return message.channel.send(one / two);
-		else return message.channel.send(`\`${operand} is not a valid operator\``);
+		if(addition.includes(operand)) return message.lineReply(one + two);
+		if(subtraction.includes(operand)) return message.lineReply(one - two);
+		if(multiplication.includes(operand)) return message.lineReply(one * two);
+		if(division.includes(operand)) return message.lineReply(one / two);
+		else return message.lineReply(`\`${operand} is not a valid operator\``);
 
 	} };

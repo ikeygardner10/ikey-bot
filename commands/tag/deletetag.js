@@ -19,9 +19,12 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
-		const config = client.config; const tag = args[0];
-		if(!tag) return message.channel.send('`Invalid tag (NO TAG NAME)`'); if(tag.length > 30) return message.channel.send('`Invalid tag (MAX. 30 CHAR TAG NAME)`');
-		const ntn = txtFormatter(tag); const fileDelete = fs.unlink;
+		const tag = args[0];
+		if(!tag) return message.lineReply('`Invalid (NO TAG NAME)`');
+		if(tag.length > 30) return message.lineReply('`Invalid tag (MAX. 30 CHAR TAG NAME)`');
+
+		const ntn = txtFormatter(tag);
+		const fileDelete = fs.unlink;
 
 		const checkGlobal = 'SELECT * FROM `tags` WHERE BINARY `tag`=? AND `guildID` IS NULL';
 		const checkServer = 'SELECT * FROM `tags` WHERE BINARY `tag`=? AND `guildID`=?';
@@ -33,7 +36,7 @@ module.exports = {
 		console.info(`[DELETE TAG] Querying database for server tag: ${ntn}`);
 		if(serverRows[0] !== undefined) {
 			console.info(`[DELETE TAG] Server tag found: ${ntn}`);
-			if(serverRows[0].userID !== message.author.id && !message.member.hasPermission('ADMINISTRATOR') && message.author.id !== config.ownerID) return message.channel.send('`Invalid (TAG OWNER/SERVER ADMIN ONLY)`');
+			if(serverRows[0].userID !== message.author.id && !message.member.hasPermission('ADMINISTRATOR') && message.author.id !== client.config.ownerID) return message.lineReply('`Invalid (TAG OWNER/SERVER ADMIN ONLY)`');
 			if(serverRows[0].imageURL !== null) {
 				console.info(`[DELETE TAG] Server tag file found, deleting: ${serverRows[0].imageURL}`);
 				fileDelete(serverRows[0].imageURL)
@@ -43,17 +46,18 @@ module.exports = {
 			await SQLpool.query(deleteServer, [ntn, message.guild.id])
 				.then(() => {
 					console.success(`[DELETE TAG] Deleted server tag: ${ntn}`);
-					return message.channel.send(`:wastebasket: Server tag **${ntn}** deleted`);
+					return message.lineReply(`:wastebasket: Server tag **${ntn}** deleted`);
 				}).catch(async (error) => {
 					console.error(`[DELETE TAG] ${error.stack}`);
-					return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+					return message.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
 				});
-		} else {
+		}
+		else {
 			console.info(`[DELETE TAG] No server tag found: ${ntn}`);
 			const [globalRows] = await SQLpool.query(checkGlobal, [ntn]);
 			console.info(`[DELETE TAG] Querying database for global tag: ${ntn}`);
 			if(globalRows[0] !== undefined) {
-				if(globalRows[0].userID !== message.author.id && !botAdmins.includes(message.author.id) && message.author.id !== config.ownerID) return message.channel.send('`Invalid (TAG OWNER/BOT ADMINS ONLY)`');
+				if(globalRows[0].userID !== message.author.id && !botAdmins.includes(message.author.id) && message.author.id !== client.config.ownerID) return message.lineReply('`Invalid (TAG OWNER/BOT ADMINS ONLY)`');
 				if(globalRows[0].imageURL !== null) {
 					console.info(`[DELETE TAG] Global tag file found, deleting: ${globalRows[0].imageURL}`);
 					fileDelete(globalRows[0].imageURL)
@@ -63,14 +67,15 @@ module.exports = {
 				await SQLpool.query(deleteGlobal, [ntn])
 					.then(() => {
 						console.success(`[DELETE TAG] Deleted global tag: ${ntn}`);
-						return message.channel.send(`:wastebasket: Global tag **${ntn}** deleted`);
+						return message.lineReply(`:wastebasket: Global tag **${ntn}** deleted`);
 					}).catch(async (error) => {
 						console.error(`[DELETE TAG] ${error.stack}`);
-						return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+						return message.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
 					});
-			} else {
+			}
+			else {
 				console.info(`[DELETE TAG] No tag found, failed to delete tag: ${ntn}`);
-				return message.channel.send(`:mag: Tag **${ntn}** not found`);
+				return message.lineReply(`:mag: Tag **${ntn}** not found`);
 			}
 		}
 	} };

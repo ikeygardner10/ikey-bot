@@ -12,12 +12,14 @@ module.exports = {
 	},
 	execute: async (client, message) => {
 
-		const waifuArray = client.imageArrays.waifu; const file = waifuArray[(Math.floor(Math.random() * waifuArray.length))];
+		const waifuArray = client.imageArrays.waifu;
+		const file = waifuArray[(Math.floor(Math.random() * waifuArray.length))];
 
 		try {
-			return message.channel.send({ files: [{ attachment: 'D:/images/waifu/' + file, name: file }] });
-		} catch(error) {
+			return message.lineReply({ files: [{ attachment: 'D:/images/waifu/' + file, name: file }] });
+		}
+		catch(error) {
 			console.error(`[WAIFU CMD] ${error.stack}`);
-			return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+			return message.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
 		}
 	} };

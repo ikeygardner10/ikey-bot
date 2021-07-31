@@ -17,9 +17,10 @@ module.exports = {
 			client.guilds.cache.get(args.join(' ')).leave();
 			return console.log('Left the guild.');
 
-		} catch(error) {
+		}
+		catch(error) {
 			console.error(`[LEAVE CMD] ${error.stack}`);
-			return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+			return message.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
 		}
 	},
 };

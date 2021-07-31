@@ -1,6 +1,7 @@
 /* eslint-disable no-inline-comments */
 /* eslint-disable no-unused-vars */
 const { MessageEmbed } = require('discord.js');
+const getMember = require('../../functions/getMember');
 
 module.exports = {
 	config: {
@@ -15,7 +16,8 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
-		const member = message.mentions.members.first() || message.member; const user = member.user;
+		const member = await getMember(message, args);
+		const user = member.user;
 		const activities = user.presence.activities; const actArray = [];
 
 		await activities.forEach(activity => {
@@ -24,7 +26,7 @@ module.exports = {
 
 		const spotifyObj = await actArray.find(act => act.name === 'Spotify');
 
-		if(!spotifyObj) return message.channel.send('`Invalid (NOTHING PLAYING)`');
+		if(!spotifyObj) return message.lineReply('`Invalid (NOTHING PLAYING)`');
 
 		// const trackIMG = `https://i.scdn.co/image/${spotifyObj.assets.largeImage.slice(8)}`;
 		const trackURL = `https://open.spotify.com/track/${spotifyObj.syncID}`;
@@ -46,7 +48,7 @@ module.exports = {
 			pageOne.setThumbnail('https://imgur.com/ulUV1l6.png');
 		}
 		finally {
-			message.channel.send(pageOne);
+			message.lineReply(pageOne);
 		}
 
 		return;

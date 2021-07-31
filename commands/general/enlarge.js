@@ -16,17 +16,18 @@ module.exports = {
 			const emoji = args[0];
 			if(!emoji.match(/<(.*?):(.*?):(.*?)>+/g)) {
 				console.warn(emoji);
-				return message.channel.send('Custom emotes only (work in progress)');
+				return message.lineReply('Custom emotes only (work in progress)');
 			}
 			const newemoji = emoji.replace(/<.*:/, '').slice(0, -1);
 			let extension = '.png';
 			if(emoji.match(/^(<a:)/)) extension = '.gif';
 			const url = `https://cdn.discordapp.com/emojis/${newemoji}${extension}`;
 
-			return message.channel.send({ files: [{ attachment: url, name: `${newemoji}${extension}` }] });
+			return message.lineReply({ files: [{ attachment: url, name: `${newemoji}${extension}` }] });
 
-		} catch(error) {
+		}
+		catch(error) {
 			console.error(`[ENLARGE CMD] ${error.stack}`);
-			return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+			return message.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
 		}
 	} };

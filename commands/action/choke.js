@@ -1,4 +1,5 @@
 const { MessageEmbed } = require('discord.js');
+const getMember = require('../../functions/getMember');
 
 module.exports = {
 	config: {
@@ -9,13 +10,14 @@ module.exports = {
 		cooldown: 5,
 		category: 'action',
 		permissions: '',
-		args: true,
+		args: false,
 		nsfw: false,
 		description: 'Choke a user',
 	},
-	execute: async (client, message) => {
+	execute: async (client, message, args) => {
 
-		const member = message.mentions.members.first(); if(!member) return('`Invalid (NO USER)`');
+		// Define member, return if no member mentioned
+		const member = await getMember(message, args);
 
 		const chokeArray = client.imageArrays.choke;
 		const file = chokeArray[(Math.floor(Math.random() * chokeArray.length))];
@@ -47,12 +49,13 @@ module.exports = {
 		if(!rows[0]) {
 			messageCount = 1;
 			msg = 'messageCount record added';
-		} else {
+		}
+		else {
 			messageCount = rows[0].messageCount + 1;
 			msg = 'messageCount record updated';
 		}
 		cEmbed.setFooter(`[${messageCount} times]`, client.user.avatarURL());
-		message.channel.send(cEmbed);
+		message.lineReply(cEmbed);
 		return SQLpool.execute(addUpdate, [message.author.id, member.id, 1])
 			.then(() => console.success(`[CHOKE CMD] ${msg}`))
 			.catch((error) => console.error(`[CHOKE CMD] ${error.stack}`));

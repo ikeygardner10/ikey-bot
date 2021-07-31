@@ -25,7 +25,8 @@ const paginationEmbed = async (msg, pages, emojiList = ['⏪', '⬅️', '➡️
 			default:
 				break;
 			}
-		} else {
+		}
+		else {
 			switch (reaction.emoji.name) {
 			case emojiList[0]:
 				page = page - 10 > 0 ? page - 10 : 0;

@@ -47,5 +47,5 @@ module.exports = {
 			.setColor(0xFFFFFA);
 
 		// Return embed
-		return message.channel.send(sEmbed);
+		return message.lineReply(sEmbed);
 	} };

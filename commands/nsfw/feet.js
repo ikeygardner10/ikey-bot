@@ -21,9 +21,9 @@ module.exports = {
 		fs.readJson('./data/temp/feet.json')
 			.then((files) => {
 				const file = files[(Math.floor(Math.random() * files.length))];
-				return message.channel.send({ files: [{ attachment: 'D:/images/Feet/' + file, name: file }] });
+				return message.lineReply({ files: [{ attachment: 'D:/images/Feet/' + file, name: file }] });
 			}).catch((error) => {
 				console.error(`[CUTIE CMD] ${error.stack}`);
-				return message.channel.send(`**:exclamation: An error occured:**\`\`\`${error.stack}\`\`\``);
+				return message.lineReply(`**:exclamation: An error occured:**\`\`\`${error.stack}\`\`\``);
 			});
 	} };

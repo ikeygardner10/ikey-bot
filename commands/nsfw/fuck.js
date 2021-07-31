@@ -1,5 +1,6 @@
 const { MessageEmbed } = require('discord.js');
 const { yes, no, cancel } = require('../../data/arrayData.json');
+const getMember = require('../../functions/getMember');
 
 module.exports = {
 	config: {
@@ -13,11 +14,10 @@ module.exports = {
 		nsfw: true,
 		description: 'Mention a user to ask them to... :flushed: (15s timeout)',
 	},
-	execute: async (client, message) => {
+	execute: async (client, message, args) => {
 
 		// Define member, return if no member mentioned
-		const member = message.mentions.members.first();
-		if(!member) return message.channel.send('`Invalid (NO USER)');
+		const member = await getMember(message, args);
 
 		const fuckArray = client.imageArrays.fuck;
 		const file = fuckArray[(Math.floor(Math.random() * fuckArray.length))];
@@ -51,35 +51,48 @@ module.exports = {
 		const [rows] = await SQLpool.query(check, [message.author.id, member.id]);
 
 		let messageCount;
-		let msg;
+		let log;
 		if(!rows[0]) {
 			messageCount = 1;
-			msg = 'messageCount record added';
-		} else {
+			log = 'messageCount record added';
+		}
+		else {
 			messageCount = rows[0].messageCount + 1;
-			msg = 'messageCount record updated';
+			log = 'messageCount record updated';
 		}
 
-		message.channel.send(`${member}, you and ${message.author}, sex... now? :hot_face:`).then(() => {
-			message.channel.awaitMessages(filter, { max: 1, time: 15000, errors: ['time'] })
-				.then(collected => {
-					if(yes.includes(collected.first().content.toLowerCase())) {
-						fEmbed.setFooter(`[${messageCount} times]`, client.user.avatarURL());
-						message.channel.send(fEmbed);
-						return SQLpool.execute(addUpdate, [message.author.id, member.id, 1])
-							.then(() => console.success(`[FUCK CMD] ${msg}`))
-							.catch((error) => console.error(`[FUCK CMD] ${error.stack}`));
-					} else if(no.includes(collected.first().content.toLowerCase())) {
-						fEmbed.setDescription(`${member} said no! :sob:`);
-						fEmbed.attachFiles('D:/images/Self/fuckno.gif');
-						fEmbed.setImage('attachment://fuckno.gif');
-						return message.channel.send(fEmbed);
-					} else if(cancel.includes(collected.first().content.toLowerCase())) {
-						console.info(`[ADOPT CMD] ${message.author.id} cancelled`);
-						return message.channel.send(`${message.author} cancelled! :sob:`);
-					}
-				}).catch(() => {
-					return message.channel.send(`${message.author}, no response :pensive:`);
-				});
-		});
+
+		if(message.author.id === member.id) {
+			fEmbed.setFooter(`[${messageCount} times]`, client.user.avatarURL());
+			message.lineReply(fEmbed);
+			return SQLpool.execute(addUpdate, [message.author.id, member.id, 1])
+				.then(() => console.success(`[FUCK CMD] ${log}`))
+				.catch((error) => console.error(`[FUCK CMD] ${error.stack}`));
+		}
+		else {
+			await message.channel.send(`${member}, you and ${message.author}, sex... now? :hot_face:`).then((msg) => {
+				message.channel.awaitMessages(filter, { max: 1, time: 15000, errors: ['time'] })
+					.then(collected => {
+						if(yes.includes(collected.first().content.toLowerCase())) {
+							fEmbed.setFooter(`[${messageCount} times]`, client.user.avatarURL());
+							msg.lineReply(fEmbed);
+							return SQLpool.execute(addUpdate, [message.author.id, member.id, 1])
+								.then(() => console.success(`[FUCK CMD] ${log}`))
+								.catch((error) => console.error(`[FUCK CMD] ${error.stack}`));
+						}
+						else if(no.includes(collected.first().content.toLowerCase())) {
+							fEmbed.setDescription(`${member} said no! :sob:`);
+							fEmbed.attachFiles('D:/images/Self/fuckno.gif');
+							fEmbed.setImage('attachment://fuckno.gif');
+							return msg.lineReply(fEmbed);
+						}
+						else if(cancel.includes(collected.first().content.toLowerCase())) {
+							console.info(`[ADOPT CMD] ${message.author.id} cancelled`);
+							return msg.lineReply(`${message.author} cancelled! :sob:`);
+						}
+					}).catch(() => {
+						return msg.lineReply(`${message.author}, no response :pensive:`);
+					});
+			});
+		}
 	} };

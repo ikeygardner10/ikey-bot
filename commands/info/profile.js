@@ -131,7 +131,7 @@ module.exports = {
 
 		// Define currentPage then send embed and create reaction collector
 		let currentPage = pageOne;
-		message.channel.send(currentPage).then(msg => {
+		message.lineReply(currentPage).then(msg => {
 			if(permList === 'None') return;
 			msg.react('➡️');
 			const collector = msg.createReactionCollector((reaction, author) => ['⬅️', '➡️'].includes(reaction.emoji.name) && author.id === message.author.id, { time: 60000 });

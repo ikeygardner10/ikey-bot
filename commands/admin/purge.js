@@ -13,9 +13,9 @@ module.exports = {
 
 		// Define args as amount, return if amount is invalid
 		const amount = args[0];
-		if(isNaN(amount)) return ('`Invalid (NOT A NUMBER)`');
-		if(amount < 1) return message.channel.send('`Invalid (MIN. 1 MESSAGE)`');
-		if(amount > 1000) return message.channel.send('`Invalid (MAX. 1000 MESSAGES)`');
+		if(isNaN(amount)) return message.lineReply('`Invalid (NOT A NUMBER)`');
+		if(amount < 1) return message.lineReply('`Invalid (MIN. 1 MESSAGE)`');
+		if(amount > 1000) return message.lineReply('`Invalid (MAX. 1000 MESSAGES)`');
 
 		// If amount is higher than 100, bulk delete in batches of 50 (for loop)
 		// If amount is lower than 100, bulk delete amount
@@ -29,17 +29,17 @@ module.exports = {
 				catch(error) {
 					console.error(`[PURGE CMD] ${error.stack}`);
 					i = amount;
-					return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+					return message.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
 				}
 			}
-			return message.channel.send(`\`Success\`\n\`${amount} deleted\``);
+			return message.lineReply(`\`Success\`\n\`${amount} deleted\``);
 		}
 		else {
 			await message.delete();
 			await message.channel.bulkDelete(amount)
 				.catch((error) => {
 					console.error(`[PURGE CMD] ${error.stack}`);
-					return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+					return message.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
 				});
 		}
 	} };

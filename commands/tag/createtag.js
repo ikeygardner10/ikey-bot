@@ -18,21 +18,31 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
-		let [tag, ...restArgs] = args; let content = restArgs.join(' ');
-		let attachment = message.attachments; const config = client.config;
-		if(!tag) return message.channel.send('`Invalid tag (NO TAG NAME)`'); if(!content && !message.attachments.first()) return message.channel.send('`Invalid Tag (NO TAG CONTENT)`');
-		if(tag.length > 30) return message.channel.send('`Invalid tag (MAX. 30 CHAR TAG NAME)`'); if(content.length > 1950) return message.channel.send('`Invalid tag (MAX. 1950 CHAR CONTENT)`');
-		const ntn = txtFormatter(tag); const ntc = txtFormatter(content);
-		let fileName; const filePath = 'D:/images/tags/'; let URI;
+		let [tag, ...restArgs] = args;
+		let content = restArgs.join(' ');
+		let attachment = message.attachments;
+		if(!tag) return message.lineReply('`Invalid (NO TAG NAME)`');
+		if(!content && !message.attachments.first()) return message.lineReply('`Invalid (NO TAG CONTENT)`');
+		if(tag.length > 30) return message.lineReply('`Invalid (MAX. 30 CHAR TAG NAME)`');
+		if(content.length > 1950) return message.lineReply('`Invalid (MAX. 1950 CHAR CONTENT)`');
+
+		const ntn = txtFormatter(tag);
+		const ntc = txtFormatter(content);
+		let fileName;
+		const filePath = 'D:/images/tags/';
+		let URI;
 
 		const checkGlobal = 'SELECT `tag` FROM `tags` WHERE BINARY `tag`=? AND `guildID` IS NULL;';
 		const checkServer = 'SELECT `tag` FROM `tags` WHERE BINARY `tag`=? AND `guildID`=?;';
-		let addGlobal = 'INSERT INTO `tags` (`tag`, `content`, `userID`, `guildCreated`) VALUES (?, ?, ?, ?);'; let globalData = [ntn, ntc, message.author.id, message.guild.id];
-		let addServer = 'INSERT INTO `tags` (`tag`, `content`, `userID`, `guildID`) VALUES (?, ?, ?, ?);'; let serverData = [ntn, ntc, message.author.id, message.guild.id];
+		let addGlobal = 'INSERT INTO `tags` (`tag`, `content`, `userID`, `guildCreated`) VALUES (?, ?, ?, ?);';
+		let addServer = 'INSERT INTO `tags` (`tag`, `content`, `userID`, `guildID`) VALUES (?, ?, ?, ?);';
+
+		let globalData = [ntn, ntc, message.author.id, message.guild.id];
+		let serverData = [ntn, ntc, message.author.id, message.guild.id];
 
 		if(attachment.size > 0) {
-			if(attachment.size > 1) return message.channel.send('`Invalid attachment (MAX. 1 (LIMIT INC. SOON))`');
-			if(attachment.first().size > 8388608) return message.channel.send('`Invalid attachment (MAX. 8MB)`');
+			if(attachment.size > 1) return message.lineReply('`Invalid (MAX. 1 ATTACHMENT)`');
+			if(attachment.first().size > 8388608) return message.lineReply('`Invalid (MAX. 8MB ATTACHMENT)`');
 
 			attachment = message.attachments.first().name;
 			const extension = attachment.substring(attachment.lastIndexOf('.'), attachment.length);
@@ -40,11 +50,15 @@ module.exports = {
 			case '.png': case '.gif': case '.jpg': case '.jpeg': case '.mp4': case '.webm': case '.mp3': case '.wav':
 				break;
 			default:
-				if(message.author.id !== config.ownerID) return message.channel.send('`Invalid attachment (PNG/GIF/JPG/WEBM/MP4 ONLY)`');
+				if(message.author.id !== client.config.ownerID) return message.lineReply('`Invalid (PNG/GIF/JPG/WEBM/MP4 ONLY)`');
 			}
 			fileName = `${shortid.generate()}${extension}`; URI = message.attachments.first().url;
-			addGlobal = 'INSERT INTO `tags` (`tag`, `content`, `imageURL`, `userID`, `guildCreated`) VALUES (?, ?, ?, ?, ?)'; globalData = [ntn, ntc, filePath + fileName, message.author.id, message.guild.id];
-			addServer = 'INSERT INTO `tags` (`tag`, `content`, `imageURL`, `userID`, `guildID`) VALUES (?, ?, ?, ?, ?)'; serverData = [ntn, ntc, filePath + fileName, message.author.id, message.guild.id];
+
+			addGlobal = 'INSERT INTO `tags` (`tag`, `content`, `imageURL`, `userID`, `guildCreated`) VALUES (?, ?, ?, ?, ?)';
+			addServer = 'INSERT INTO `tags` (`tag`, `content`, `imageURL`, `userID`, `guildID`) VALUES (?, ?, ?, ?, ?)';
+
+			globalData = [ntn, ntc, filePath + fileName, message.author.id, message.guild.id];
+			serverData = [ntn, ntc, filePath + fileName, message.author.id, message.guild.id];
 		}
 
 		const SQLpool = client.conPool.promise();
@@ -60,12 +74,13 @@ module.exports = {
 			await SQLpool.execute(addGlobal, globalData)
 				.then(() => {
 					console.success(`[CREATE TAG] Added global tag: ${ntn}`);
-					return message.channel.send(`:scroll: Global tag **${ntn}** added`);
+					return message.lineReply(`:scroll: Global tag **${ntn}** added`);
 				}).catch(async (error) => {
 					console.error(`[CREATE TAG] ${error.stack}`);
-					return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+					return message.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
 				});
-		} else {
+		}
+		else {
 			console.info(`[CREATE TAG] Global tag found: ${ntn}, not adding`);
 			const [serverRows] = await SQLpool.query(checkServer, [ntn, message.guild.id]);
 			console.info(`[CREATE TAG] Querying database for server tag: ${ntn}`);
@@ -79,14 +94,15 @@ module.exports = {
 				await SQLpool.execute(addServer, serverData)
 					.then(() => {
 						console.success(`[CREATE TAG] Added server tag: ${ntn}`);
-						return message.channel.send(`:scroll: Server tag **${ntn}** added`);
+						return message.lineReply(`:scroll: Server tag **${ntn}** added`);
 					}).catch(async (error) => {
 						console.error(`[CREATE TAG] ${error.stack}`);
-						return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+						return message.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
 					});
-			} else {
+			}
+			else {
 				console.info(`[CREATE TAG] Both tag slots in use, failed to add tag: ${ntn}`);
-				return message.channel.send(`:lock: Tag **${ntn}** in use`);
+				return message.lineReply(`:lock: Tag **${ntn}** in use`);
 			}
 		}
 	} };

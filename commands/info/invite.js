@@ -22,9 +22,10 @@ module.exports = {
 
 		try {
 			await message.author.send(iEmbed);
-			return message.channel.send('`Incoming DM`');
-		} catch(error) {
-			console.error(`[INVITE CMD] ${error.stack}`);
-			return message.channel.send('Could not send DM, do you have messages open?');
+			return message.lineReply('`Incoming DM`');
+		}
+		catch(error) {
+			message.channel.send('`Failed to send DM`');
+			return message.lineReply(iEmbed);
 		}
 	} };

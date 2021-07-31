@@ -1,4 +1,5 @@
 const { MessageEmbed } = require('discord.js');
+const getMember = require('../../functions/getMember');
 
 module.exports = {
 	config: {
@@ -15,16 +16,22 @@ module.exports = {
 	execute: async (client, message, args) => {
 
 		// Define member and user, if ID is given, fetch member and user, redefine
-		let member = message.guild.member(message.mentions.users.first());
-		if(args[0] && args[0].match(/^[0-9]{18}$/)) {
-			await message.guild.members.fetch(args[0]);
-			member = message.guild.members.cache.get(args[0]);
+		const member = await getMember(message, args);
+		if(!member) return message.lineReply('`Invalid (MENTION USER/USER ID)`');
+
+		let restArgs;
+		if(message.content.match(/<@!\d+?>/)) {
+			[, ...restArgs] = args;
 		}
-		if(!member) return message.channel.send('No user mentioned.');
-		const [, ...restArgs] = args; const input = restArgs.join(' '); if(!input) return message.channel.send('Specify a role.');
+		else {
+			[...restArgs] = args;
+		}
+
+		const input = restArgs.join(' ');
+		if(!input) return message.lineReply('`Invalid (SPECIFY ROLE)`');
 
 		const role = message.guild.roles.cache.find(r => r.name === input);
-		if(!role) return message.channel.send('No role found with that name.');
+		if(!role) return message.lineReply('`Invalid (NO ROLE FOUND)`');
 
 		const rEmbed = new MessageEmbed()
 			.setThumbnail(member.user.avatarURL({ format: 'png', dynamic: true, size: 512 }))
@@ -34,33 +41,35 @@ module.exports = {
 
 		if(message.author.id !== client.config.ownerID) {
 			const authorrole = message.member.roles.highest; const botrole = message.guild.me.roles.highest;
-			if(authorrole.position <= role.position) return message.channel.send('`Invalid Permission (ROLE IS HIGHER/EQUAL TO YOURS)`');
-			if(role.position <= botrole.position) return message.channel.send('`Invalid Permission (ROLE IS HIGHER/EQUAL THAN MINE)`');
+			if(authorrole.position <= role.position) return message.lineReply('`Invalid (ROLE IS HIGHER/EQUAL TO YOURS)`');
+			if(role.position <= botrole.position) return message.lineReply('`Invalid (ROLE IS HIGHER/EQUAL THAN MINE)`');
 		}
 
 		if(member.roles.cache.has(role.id)) {
 			return member.roles.remove(role.id)
 				.then(() => {
 					rEmbed.setDescription(`**Result:** ${member} has been removed from the ${role} role.\n\n**Removed By:** <@${message.author.id}>`);
-					return message.channel.send(rEmbed);
+					return message.lineReply(rEmbed);
 				})
 				.catch((error) => {
 					console.error(`[ROLE CMD] ${error.stack}`);
-					return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+					return message.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
 				});
-		} else if(!member.roles.cache.has(role.id)) {
+		}
+		else if(!member.roles.cache.has(role.id)) {
 			return member.roles.add(role.id)
 				.then(() => {
 					rEmbed.setDescription(`**Result:** ${member} has been added to the ${role} role.\n\n**Added By:** <@${message.author.id}>`);
-					return message.channel.send(rEmbed);
+					return message.lineReply(rEmbed);
 				})
 				.catch((error) => {
 					rEmbed.setDescription(`**Result:** I could not remove ${member} from the ${role} role.\n\n**Reason:** An error occured.\nIs the role higher than mine?\nDo I have sufficient permissions?`);
 					console.error(`[ROLE CMD] ${error.stack}`);
-					return message.channel.send(rEmbed);
+					return message.lineReply(rEmbed);
 				});
-		} else {
+		}
+		else {
 			rEmbed.setDescription(`**Result:** I could not manage roles for ${member}.\n\n**Reason:** No member or role found.`);
-			return message.channel.send(rEmbed);
+			return message.lineReply(rEmbed);
 		}
 	} };

@@ -35,10 +35,11 @@ module.exports = {
 				if(capitalise === 'Owner' && message.author.id !== client.config.ownerID) return;
 				cEmbed.addField(`> ${capitalise} [${dir.size}]:`, dir.map(c => `\`${c.config.name}\``).join(' '));
 			});
-		} catch(error) {
+		}
+		catch(error) {
 			console.error(`[COMMANDS CMD] ${error.stack}`);
-			return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+			return message.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
 		}
 
-		return message.channel.send(cEmbed);
+		return message.lineReply(cEmbed);
 	} };

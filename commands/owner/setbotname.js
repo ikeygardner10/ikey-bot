@@ -18,15 +18,16 @@ module.exports = {
 
 			await client.user.setUsername(name)
 				.then(() => {
-					return message.channel.send(`My new username is **${name}**`);
+					return message.lineReply(`My new username is **${name}**`);
 				}).catch((error) => {
 					console.error(`[SBN CMD] ${error.stack}`);
-					return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+					return message.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
 				});
 
-		} catch(error) {
+		}
+		catch(error) {
 			console.error(`[SBN CMD] ${error.stack}`);
-			return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+			return message.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
 		}
 	},
 };

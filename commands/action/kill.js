@@ -1,3 +1,5 @@
+const getMember = require('../../functions/getMember');
+
 module.exports = {
 	config: {
 		name: 'kill',
@@ -6,15 +8,14 @@ module.exports = {
 		cooldown: 5,
 		category: 'action',
 		permissions: '',
-		args: true,
+		args: false,
 		nsfw: false,
 		description: 'Kill a user (33% chance Choke/Shoot/Stab)',
 	},
 	execute: async (client, message, args) => {
 
 		// Define member, return if no member mentioned
-		const member = message.mentions.members.first();
-		if(!member) return message.channel.send('Invalid (NO USER)');
+		const member = await getMember(message, args);
 
 		// Define chace as random value
 		const chance = Math.random();
@@ -23,9 +24,11 @@ module.exports = {
 		// Execute command based on value, pass member through, command will do the rest
 		if(chance < 0.33) {
 			return client.commands.get('choke').execute(client, message, args, member);
-		} else if(chance > 0.33 && chance < 0.66) {
+		}
+		else if(chance > 0.33 && chance < 0.66) {
 			return client.commands.get('shoot').execute(client, message, args, member);
-		} else {
+		}
+		else {
 			return client.commands.get('stab').execute(client, message, args, member);
 		}
 	} };

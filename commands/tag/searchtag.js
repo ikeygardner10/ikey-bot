@@ -5,6 +5,7 @@
 const txtFormatter = require('../../functions/txtFormatter.js');
 const { MessageEmbed } = require('discord.js');
 const sendEmbed = require('../../functions/sendEmbed.js');
+const getMember = require('../../functions/getMember');
 
 module.exports = {
 	config: {
@@ -26,7 +27,7 @@ module.exports = {
 		const checkSelf = 'SELECT `tag`, `guildID` FROM `tags` WHERE `userID`=?;';
 
 		// Define mentioned memeber, setup tagArray and format args
-		const member = message.mentions.users.first();
+		const member = await getMember(message, args);
 		const tagArray = []; let author; let ntn;
 
 		// Define SQLpool
@@ -37,7 +38,7 @@ module.exports = {
 
 			// Define SQL query, if no tags are found, return
 			const [selfRows] = await SQLpool.query(checkSelf, [message.author.id]);
-			if(selfRows[0] === undefined) return message.channel.send(':mag: You have no tags');
+			if(selfRows[0] === undefined) return message.lineReply(':mag: You have no tags');
 
 			// Define author
 			// Wait for each tag to be pushed to the array
@@ -61,7 +62,7 @@ module.exports = {
 
 			// Define SQL query, if no tags are found, return
 			const [userRows] = await SQLpool.query(checkUser, [member.id]);
-			if(userRows[0] === undefined) return message.channel.send(':mag: No user tags found');
+			if(userRows[0] === undefined) return message.lineReply(':mag: No user tags found');
 
 			// Define author
 			// Wait for each tag found to be pushed to the array
@@ -83,7 +84,7 @@ module.exports = {
 
 			// Define SQL query, if no tags are found, return
 			const [idRows] = await SQLpool.query(checkUser, [args[0]]);
-			if(idRows[0] === undefined) return message.channel.send(':mag: No user tags found');
+			if(idRows[0] === undefined) return message.lineReply(':mag: No user tags found');
 
 			// Define author
 			// Wait for each tag found to be pushed to the array
@@ -106,7 +107,7 @@ module.exports = {
 
 			// Define SQL query, if no tags are found, return
 			const [serverRows] = await SQLpool.query(checkServer, [message.guild.id]);
-			if(serverRows[0] === undefined) return message.channel.send(':mag: No server tags found');
+			if(serverRows[0] === undefined) return message.lineReply(':mag: No server tags found');
 
 			// Define author
 			// Wait for each tag found to be pushed to the array
@@ -123,7 +124,7 @@ module.exports = {
 
 			// Define SQL query, if no tags are found, return
 			const [tagRows] = await SQLpool.query(checkTag, [ntn]);
-			if(tagRows[0] === undefined) return message.channel.send(`:mag: No tag **${ntn}** found`);
+			if(tagRows[0] === undefined) return message.lineReply(`:mag: No tag **${ntn}** found`);
 
 			// Define author
 			// Wait for each tag found to be pushed to the array

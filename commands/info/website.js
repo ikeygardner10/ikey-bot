@@ -20,5 +20,5 @@ module.exports = {
 			.setTimestamp()
 			.setColor('0xFFFFFA');
 
-		return message.channel.send(wEmbed);
+		return message.lineReply(wEmbed);
 	} };

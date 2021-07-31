@@ -17,7 +17,7 @@ module.exports = {
 		const guildPrefix = client.prefixes.get(message.guild.id);
 		const prefix = guildPrefix ? guildPrefix : client.config.defaultPrefix;
 
-		if(args[0] == 'help') return message.channel.send(`Use \`${prefix}help\` or \`${prefix}help <command>\``);
+		if(args[0] == 'help') return message.lineReply(`Use \`${prefix}help\` or \`${prefix}help <command>\``);
 
 		if(args[0]) {
 
@@ -34,12 +34,14 @@ module.exports = {
 						.setTimestamp()
 						.setColor(0xFFFFFA);
 
-					return message.channel.send(hEmbed);
-				} catch(error) {
-					console.error(`[HELP CMD] ${error.stack}`);
-					return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+					return message.lineReply(hEmbed);
 				}
-			} else {
+				catch(error) {
+					console.error(`[HELP CMD] ${error.stack}`);
+					return message.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+				}
+			}
+			else {
 				return;
 			}
 		}
@@ -54,11 +56,11 @@ module.exports = {
 
 			await message.author.send(dmEmbed)
 				.then(() => {
-					return message.channel.send('`DM Sent`');
+					return message.lineReply('`DM Sent`');
 				})
-				.catch((error) => {
+				.catch(() => {
 					message.channel.send('`Failed to send DM`');
-					return message.channel.send(dmEmbed);
+					return message.lineReply(dmEmbed);
 				});
 		}
 	} };

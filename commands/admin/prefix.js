@@ -25,10 +25,10 @@ module.exports = {
 		if(!args[0]) {
 			return SQLpool.execute(checkPrefix, [message.guild.id])
 				.then(([rows]) => {
-					return message.channel.send(`\`Your server prefix is ${rows[0].prefix}\``);
+					return message.lineReply(`\`Your server prefix is ${rows[0].prefix}\``);
 				}).catch((error) => {
 					console.error(`[PREFIX CMD] ${error.stack}`);
-					return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+					return message.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
 				});
 		}
 
@@ -43,12 +43,13 @@ module.exports = {
 			return SQLpool.execute(updatePrefix, [newPrefix, message.guild.id])
 				.then(() => {
 					console.success(`[PREFIX CMD] Successfully updated record for guildsettings: ${message.guild.id}`);
-					return message.channel.send(`Server prefix set to \`${newPrefix}\``);
+					return message.lineReply(`Server prefix set to \`${newPrefix}\``);
 				}).catch((error) => {
 					console.error(`[PREFIX CMD] ${error.stack}`);
-					return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+					return message.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
 				});
-		} else if(!prefix.includes(newPrefix)) {
-			return message.channel.send(`\`Invalid Prefix (AVAILABLE PREFIXES: ${prefix.join(' ')} )\``);
+		}
+		else if(!prefix.includes(newPrefix)) {
+			return message.lineReply(`\`Invalid Prefix (AVAILABLE PREFIXES: ${prefix.join(' ')} )\``);
 		}
 	} };

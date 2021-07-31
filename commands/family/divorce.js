@@ -16,7 +16,6 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
-		const author = message.author; const member = message.mentions.members.first(); const guild = message.guild;
 		let partnerOne; let partnerTwo; let familyID;
 
 		const checkMarriages = 'SELECT * FROM `marriages` WHERE (`userID`=? OR `partnerID`=?) AND `guildID`=?;';
@@ -28,15 +27,15 @@ module.exports = {
 
 		try {
 
-			const [authorRows] = await SQLpool.query(checkMarriages, [author.id, author.id, guild.id]);
-			console.info(`[DIVORCE CMD] Querying database for user: ${author.id} in guild: ${guild.id}`);
+			const [authorRows] = await SQLpool.query(checkMarriages, [message.author.id, message.author.id, message.guild.id]);
+			console.info(`[DIVORCE CMD] Querying database for user: ${message.author.id} in guild: ${message.guild.id}`);
 			if(authorRows[0] === undefined) {
-				console.info(`[DIVORCE CMD] No entry found for user: ${author.id} in guild: ${guild.id}, cancelling divorce`);
-				return message.channel.send('`Invalid Divorce (YOU\'RE NOT MARRIED)`');
+				console.info(`[DIVORCE CMD] No entry found for user: ${message.author.id} in guild: ${message.guild.id}, cancelling divorce`);
+				return message.lineReply('`Invalid (YOU\'RE NOT MARRIED)`');
 			}
 
 			switch(authorRows[0].userID) {
-			case author.id:
+			case message.author.id:
 				partnerOne = authorRows[0].userID;
 				partnerTwo = authorRows[0].partnerID;
 				break;
@@ -48,48 +47,50 @@ module.exports = {
 
 			familyID = authorRows[0].familyID;
 
-		} catch(error) {
+		}
+		catch(error) {
 			console.error(`[DIVORCE CMD] ${error.stack}`);
-			return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+			return message.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
 		}
 
 		const responseFilter = response => {
-			return yes.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === author.id) ||
-			no.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === author.id);
+			return yes.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === message.author.id) ||
+			no.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === message.author.id);
 		};
 
-		console.info(`[DIVORCE CMD] Found marriage for user: ${author.id} in guild: ${guild.id}`);
-		message.channel.send(`${author}, you are about to divorce <@${partnerTwo}>...\n\n**Are you sure?**`).then(() => {
+		console.info(`[DIVORCE CMD] Found marriage for user: ${message.author.id} in guild: ${message.guild.id}`);
+		message.channel.send(`${message.author}, you are about to divorce <@${partnerTwo}>...\n\n**Are you sure?**`).then((msg) => {
 			message.channel.awaitMessages(responseFilter, { max: 1, time: 15000, errors: ['time'] })
 				.then(collected => {
 					if(yes.includes(collected.first().content.toLowerCase())) {
-						return SQLpool.query(deleteMarriage, [familyID, guild.id])
+						return SQLpool.query(deleteMarriage, [familyID, message.guild.id])
 							.then(async () => {
-								console.success(`[DIVORCE CMD] Marriage removed for users: ${author.id} & ${partnerTwo} in guild: ${guild.id}`);
-								message.channel.send(`**${author} & <@${partnerTwo}> are no longer together :broken_heart: :sob:**`);
-								const [adoptRows] = await SQLpool.query(checkAdoption, [familyID, guild.id]);
+								console.success(`[DIVORCE CMD] Marriage removed for users: ${message.author.id} & ${partnerTwo} in guild: ${message.guild.id}`);
+								msg.lineReply(`**${message.author} & <@${partnerTwo}> are no longer together :broken_heart: :sob:**`);
+								const [adoptRows] = await SQLpool.query(checkAdoption, [familyID, message.guild.id]);
 								if(adoptRows[0] !== undefined) {
-									return SQLpool.query(deleteAdoption, [familyID, guild.id])
+									return SQLpool.query(deleteAdoption, [familyID, message.guild.id])
 										.then(() => {
-											return console.success(`[DIVORCE CMD] Adoption removed for user: ${adoptRows[0].childID} in guild: ${guild.id}`);
+											return console.success(`[DIVORCE CMD] Adoption removed for user: ${adoptRows[0].childID} in guild: ${message.guild.id}`);
 										})
 										.catch((error) => {
 											console.error(`[DIVORCE CMD] ${error.stack}`);
-											return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+											return msg.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
 										});
 								}
 							})
 							.catch((error) => {
 								console.error(`[DIVORCE CMD] ${error.stack}`);
-								return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+								return msg.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
 							});
-					} else if(no.includes(collected.first().content.toLowerCase())) {
-						console.info(`[DIVORCE CMD] ${author.id} cancelled the divorce`);
-						return message.channel.send(`${author} cancelled the divorce! :heart:`);
+					}
+					else if(no.includes(collected.first().content.toLowerCase())) {
+						console.info(`[DIVORCE CMD] ${message.author.id} cancelled the divorce`);
+						return msg.lineReply(`${message.author} cancelled the divorce! :heart:`);
 					}
 				}).catch((timeout) => {
 					console.info(`[DIVORCE CMD] ${timeout}`);
-					return message.channel.send(`${author}, no response, cancelled! :heart:`);
+					return msg.lineReply(`${message.author}, no response, cancelled! :heart:`);
 				});
 		});
 	} };

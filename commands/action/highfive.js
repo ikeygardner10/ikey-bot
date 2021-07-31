@@ -1,4 +1,5 @@
 const { MessageEmbed } = require('discord.js');
+const getMember = require('../../functions/getMember');
 
 module.exports = {
 	config: {
@@ -8,15 +9,14 @@ module.exports = {
 		cooldown: 5,
 		category: 'action',
 		permissions: '',
-		args: true,
+		args: false,
 		nsfw: false,
 		description: 'Highfive a user',
 	},
-	execute: async (client, message) => {
+	execute: async (client, message, args) => {
 
 		// Define member, return if no member mentioned
-		const member = message.mentions.members.first();
-		if(!member) return('`Invalid (NO USER)`');
+		const member = await getMember(message, args);
 
 		// Define imageArray, select random image URL
 		const highfiveArray = client.imageArrays.highfive;
@@ -54,14 +54,15 @@ module.exports = {
 		if(rows[0] === undefined) {
 			const messageCount = 1;
 			hEmbed.setFooter(`[${messageCount} times]`, client.user.avatarURL());
-			message.channel.send(hEmbed);
+			message.lineReply(hEmbed);
 			return SQLpool.execute(addUpdate, [message.author.id, member.id, 1])
 				.then(() => console.success('[HIGHFIVE CMD] messageCount record added'))
 				.catch((error) => console.error(`[HIGHFIVE CMD] ${error.stack}`));
-		} else {
+		}
+		else {
 			const messageCount = rows[0].messageCount + 1;
 			hEmbed.setFooter(`[${messageCount} times]`, client.user.avatarURL());
-			message.channel.send(hEmbed);
+			message.lineReply(hEmbed);
 			return SQLpool.execute(addUpdate, [message.author.id, member.id, 1])
 				.then(() => console.success('[HIGHFIVE CMD] messageCount record updated'))
 				.catch((error) => console.error(`[HIGHFIVE CMD] ${error.stack}`));

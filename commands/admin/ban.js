@@ -1,5 +1,6 @@
 const { MessageEmbed } = require('discord.js');
 const sendEmbed = require('../../functions/sendEmbed.js');
+const getMember = require('../../functions/getMember');
 
 module.exports = {
 	config: {
@@ -31,18 +32,25 @@ module.exports = {
 			});
 
 			// If there is no bans, return, else pass to embed function
-			if(!banListArray[0]) return message.channel.send('`Invalid (NO BANNED USERS)`');
+			if(!banListArray[0]) return message.lineReply('`Invalid (NO BANNED USERS)`');
 			return sendEmbed(message, banListArray, author, 15, '\n');
 		}
 
 		// Define member, return if no member mentioned
-		let member = message.mentions.members.first();
-		if(args[0] && args[0].match(/^[0-9]{18}$/)) {
-			await message.guild.members.fetch(args[0]);
-			member = message.guild.members.cache.get(args[0]);
+		const member = await getMember(message, args);
+		if(member.id === message.author.id) return message.lineReply('`Invalid (MENTION USER/USER ID - NOT YOURSELF)`');
+
+		// Define any arguments after a mentioned member as the reason
+		// Join them to look pretty
+		let restArgs;
+		if(message.content.match(/<@!\d+?>/)) {
+			[, ...restArgs] = args;
 		}
-		if(!member) return message.channel.send('`Invalid (MENTION USER/USER ID)`');
-		if(member.id === message.author.id) return message.channel.send('`Invalid (REALLY..?)`');
+		else {
+			[...restArgs] = args;
+		}
+
+		const reason = restArgs.join(' ');
 
 		// A few role checks, first define author, member & bot highest roles
 		// Checks if member has admin/mod perms, return if true
@@ -53,18 +61,14 @@ module.exports = {
 			const memberrole = member.roles.highest;
 			const botrole = message.guild.me.roles.highest;
 			const perms = ['ADMINISTRATOR', 'BAN_MEMBERS', 'MANAGE_SERVER'];
-			if(member.hasPermission(perms)) return message.channel.send('`Invalid Permission (USER HAS ADMIN/MOD PERMISSIONS)`');
-			if(authorrole.position <= memberrole.position) return message.channel.send('`Invalid Permission (USERS ROLE HIGHER/EQUAL TO YOURS)`');
-			if(memberrole.position >= botrole.position) return message.channel.send('`Invalid Permission (USERS ROLE HIGHER/EQUAL TO MINE)`');
+			if(member.hasPermission(perms)) return message.lineReply('`Invalid (USER HAS ADMIN/MOD PERMISSIONS)`');
+			if(authorrole.position <= memberrole.position) return message.lineReply('`Invalid (USERS ROLE HIGHER/EQUAL TO YOURS)`');
+			if(memberrole.position >= botrole.position) return message.lineReply('`Invalid (USERS ROLE HIGHER/EQUAL TO MINE)`');
 		}
 
 		// Check to see if member is bannable, if all other checks succeed
-		if(!message.guild.member(member.user).bannable) return message.channel.send('`Invalid Permission (USER NOT BANNABLE)`');
+		if(!message.guild.member(member.user).bannable) return message.lineReply('`Invalid (USER NOT BANNABLE)`');
 
-		// Define any arguments after a mentioned member as the reason
-		// Join them to look pretty
-		const [, ...restArgs] = args;
-		const reason = restArgs.join(' ');
 
 		// Create basic embed
 		const bEmbed = new MessageEmbed()
@@ -77,10 +81,10 @@ module.exports = {
 		return member.ban({ reason: `${reason || 'No reason provided.'}` })
 			.then(() => {
 				bEmbed.setDescription(`**Result:** ${member} (ID: \`${member.id}\`) has been banned\n\n**Banned By:** <@${message.author.id}>\n**Reason:** ${reason || 'No reason provided'}`);
-				return message.channel.send(bEmbed);
+				return message.lineReply(bEmbed);
 			})
 			.catch((error) => {
 				console.error(`[BAN CMD] ${error.stack}`);
-				return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+				return message.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
 			});
 	} };

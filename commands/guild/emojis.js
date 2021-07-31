@@ -26,6 +26,6 @@ module.exports = {
 		});
 
 		// If no server emoji, return, else pass to embed function
-		if(!emojiArray) return message.channel.send('`Invalid (NO SERVER EMOJI)`');
+		if(!emojiArray) return message.lineReply('`Invalid (NO SERVER EMOJI)`');
 		return sendEmbed(message, emojiArray, author, 44, ' ');
 	} };

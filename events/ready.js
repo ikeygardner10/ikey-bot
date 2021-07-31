@@ -8,6 +8,8 @@ const pollModel = require('../data/pollModel');
 const { emojiArray } = require('../data/arrayData.json');
 const buildImageArray = require('../functions/buildImageArray');
 
+const { MessageEmbed } = require('discord.js');
+
 module.exports = async (client, ready) => {
 
 	const checkTracking = 'SELECT `guildID` FROM `logsettings` WHERE `invites`=?;';
@@ -93,15 +95,29 @@ module.exports = async (client, ready) => {
 
 					resultsArr.sort((a, b) => b[1] - a[1]);
 
-					if (resultsArr[0][1] == resultsArr[1][1]) {
-						await msg.reply('The poll was a tie!');
+					const embed = new MessageEmbed()
+						.setAuthor(`${msg.embeds[0].author.name}`)
+						.setTimestamp()
+						.setColor(0xFFFFFA);
+
+					if(resultsArr[0][1] === 1) {
+						embed.setDescription(`**No Votes**\n\n${msg.embeds[0].description}`);
+						await msg.lineReply('No votes');
+					}
+					else if (resultsArr[0][1] == resultsArr[1][1]) {
+						embed.setDescription(`**Tie:**\n${resultsArr[0][0]} *${resultsArr[0][1]} votes*\n${resultsArr[1][0]} *${resultsArr[1][1]} votes*\n\n${msg.embeds[0].description}`);
+						await msg.lineReply('The poll was a tie');
 					}
 					else {
-						await msg.reply(`The winner of the poll was ${resultsArr[0][0]}`);
+						embed.setDescription(`**Winner:** ${resultsArr[0][0]} with ${resultsArr[0][1]} votes\n\n${msg.embeds[0].description}`);
+						await msg.lineReply(`The winner of the poll was ${resultsArr[0][0]}`);
 					}
+					console.log(await client.guild.cache.get(msg.guild.id).name);
 
+					await msg.edit(embed);
 					await msg.reactions.removeAll().catch(err => console.log(err));
 					await poll.deleteOne().catch(err => console.log(err));
+
 				}
 			}
 		}

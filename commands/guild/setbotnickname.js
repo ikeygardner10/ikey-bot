@@ -14,14 +14,14 @@ module.exports = {
 
 		// Define new name as args joined, return if no args
 		const name = args.join(' ');
-		if(!name) return message.channel.send('No nickname given.');
+		if(!name) return message.lineReply('`Invalid (SPECIFY NEW NAME)`');
 
 		// Wait for nickname to be set, then return message, or return error
 		await message.guild.me.setNickname(name)
 			.then(() => {
-				return message.channel.send(`My new nickname is **${name}**`);
+				return message.lineReply(`My new nickname is **${name}**`);
 			}).catch((error) => {
 				console.error(`[SBNICK CMD] ${error.stack}`);
-				return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+				return message.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
 			});
 	} };

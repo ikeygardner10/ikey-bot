@@ -1,4 +1,5 @@
 const { MessageEmbed } = require('discord.js');
+const getMember = require('../../functions/getMember');
 
 module.exports = {
 	config: {
@@ -11,12 +12,13 @@ module.exports = {
 		args: true,
 		description: 'Unmutes a member',
 	},
-	execute: async (client, message) => {
+	execute: async (client, message, args) => {
 
-		const member = message.guild.member(message.mentions.members.first()); if(!member) return message.channel.send('Mention a user.');
+		const member = message.guild.member(await getMember(message, args));
+		if(!member) return message.lineReply('`Invalid (MENTION USER/USER ID)`');
 
 		const role = message.guild.roles.cache.find(r => r.name === 'Muted');
-		if(!role) return message.channel.send('No Muted role found.');
+		if(!role) return message.lineReply('`Invalid (NO MUTED ROLE)`');
 
 		const uEmbed = new MessageEmbed()
 			.setThumbnail(member.user.avatarURL({ format: 'png', dynamic: true, size: 512 }))
@@ -24,21 +26,22 @@ module.exports = {
 			.setTimestamp()
 			.setColor(0xFFFFFA);
 
-		if(!member.roles.cache.has(role.id)) return message.channel.send('`Invalid (USER NOT MUTED)`');
+		if(!member.roles.cache.has(role.id)) return message.lineReply('`Invalid (USER NOT MUTED)`');
 
 		if(member.roles.cache.has(role.id)) {
 			await member.roles.remove(role.id)
 				.then(() => {
 					uEmbed.setDescription(`**Result:** ${member} has been unmuted.\n\n**Unmuted By:** <@${message.author.id}>`);
-					return message.channel.send(uEmbed);
+					return message.lineReply(uEmbed);
 				})
 				.catch((error) => {
 					console.error(`[UNMUTE CMD] ${error.stack}`);
-					return message.channel.send(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+					return message.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
 				});
-		} else {
+		}
+		else {
 			uEmbed.setDescription(`**Result:** I could not unmute ${member}.\n\n**Reason:** No muted member was found.\nAre they already unmuted?\nDo I have sufficient permissions?`);
-			return message.channel.send(uEmbed);
+			return message.lineReply(uEmbed);
 		}
 
 	} };

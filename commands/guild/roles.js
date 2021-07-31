@@ -31,6 +31,6 @@ module.exports = {
 		});
 
 		// If no server roles, return, else pass to embed function
-		if(!rolesArray[0]) return message.channel.send('`Invalid (NO SERVER ROLES)`');
+		if(!rolesArray[0]) return message.lineReply('`Invalid (NO SERVER ROLES)`');
 		return sendEmbed(message, rolesArray, author, 15, '\n');
 	} };
