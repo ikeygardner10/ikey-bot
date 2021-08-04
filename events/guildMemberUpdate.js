@@ -29,11 +29,11 @@ module.exports = async (client, oldMember, newMember) => {
 
 	if(removed.length !== 0) {
 		difference = removed;
-		author = 'Role Removed';
+		author = 'User Role Removed';
 	}
 	else if(added.length !== 0) {
 		difference = added;
-		author = 'Role Added';
+		author = 'User Role Added';
 	}
 
 	if(difference.length === 0) return;
