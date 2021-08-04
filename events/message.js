@@ -68,7 +68,7 @@ module.exports = async (client, message) => {
 	if(command.config.args && !args.length) {
 		let reply = `\`No args given\``;
 		if(command.config.usage) reply += `\n\`Correct usage: ${prefix}${commandName} ${command.config.usage}\``;
-		return message.channel.send(reply);
+		return message.lineReply(reply);
 	}
 
 	// Check for command cooldown map, if not, create new

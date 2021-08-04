@@ -38,6 +38,7 @@ module.exports = async (client, oldState, newState) => {
 		case 'streaming':
 			return differences['Enabled Screen'] = trueToEnable[value];
 		case 'channelID':
+			if(oldState[key] === null || newState[key] === null) return differences['Channel'] = oldState.channel ? oldState.guild.channels.cache.get(oldState.channel.id) : newState.guild.channels.cache.get(newState.channel.id);
 			differences['Old Channel'] = oldState.channel ? oldState.guild.channels.cache.get(oldState.channel.id) : null;
 			return differences['New Channel'] = newState.channel ? newState.guild.channels.cache.get(newState.channel.id) : null;
 		default:

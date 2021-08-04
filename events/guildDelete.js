@@ -21,7 +21,8 @@ module.exports = async (client, guild) => {
 
 	try {
 		return client.channels.cache.get('780252080689774593').send(`[GUILD DELETE] ${guild.name} (${guild.id}) owned by ${guild.owner.user.tag} (${guild.owner.user.id}).`);
-	} catch(error) {
+	}
+	catch(error) {
 		return console.error(`[GUILD DELETE] ${error.stack}`);
 	}
 };

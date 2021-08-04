@@ -35,7 +35,8 @@ module.exports = async (client, member) => {
 		.then(bans => {
 			if(bans.some(u => member.id.includes(u.user.id))) {
 				return true;
-			} else {
+			}
+			else {
 				return false;
 			}
 		});

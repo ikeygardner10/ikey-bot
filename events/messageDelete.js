@@ -33,9 +33,7 @@ module.exports = async (client, message) => {
 
 	if(attachments.size === 0) attachments = 'None';
 
-	console.warn(attachments);
-
-	await wait(2000);
+	await wait(1500);
 
 	const embed = new MessageEmbed()
 		.setAuthor('Message Deleted', message.guild.iconURL())
