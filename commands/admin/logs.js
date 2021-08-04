@@ -1,7 +1,7 @@
 const { MessageEmbed } = require('discord.js');
 const addInvites = require('../../functions/addInvites');
 const createChannel = require('../../functions/createChannel');
-const { booleanToText, loggingOptions } = require('../../data/arrayData.json');
+const { booleanToEnable, loggingOptions } = require('../../data/arrayData.json');
 
 module.exports = {
 	config: {
@@ -36,7 +36,7 @@ module.exports = {
 
 			Object.entries(rows[0]).forEach(([key, value]) => {
 				if(key === 'logChannel') return;
-				embed.addField(`> ${key}`, `\`${booleanToText[value]}\``, true);
+				embed.addField(`> ${key}`, `\`${booleanToEnable[value]}\``, true);
 			});
 
 			return message.lineReply(embed);
@@ -46,7 +46,7 @@ module.exports = {
 			return SQLpool.execute(statement, [message.guild.id])
 				.then(() => {
 					console.success(`[LOGS CMD] Successfully updated record for ${column} in guild: ${message.guild.id}`);
-					return message.lineReply(`Logging ${booleanToText[value].toLowerCase()} for: \`${column}\``);
+					return message.lineReply(`Logging ${booleanToEnable[value].toLowerCase()} for: \`${column}\``);
 				})
 				.catch((error) => {
 					console.error(`[LOGS CMD] ${error.stack}`);

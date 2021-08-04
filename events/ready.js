@@ -10,7 +10,7 @@ const buildImageArray = require('../functions/buildImageArray');
 
 const { MessageEmbed } = require('discord.js');
 
-module.exports = async (client, ready) => {
+module.exports = async (client, slash, ready) => {
 
 	const checkTracking = 'SELECT `guildID` FROM `logsettings` WHERE `invites`=?;';
 	const truncateInvites = 'SET SQL_SAFE_UPDATES=0; TRUNCATE TABLE `invites`;';
@@ -112,7 +112,6 @@ module.exports = async (client, ready) => {
 						embed.setDescription(`**Winner:** ${resultsArr[0][0]} with ${resultsArr[0][1]} votes\n\n${msg.embeds[0].description}`);
 						await msg.lineReply(`The winner of the poll was ${resultsArr[0][0]}`);
 					}
-					console.log(await client.guild.cache.get(msg.guild.id).name);
 
 					await msg.edit(embed);
 					await msg.reactions.removeAll().catch(err => console.log(err));

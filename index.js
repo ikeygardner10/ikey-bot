@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
-const { Discord, Client, Intents } = require('discord.js');
+const { Client, Intents } = require('discord.js');
+const { CommandBuilder, CommandType, Slash } = require('discord.js-slash-command');
 require('discord-reply');
 const fs = require('fs-extra');
 const Enmap = require('enmap');
@@ -10,6 +11,7 @@ const client = new Client({
 	sync: true,
 	cloneLevel: 'deep',
 });
+const slash = new Slash(client);
 
 client.config = require('./data/owner/config.json');
 

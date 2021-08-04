@@ -24,29 +24,22 @@ module.exports = async (client, message) => {
 			});
 	}
 
-	let embedCount = 0;
-	let embeds = '';
-	message.embeds.forEach(embed => {
-		embedCount++;
-	});
-	if(embedCount === 1) embeds = '(embed) ';
-	if(embedCount > 1) embeds = '(embeds) ';
-
-	let attachments = 0;
-	let atchmnt = '';
-	if(message.attachments[0]) {
-		message.attachemts.forEach(atmt => {
-			attachments++;
+	let attachments = [];
+	if(message.attachments.size > 0) {
+		await message.attachments.forEach(key => {
+			return attachments.push(key.url);
 		});
 	}
-	if(attachments === 1) atchmnt = '(attachment)';
-	if(attachments > 1) atchmnt = '(attachments)';
 
-	await wait(2 * 1000);
+	if(attachments.size === 0) attachments = 'None';
+
+	console.warn(attachments);
+
+	await wait(2000);
 
 	const embed = new MessageEmbed()
 		.setAuthor('Message Deleted', message.guild.iconURL())
-		.setDescription(`**Message By:** ${message.author}\n**In Channel:** \`#${await message.guild.channels.cache.get(message.channel.id).name}\`\n**Content:** ${embeds}${atchmnt}\n${message.content}`)
+		.setDescription(`**Message By:** ${message.author}\n**In Channel:** \`#${await message.guild.channels.cache.get(message.channel.id).name}\`\n\n**Content:** ${message.content}\n\n**Attachments:**\n${attachments.join('\n')}`)
 		.setFooter(`Message ID: ${message.id}\nAuthor ID: ${message.author.id}`)
 		.setTimestamp()
 		.setColor(0xFFFFFA);

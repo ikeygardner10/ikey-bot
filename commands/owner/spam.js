@@ -18,6 +18,6 @@ module.exports = {
 		const sleep = ms => new Promise(res => setTimeout(res, ms));
 		for(let i = 0; i < amount; i++) {
 			await sleep(delay * 1000);
-			await message.lineReply(msg);
+			await message.channel.send(msg);
 		}
 	} };

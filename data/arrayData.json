@@ -237,9 +237,25 @@
         "quit",
         "undo"
     ],
-    "booleanToText": {
+    "booleanToEnable": {
         "1": "Enabled",
         "0": "Disabled"
+    },
+    "booleanToYes": {
+        "1": "Yes",
+        "0": "No"
+    },
+    "booleanToTrue": {
+        "1": "True",
+        "0": "False"
+    },
+    "trueToEnable": {
+        "true": "Enabled",
+        "false": "Disabled"
+    },
+    "trueToYes": {
+        "true": "Yes",
+        "false": "No"
     },
     "loggingOptions": [
         "channels",

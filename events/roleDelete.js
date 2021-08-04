@@ -19,7 +19,7 @@ module.exports = async (client, role) => {
 	}
 
 	const rEmbed = new MessageEmbed()
-		.setAuthor('Role Delete', role.guild.iconURL())
+		.setAuthor('Role Deleted', role.guild.iconURL())
 		.setDescription(`**Name:** ${role.name}\n**ID:** ${role.id}`)
 		.setFooter(`${role.guild.name}`)
 		.setTimestamp()

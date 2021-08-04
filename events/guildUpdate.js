@@ -6,7 +6,6 @@ const { verification, region } = require('../data/arrayData.json');
 
 module.exports = async (client, oldGuild, newGuild) => {
 
-	const guild = newGuild;
 	const differences = {};
 	Object.entries(newGuild).forEach(([key, value]) => {
 		switch(key) {
@@ -20,14 +19,14 @@ module.exports = async (client, oldGuild, newGuild) => {
 		case 'afkChannelID':
 			if(oldGuild[key] === newGuild[key]) return;
 			if(value === null) return differences['AFK Channel'] = 'None';
-			return differences['AFK Channel'] = guild.channels.cache.get(value).name;
+			return differences['AFK Channel'] = newGuild.channels.cache.get(value).name;
 		case 'afkTimeout':
 			if(oldGuild[key] === newGuild[key]) return;
 			if(value === 0) return differences['AFK Timeout'] = 'None';
 			return differences['AFK Timeout'] = ms(value * 1000);
 		case 'systemChannelID':
 			if(oldGuild[key] === newGuild[key]) return;
-			return differences['Welcome Channel'] = guild.channels.cache.get(value).name;
+			return differences['Welcome Channel'] = newGuild.channels.cache.get(value).name;
 		case 'verificationLevel':
 			if(oldGuild[key] === newGuild[key]) return;
 			return differences['Verification Level'] = verification[value];
@@ -44,21 +43,22 @@ module.exports = async (client, oldGuild, newGuild) => {
 	const stmt = 'SELECT `server`, `logChannel` FROM `logsettings` WHERE `guildID`=?;';
 
 	const SQLpool = client.conPool.promise();
-	const [rows] = await SQLpool.query(stmt, [guild.id]);
+	const [rows] = await SQLpool.query(stmt, [newGuild.id]);
 	const [enabled, channel] = [rows[0].server, rows[0].logChannel];
 	if(enabled !== 0) {
 
-		const logChannel = await guild.channels.cache.find(ch => ch.name === channel);
+		const logChannel = await newGuild.channels.cache.find(ch => ch.name === channel);
 		if(!logChannel) {
-			await createChannel(client, guild, channel, 'text', 500, 'logs', guild.id, ['VIEW_CHANNEL', 'SEND_MESSAGES'])
+			await createChannel(client, newGuild, channel, 'text', 500, 'logs', newGuild.id, ['VIEW_CHANNEL', 'SEND_MESSAGES'])
 				.catch((error) => {
 					return console.error(`[GUILD MEMBER ADD] ${error.stack}`);
 				});
 		}
 
 		const embed = new MessageEmbed()
-			.setAuthor('Server Updated', guild.iconURL())
-			.setThumbnail(guild.iconURL({ format: 'png', dynamic: true, size: 512 }))
+			.setAuthor('Server Updated', newGuild.iconURL())
+			.setThumbnail(newGuild.iconURL({ format: 'png', dynamic: true, size: 512 }))
+			.setFooter(`Server ID: ${newGuild.id}`)
 			.setTimestamp()
 			.setColor(0xFFFFFA);
 
@@ -68,19 +68,19 @@ module.exports = async (client, oldGuild, newGuild) => {
 		});
 
 		embed.setDescription(desc);
-		embed.setFooter(`Server ID: ${guild.id}`);
 
 		await logChannel.send(embed);
+
 	}
 
-	const ngn = txtFormatter(guild.name);
-	const non = txtFormatter(guild.owner.user.tag);
+	const ngn = txtFormatter(newGuild.name);
+	const non = txtFormatter(newGuild.owner.user.tag);
 	const addGuild = 'INSERT INTO `guilds` (`guildID`, `name`, `joined`, `ownerID`, `ownerName`, `members`, `region`, `createdAt`) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `name`= VALUES (`name`), `joined`=true, `members`= VALUES (`members`);';
 
 	console.info('[GUILD UPDATE] Guild updated, updating records in database');
-	await SQLpool.execute(addGuild, [guild.id, ngn, true, guild.owner.user.id, non, guild.members.cache.size, guild.region, guild.createdAt])
+	await SQLpool.execute(addGuild, [newGuild.id, ngn, true, newGuild.owner.user.id, non, newGuild.members.cache.size, newGuild.region, newGuild.createdAt])
 		.then(() => {
-			console.success(`[GUILD UPDATE] Successfully added/updated record for guild: ${guild.id}`);
+			console.success(`[GUILD UPDATE] Successfully added/updated record for guild: ${newGuild.id}`);
 		}).catch((error) => {
 			console.error(`[GUILD UPDATE] ${error.stack}`);
 		});
