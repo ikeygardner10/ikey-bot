@@ -3,6 +3,7 @@ const { MessageEmbed } = require('discord.js');
 const moment = require('moment');
 const { status, permissions, flags, activity } = require('../../data/arrayData.json');
 const fetch = require('node-fetch');
+const getMember = require('../../functions/getMember');
 
 module.exports = {
 	config: {
@@ -17,15 +18,9 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
-		// Define member and user, if ID is given, fetch member and user, redefine
-		let member = message.mentions.members.first() || message.member;
-		let user = member.user;
-		if(args[0] && args[0].match(/^[0-9]{18}$/)) {
-			await message.guild.members.fetch(args[0]);
-			member = message.guild.members.cache.get(args[0]);
-			await client.users.fetch(args[0]);
-			user = client.users.cache.get(args[0]);
-		}
+		// Define member, return if no member mentioned
+		const member = await getMember(message, args);
+		const user = member.user;
 
 		// Define roles, and remove @everyone
 		const roles = member.roles.cache.map(r => `${r}`).join(' ');
