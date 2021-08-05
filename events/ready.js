@@ -7,17 +7,15 @@ const fetchAll = require('../functions/fetchAll');
 const pollModel = require('../data/pollModel');
 const { emojiArray } = require('../data/arrayData.json');
 const buildImageArray = require('../functions/buildImageArray');
-
 const { MessageEmbed } = require('discord.js');
 
-module.exports = async (client, slash, ready) => {
+const checkTracking = 'SELECT `guildID` FROM `logsettings` WHERE `invites`=?;';
+const truncateInvites = 'SET SQL_SAFE_UPDATES=0; TRUNCATE TABLE `invites`;';
+const selectJoinedGuilds = 'SELECT * FROM `guilds` WHERE `joined`=1;';
+const selectGuildSettings = 'SELECT * FROM `guildsettings` WHERE `guildID`=?;';
+const stmt = 'SELECT `guildID` FROM `logsettings` WHERE `messages`=?;';
 
-	const checkTracking = 'SELECT `guildID` FROM `logsettings` WHERE `invites`=?;';
-	const truncateInvites = 'SET SQL_SAFE_UPDATES=0; TRUNCATE TABLE `invites`;';
-	const selectJoinedGuilds = 'SELECT * FROM `guilds` WHERE `joined`=1;';
-	const selectGuildSettings = 'SELECT * FROM `guildsettings` WHERE `guildID`=?;';
-
-	const stmt = 'SELECT `guildID` FROM `logsettings` WHERE `messages`=?;';
+module.exports = async (client, ready) => {
 
 	await wait(1500);
 

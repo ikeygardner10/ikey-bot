@@ -49,7 +49,7 @@ module.exports = {
 		if(!args[0]) {
 			const dmEmbed = new MessageEmbed()
 				.setAuthor(`${client.user.username} Help`, client.user.avatarURL())
-				.setDescription(`**Default prefix is: ${client.config.defaultPrefix}**\n__***@IkeyBot***__ for your server prefix\n*$prefixreset* resets prefix to default\n\n**Getting Started:**\n*$help command* -- e.g. $help createtag\n*$logs channel-name* -- e.g. $logs invite-logs\n\n**Commands:**\nAll commands available [here](https://ikeybot.github.io/)\n\n**Add to Server:**\nJoin the bot to your server [here](https://discord.com/api/oauth2/authorize?client_id=607091388588359687&permissions=1544027255&scope=bot)\n\n**Help & Support:**\nSupport avaliable in [${await client.guilds.cache.get('413532909400752139').name || 'the support server'}](https://discord.gg/GQh6XEk)`)
+				.setDescription(`**Default prefix is: ${client.config.defaultPrefix}**\n__***@IkeyBot***__ for your server prefix\n*$prefixreset* resets prefix to default\n\n**Getting Started:**\n*$help command* -- e.g. $help createtag\n*$logs channel-name* -- e.g. $logs invite-logs\n\n**Commands:**\nAll commands available [here](https://ikeybot.github.io/)\n\n**Add to Server:**\nJoin the bot to your server [here](https://discord.com/api/oauth2/authorize?client_id=607091388588359687&permissions=261255720183&scope=bot%20applications.commands)\n\n**Help & Support:**\nSupport avaliable in [${await client.guilds.cache.get('413532909400752139').name || 'the support server'}](https://discord.gg/GQh6XEk)`)
 				.setFooter(`${message.guild.name}`)
 				.setTimestamp()
 				.setColor(0xFFFFFA);

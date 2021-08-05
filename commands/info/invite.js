@@ -16,7 +16,7 @@ module.exports = {
 
 		const iEmbed = new MessageEmbed()
 			.setAuthor(`${client.user.username}`, client.user.avatarURL())
-			.setDescription('**Invite:** [Link](https://discord.com/api/oauth2/authorize?client_id=607091388588359687&permissions=1544027255&scope=bot)')
+			.setDescription('**Invite:** [Link](https://discord.com/api/oauth2/authorize?client_id=607091388588359687&permissions=261255720183&scope=bot%20applications.commands)')
 			.setTimestamp()
 			.setColor('0xFFFFFA');
 

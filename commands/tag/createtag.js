@@ -1,6 +1,3 @@
-/* eslint-disable no-undef */
-/* eslint-disable no-unused-vars */
-/* eslint-disable prefer-const */
 const txtFormatter = require('../../functions/txtFormatter.js');
 const shortid = require('shortid');
 const fileDownload = require('../../functions/fileDownload.js');
@@ -18,8 +15,8 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
-		let [tag, ...restArgs] = args;
-		let content = restArgs.join(' ');
+		const [tag, ...restArgs] = args;
+		const content = restArgs.join(' ');
 		let attachment = message.attachments;
 		if(!tag) return message.lineReply('`Invalid (NO TAG NAME)`');
 		if(!content && !message.attachments.first()) return message.lineReply('`Invalid (NO TAG CONTENT)`');

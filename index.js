@@ -1,6 +1,5 @@
 /* eslint-disable no-unused-vars */
 const { Client, Intents } = require('discord.js');
-const { CommandBuilder, CommandType, Slash } = require('discord.js-slash-command');
 require('discord-reply');
 const fs = require('fs-extra');
 const Enmap = require('enmap');
@@ -11,8 +10,6 @@ const client = new Client({
 	sync: true,
 	cloneLevel: 'deep',
 });
-const slash = new Slash(client);
-
 client.config = require('./data/owner/config.json');
 
 const mysql = require('mysql2');
@@ -26,6 +23,8 @@ client.conPool = mysql.createPool({
 	charset: 'utf8mb4',
 	Promise: global.Promise,
 });
+
+const log = require('npmlog');
 
 const logger = require('./functions/logger.js')('./logs/logs.txt');
 const chalk = require('chalk');

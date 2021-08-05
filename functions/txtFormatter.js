@@ -14,7 +14,8 @@ module.exports = function(str) {
 				return String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 8));
 			});
 		return str;
-	} catch(error) {
+	}
+	catch(error) {
 		console.error(`[TXT FORMAT] ${error.stack}`);
 	}
 };

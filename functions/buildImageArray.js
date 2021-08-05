@@ -21,7 +21,7 @@ module.exports = function(client) {
 		if(error) return console.error(`[IMG ARRAYS] ${error.stack}`);
 		folders.forEach(folder => {
 			switch(folder) {
-			case 'self': case 'tags': return;
+			case 'self': case 'tags': case 'mario': return;
 			}
 			fs.readdir(`D:/images/${folder}`, (err, images) => {
 				if(err) return console.error(`[IMG ARRAYS] ${err.stack}`);
