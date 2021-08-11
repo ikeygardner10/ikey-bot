@@ -1,6 +1,6 @@
-const { getSong, getAlbumArt } = require('genius-lyrics-api');
-const getArtistTitle = require('get-artist-title');
 const sendEmbed = require('../../functions/sendEmbed');
+const { getSong } = require('../../functions/lyricSearch');
+
 
 module.exports = {
 	config: {
@@ -31,15 +31,19 @@ module.exports = {
 		}
 		else {
 			try {
-				[artist, title] = getArtistTitle(args.join(' '));
+				const input = args.join(' ');
+				if(!input.match(/([\s\w]*)(\s-\s)([\s\w]*)/)) return message.lineReply('`Invalid (SEARCH FORMAT: ARTIST - SONG NAME)`');
+				const array = input.split(/\s-\s/);
+				if(array.length !== 2) return message.lineReply('`Invalid (SEARCH FORMAT: ARTIST - SONG NAME)`');
+				[artist, title] = [array[0], array[1]];
 			}
 			catch(error) {
 				console.error(`[LYRICS CMD] ${error.stack}`);
-				return message.lineReply('`Invalid (SEARCH FORMAT: \'ARTIST - SONG NAME\')`');
+				return message.lineReply('`Invalid (SEARCH FORMAT: ARTIST - SONG NAME)`');
 			}
 		}
 
-		const options = {
+		const parameters = {
 			apiKey: client.config.geniusKey,
 			title: title,
 			artist: artist,
@@ -47,34 +51,24 @@ module.exports = {
 		};
 
 		const lyricArray = []; let author;
-		await getSong(options)
-			.then(song => {
-				try {
-					author = `Lyrics for ${song.title}`;
-				}
-				catch {
-					author = `Lyrics for ${title} by ${artist}`;
-				}
+		await getSong(parameters)
+			.then(async song => {
+				if(song === null) return message.lineReply('`Invalid (NO LYRICS FOUND)`');
+				author = `Lyrics for ${song.title}`;
 				async function createArray(text) {
 					await text.replace(/\[.*\]\n?/g, '');
-					const arr = text.match(/[\s\S]{1,1024}(?=(\[|$))/g);
+					const arr = text.match(/[\s\S]{1,2048}(?=(\[|$))/g);
 					for(const list of arr) {
 						lyricArray.push(`[Genius Lyrics](${song.url})\n\n${list}`);
 					}
 				}
 				if(song === null) return message.lineReply('`Invalid (NO SONG FOUND)`');
-				const ly = song.lyrics.replace(/\[.*\]?/g, '');
-				createArray(song.lyrics);
-				const lyArray = ly.split('\n\n');
-				console.warn(lyArray[0]);
+				await createArray(song.lyrics);
 				lyricArray.forEach(lyric => {
 					lyric.replace('-', '\n');
 					return lyric;
 				});
-				return getAlbumArt(options)
-					.then(art => {
-						return sendEmbed(message, lyricArray, author, 1, ' ', art);
-					});
+				return sendEmbed(message, lyricArray, author, 1, ' ', song.albumArt);
 			});
 
 	} };

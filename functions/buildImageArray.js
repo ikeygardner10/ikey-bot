@@ -3,16 +3,13 @@ const fs = require('fs-extra');
 module.exports = function(client) {
 	let imageTotal = 0;
 	const imageArrays = {
-		choke: [], crazimo: [],
-		dodgefail: [], dodgesuccess: [],
-		doubledance: [], fuck: [],
-		handhold: [], highfive: [],
-		hug: [], kiss: [],
-		pat: [], punch: [],
-		shoot: [], shootself: [],
-		singledance: [], slap: [],
-		spank: [], stab: [],
-		tights: [], waifu: [],
+		bite: [], choke: [], crazimo: [],
+		dodgefail: [], dodgesuccess: [], doubledance: [],
+		fuck: [], handhold: [], highfive: [],
+		hug: [], kiss: [], pat: [],
+		punch: [], shoot: [], shootself: [],
+		singledance: [], slap: [], spank: [],
+		stab: [], tights: [], waifu: [],
 	};
 	client.imageArrays = imageArrays;
 	client.imageTotal = imageTotal;

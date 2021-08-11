@@ -1,7 +1,7 @@
 const generateEmbed = require('../functions/generateEmbed.js');
 
 module.exports = function(message, list, author, amount, joinBy, image = '', timeout = 60000) {
-	message.lineReply(generateEmbed(0, list, author, amount, joinBy, image)).then(msg => {
+	message.channel.send(generateEmbed(0, list, author, amount, joinBy, image)).then(msg => {
 		if(list.length <= amount) return;
 		msg.react('➡️');
 		const collector = msg.createReactionCollector((reaction, user) => ['⬅️', '➡️'].includes(reaction.emoji.name) && user.id === message.author.id, { time: timeout });

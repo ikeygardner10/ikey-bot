@@ -12,6 +12,8 @@ module.exports = async (client, message) => {
 	// Ignore all bots, to stop looping or worse, ignore non guild message, or non text channels
 	if(message.author.bot || !message.guild || message.channel.type !== 'text') return;
 
+	if(message.channel.permissionsFor(client.user).has("SEND_MESSAGES") === false) return;
+
 	if(userBL.includes(message.author.id)) return;
 
 	// Check for guilds prefix from Enmap, otherwise use default
@@ -39,8 +41,6 @@ module.exports = async (client, message) => {
 	const command = client.commands.get(commandName) || client.commands.get(client.aliases.get(commandName));
 	if(!command) return;
 
-	if(message.channel.permissionsFor(client.user).has("SEND_MESSAGES") === false) return;
-
 	// Define SQLpool, query for disabled commands
 	// If returns true and command isn't toggle, return
 	const SQLpool = client.conPool.promise();
@@ -52,7 +52,7 @@ module.exports = async (client, message) => {
 
 	// Check for required user permissions
 	if(command.config.permissions) {
-		if(command.config.permissions === 'Bot Owner' && message.author.id !== config.ownerID) return message.channel.send('that\'s sus bro <:amogus:811415219044745216>');
+		if(command.config.permissions === 'Bot Owner' && message.author.id !== config.ownerID) return;
 		if(!message.member.hasPermission(botPerms[command.config.permissions]) && message.author.id !== config.ownerID) return message.channel.send(`\`Requires ${command.config.permissions} Permission\``);
 	}
 
