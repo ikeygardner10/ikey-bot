@@ -1,5 +1,7 @@
 /* eslint-disable no-inner-declarations */
 const { MessageEmbed } = require('discord.js');
+const createChannel = require('../../functions/createChannel');
+const { booleanToEnable, booleanToDelete } = require('../../data/arrayData.json');
 
 module.exports = {
 	config: {
@@ -14,33 +16,51 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
-		const [guild, channel] = [message.guild, message.channel];
-		let command; let commandName;
 		const SQLpool = client.conPool.promise();
-		const checkDisabledCommand = 'SELECT * FROM `disabledcommands` WHERE `command`=? AND `guildID`=? AND `channelID`=?;';
-		const addDisabledCommand = 'INSERT INTO `disabledcommands` (`command`, `guildID`, `channelID`) VALUES (?, ?, ?);';
-		const delDisabledCommand = 'DELETE FROM `disabledcommands` WHERE `command`=? AND `guildID`=? AND `channelID`=?;';
-		const selectAll = 'SELECT * FROM `disabledcommands` WHERE `guildID`=?;';
 
 		if(!args[0]) return message.lineReply('`Invalid (CHOOSE A COMMAND/ALL/LIST)`');
-		if(!message.channel) return message.lineReply('`Invalid (INVALID CHANNEL TYPE');
+
+		const embed = new MessageEmbed();
+		const user = message.member.user;
+		let logChannel;
+		const command = args[0].toLowerCase();
+
+		let stmt = 'SELECT `commands`, `logChannel` FROM `logsettings` WHERE `guildID`=?;';
+		let [rows] = await SQLpool.query(stmt, [message.guild.id]);
+
+		const [enabled, channel] = [rows[0].commands, rows[0].logChannel];
+
+		if(enabled === 1) {
+			logChannel = await message.guild.channels.cache.find(ch => ch.name === channel);
+			if(!logChannel) {
+				await createChannel(client, message.guild, channel, 'text', 500, 'logs', message.guild.id, ['VIEW_CHANNEL', 'SEND_MESSAGES'])
+					.catch((error) => {
+						return console.error(`[GUILD MEMBER ADD] ${error.stack}`);
+					});
+			}
+
+			embed.setFooter(`ID: ${user.id}`);
+			embed.setTimestamp();
+			embed.setColor(0xFFFFFA);
+		}
 
 		if(args[0].toLowerCase() === 'list') {
 
-			const [allRows] = await SQLpool.execute(selectAll, [guild.id]);
-			if(allRows[0] === undefined) return message.lineReply('`Invalid (NOTHING DISABLED)`');
+			stmt = 'SELECT * FROM `disabledcommands` WHERE `guildID`=?;';
+			[rows] = await SQLpool.execute(stmt, [message.guild.id]);
+			if(rows[0] === undefined) return message.lineReply('`Invalid (NOTHING DISABLED)`');
 
 			const tEmbed = new MessageEmbed()
-				.setAuthor(`${guild.name}'s Disabled List`, guild.iconURL())
-				.setThumbnail(guild.iconURL({ format: 'png', dynamic: true, size: 512 }))
-				.setFooter(`${guild.me.displayName}`, client.user.avatarURL())
+				.setAuthor(`${message.guild.name}'s Disabled List`, message.guild.iconURL())
+				.setThumbnail(message.guild.iconURL({ format: 'png', dynamic: true, size: 512 }))
+				.setFooter(`${message.guild.me.displayName}`, client.user.avatarURL())
 				.setTimestamp()
 				.setColor(0xFFFFFA);
 
 
-			await guild.channels.cache.forEach(chan => {
+			await message.guild.channels.cache.forEach(chan => {
 				if(chan.type !== 'text') return;
-				const mappedRows = allRows.map(row => {
+				const mappedRows = rows.map(row => {
 					if(row.channelID !== chan.id) return;
 					if(!row.command) return;
 					const cmd = `\`${row.command}\``;
@@ -55,63 +75,47 @@ module.exports = {
 			return message.lineReply(tEmbed);
 		}
 
-		if(args[0].toLowerCase() === 'all') {
+		const updateFunc = async (statement, value, cmd) => {
+			return SQLpool.execute(statement, [cmd, message.guild.id, message.channel.id])
+				.then(() => {
+					console.success(`[TOGGLE CMD] Successfully ${booleanToDelete[value].toLowerCase()} record for ${cmd} in guild: ${message.guild.id} for channel: ${message.channel.id}`);
+					return message.lineReply(`\`${cmd}\` ${booleanToEnable[value].toLowerCase()} for channel: \`#${message.channel.name}\``);
+				})
+				.catch((error) => {
+					console.error(`[TOGGLE CMD] ${error.stack}`);
+					return message.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
+				});
+		};
 
-			commandName = 'all';
-			const [checkAllRows] = await SQLpool.execute(checkDisabledCommand, [commandName, guild.id, channel.id]);
+		if(client.commands.has(command) || client.aliases.has(command) || command === 'all') {
 
-			if(checkAllRows[0]) {
-				return SQLpool.query(delDisabledCommand, [commandName, guild.id, channel.id])
-					.then(() => {
-						console.success(`[TOGGLE CMD] Successfully removed entry for command: ${commandName} in guild: ${guild.id} for channel: ${channel.id}`);
-						return message.lineReply(`\`All commands enabled for channel: ${channel.name}\``);
-					})
-					.catch((error) => {
-						console.error(`[TOGGLE CMD] ${error.stack}`);
-						return message.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
-					});
+			stmt = 'SELECT * FROM `disabledcommands` WHERE `command`=? AND `guildID`=? AND `channelID`=?;';
+			[rows] = await SQLpool.execute(stmt, [command, message.guild.id, message.channel.id]);
+
+			if(!rows[0]) {
+
+				if(enabled === 1) {
+					embed.setAuthor('Command Disabled', user.avatarURL);
+					embed.setDescription(`**User:** ${user}\n**Command:** \`${command}\`\n**Channel:** \`#${message.channel.name}\``);
+					await logChannel.send(embed);
+				}
+				stmt = 'INSERT INTO `disabledcommands` (`command`, `guildID`, `channelID`) VALUES (?, ?, ?);';
+				return updateFunc(stmt, 0, command);
+
 			}
-			if(!checkAllRows[0]) {
-				return SQLpool.query(addDisabledCommand, [commandName, guild.id, channel.id])
-					.then(() => {
-						console.success(`[TOGGLE CMD] Successfully added entry for command: ${commandName} in guild: ${guild.id} for channel: ${channel.id}`);
-						return message.lineReply(`\`All commands disabled for channel: ${channel.name}\``);
-					})
-					.catch((error) => {
-						console.error(`[TOGGLE CMD] ${error.stack}`);
-						return message.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
-					});
-			}
-		}
+			else {
 
-		command = args[0].toLowerCase();
-		if(client.commands.has(command) || client.aliases.has(command)) {
+				if(enabled === 1) {
+					embed.setAuthor('Command Enabled', user.avatarURL);
+					embed.setDescription(`**User:** ${user}\n**Command:** \`${command}\`\n**Channel:** \`#${message.channel.name}\``);
+					await logChannel.send(embed);
+				}
+				stmt = 'DELETE FROM `disabledcommands` WHERE `command`=? AND `guildID`=? AND `channelID`=?;';
+				return updateFunc(stmt, 1, command);
 
-			command = client.commands.get(command) || client.commands.get(client.aliases.get(command));
-			commandName = command.config.name;
-
-			const [checkCmdRows] = await SQLpool.execute(checkDisabledCommand, [commandName, guild.id, channel.id]);
-			if(checkCmdRows[0]) {
-				return SQLpool.query(delDisabledCommand, [commandName, guild.id, channel.id])
-					.then(() => {
-						console.success(`[TOGGLE CMD] Successfully removed entry for command: ${commandName} in guild: ${guild.id} for channel: ${channel.id}`);
-						return message.lineReply(`\`${commandName} enabled for channel: ${channel.name}\``);
-					})
-					.catch((error) => {
-						console.error(`[TOGGLE CMD] ${error.stack}`);
-						return message.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
-					});
-			}
-			if(!checkCmdRows[0]) {
-				return SQLpool.query(addDisabledCommand, [commandName, guild.id, channel.id])
-					.then(() => {
-						console.success(`[TOGGLE CMD] Successfully added entry for command: ${commandName} in guild: ${guild.id} for channel: ${channel.id}`);
-						return message.lineReply(`\`${commandName} disabled for channel: ${channel.name}\``);
-					})
-					.catch((error) => {
-						console.error(`[TOGGLE CMD] ${error.stack}`);
-						return message.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
-					});
 			}
 		}
+
+		return message.lineReply('`Invalid (USE $help toggle FOR AVAILABLE OPTIONS)`');
+
 	} };

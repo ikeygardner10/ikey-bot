@@ -257,6 +257,10 @@
         "true": "Yes",
         "false": "No"
     },
+    "booleanToDelete": {
+        "1": "Deleted",
+        "0": "Added"
+    },
     "loggingOptions": [
         "channels",
         "commands",

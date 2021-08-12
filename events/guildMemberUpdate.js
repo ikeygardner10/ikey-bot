@@ -39,7 +39,7 @@ module.exports = async (client, oldMember, newMember) => {
 	if(difference.length === 0) return;
 
 	const embed = new MessageEmbed()
-		.setAuthor(`${author}`, newMember.guild.iconURL())
+		.setAuthor(`${author}`, newMember.user.avatarURL())
 		.setDescription(`**User:** ${newMember.user}\n**Role:** ${difference}`)
 		.setFooter(`ID: ${newMember.user.id}`)
 		.setTimestamp()
