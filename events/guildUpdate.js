@@ -33,6 +33,8 @@ module.exports = async (client, oldGuild, newGuild) => {
 		case 'region':
 			if(oldGuild[key] === newGuild[key]) return;
 			return differences['Region'] = region[value];
+		case 'banner':
+			return;
 		default:
 			return;
 		}

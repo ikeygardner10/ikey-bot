@@ -38,7 +38,7 @@ module.exports = {
 		const [prefix] = await SQLpool.execute(checkPrefix, [message.guild.id]);
 
 		// Create embed
-		const sEmbed = new MessageEmbed()
+		const embed = new MessageEmbed()
 			.setAuthor('Server Information', client.user.avatarURL())
 			.setThumbnail(message.guild.iconURL({ format: 'png', dynamic: true, size: 512 }))
 			.setDescription(`**Name:** ${message.guild.name}\n**Owner:** <@${message.guild.owner.user.id}>\n**Prefix: ${prefix[0].prefix}**\n\n**Verification:** ${verification[message.guild.verificationLevel]}\n**Region:** ${region[message.guild.region]}\n**Boost Level:** ${premium[message.guild.premiumTier]}\n\n**:busts_in_silhouette: Members:** ${members}\n**:robot: Bots:** ${bots}\n**:sweat_smile: Emojis:** ${emojis} *(${prefix[0].prefix}emojis)*\n**:dividers: Categories:** ${channelch}\n**:speech_balloon: Text Channels:** ${textch}\n**:loud_sound: Voice Channels:** ${voicech}\n**:rainbow: Roles:** ${roles} *(${prefix[0].prefix}roles)*\n**:gem: Boost Count:** ${message.guild.premiumSubscriptionCount}\n**:calendar: Created:** ${moment(message.guild.createdAt).format('dddd, MMMM Do YYYY')}`)
@@ -46,6 +46,17 @@ module.exports = {
 			.setTimestamp()
 			.setColor(0xFFFFFA);
 
+		let desc = `**Name:** ${message.guild.name}\n**Owner:** <@${message.guild.owner.user.id}>\n**Prefix: ${prefix[0].prefix}**\n\n**Verification:** ${verification[message.guild.verificationLevel]}\n**Region:** ${region[message.guild.region]}\n**Boost Level:** ${premium[message.guild.premiumTier]}\n\n**:busts_in_silhouette: Members:** ${members}\n**:robot: Bots:** ${bots}\n**:sweat_smile: Emojis:** ${emojis} *(${prefix[0].prefix}emojis)*\n**:dividers: Categories:** ${channelch}\n**:speech_balloon: Text Channels:** ${textch}\n**:loud_sound: Voice Channels:** ${voicech}\n**:rainbow: Roles:** ${roles} *(${prefix[0].prefix}roles)*\n**:gem: Boost Count:** ${message.guild.premiumSubscriptionCount}\n**:calendar: Created:** ${moment(message.guild.createdAt).format('dddd, MMMM Do YYYY')}`;
+		let url = `https://cdn.discordapp.com/banners/${message.guild.id}/`;
+		if(message.guild.banner) {
+			if(message.guild.banner.startsWith('a_')) url += `${message.guild.banner}.gif`;
+			else url += `${message.guild.banner}.png`;
+
+			desc += '\n\n**Banner:**';
+			embed.setDescription(desc);
+			embed.setImage(`${url}`);
+		}
+
 		// Return embed
-		return message.lineReply(sEmbed);
+		return message.lineReply(embed);
 	} };
