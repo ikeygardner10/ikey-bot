@@ -6,7 +6,7 @@ module.exports = async (client, member) => {
 
 
 	const updateGuild = 'UPDATE `guilds` SET `members`=? WHERE `guildID`=?;';
-	const checkLogSettings = 'SELECT `members`, `logChannel` FROM `logsettings` WHERE `guildID`=?;';
+	const checkLogSettings = 'SELECT `members`, `userLogs` FROM `logsettings` WHERE `guildID`=?;';
 	const getInvites = 'SELECT * FROM `invites` WHERE `guildID`=?;';
 	const addInvite = 'INSERT INTO `invites` (`code`, `guildID`, `uses`, `inviterID`) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE `uses`=?;';
 
@@ -21,8 +21,8 @@ module.exports = async (client, member) => {
 
 
 	const [logRows] = await SQLpool.query(checkLogSettings, [member.guild.id]);
-	const [members, channel] = [logRows[0].members, logRows[0].logChannel];
-	if(members === 0) return;
+	const [enabled, channel] = [logRows[0].members, logRows[0].userLogs];
+	if(enabled === 0) return;
 
 	const [invRows] = await SQLpool.query(getInvites, [member.guild.id]);
 	if(!invRows) return;
@@ -52,15 +52,8 @@ module.exports = async (client, member) => {
 
 	const accAge = (Date.now() - member.user.createdAt);
 	const inviter = client.users.cache.get(invAuthor[0]);
-	const logsChannel = member.guild.channels.cache.find(ch => ch.name === channel);
-	if(!logsChannel) {
-		await createChannel(client, member.guild, channel, 'text', 500, 'logs', member.guild.id, [], ['VIEW_CHANNEL', 'SEND_MESSAGES'])
-			.catch((error) => {
-				console.error(`[GUILD MEMBER ADD] ${error.stack}`);
-			});
-	}
 
-	const iEmbed = new MessageEmbed()
+	const embed = new MessageEmbed()
 		.setAuthor('Member Join', member.guild.iconURL())
 		.setThumbnail(member.user.avatarURL())
 		.setDescription(`**Username:** ${member.user.tag}\n**Acc Age:** ${ms(accAge, { long: true })}\n\n**Invite:** \`discord.gg/${invite[0].code}\`\n**By:** ${inviter.tag}`)
@@ -68,7 +61,20 @@ module.exports = async (client, member) => {
 		.setTimestamp()
 		.setColor(0xFFFFFA);
 
-	logsChannel.send(iEmbed);
+	let logChannel = await member.guild.channels.cache.find(ch => ch.name === channel);
+	if(!logChannel) {
+		await createChannel(client, member.guild, 'user-logs', 'text', 500, 'user-logs', member.guild.id, ['VIEW_CHANNEL', 'SEND_MESSAGES'])
+			.then(() => {
+				logChannel = member.guild.channels.cache.find(ch => ch.name === 'user-logs');
+				logChannel.send(embed);
+			})
+			.catch((error) => {
+				console.error(`[GUILD MEMBER REMOVE] ${error.stack}`);
+			});
+	}
+	else {
+		logChannel.send(embed);
+	}
 
 	return SQLpool.execute(addInvite, [invite[0].code, invite[0].guild.id, invite[0].uses || null, invAuthor[0] || null, invite[0].uses])
 		.then(() => {

@@ -1,4 +1,4 @@
-module.exports = (client, guild, channelName = 'logs', type = 'text', position = 500, reason, id, denyPerm = ['VIEW_CHANNEL', 'SEND_MESSAGES']) => {
+module.exports = (client, guild, channelName, type = 'text', position = 500, reason, id, denyPerm = ['VIEW_CHANNEL', 'SEND_MESSAGES']) => {
 
 	return guild.channels.create(channelName, {
 		type: type,

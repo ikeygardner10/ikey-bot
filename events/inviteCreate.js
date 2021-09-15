@@ -4,15 +4,13 @@ const createChannel = require('../functions/createChannel');
 
 module.exports = async (client, invite) => {
 
-
 	const addInvite = 'INSERT INTO `invites` (`code`, `guildID`, `uses`, `inviterID`) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE `uses`=?;';
-	const checkTracking = 'SELECT `invites`, `logChannel` FROM `logsettings` WHERE `guildID`=?;';
+	const checkTracking = 'SELECT `invites`, `serverLogs` FROM `logsettings` WHERE `guildID`=?;';
 
 	const SQLpool = client.conPool.promise();
 	const [logRows] = await SQLpool.query(checkTracking, [invite.guild.id]);
-	const [invites, channel] = [logRows[0].invites, logRows[0].logChannel];
-	if(invites === 0) return;
-
+	const [enabled, channel] = [logRows[0].invites, logRows[0].serverLogs];
+	if(enabled === 0) return;
 
 	let maxAge = invite.maxAge;
 	switch(maxAge) {
@@ -37,25 +35,27 @@ module.exports = async (client, invite) => {
 	const inviter = client.users.cache.get(invite.inviter.id);
 	const channelName = invite.guild.channels.cache.get(invite.channel.id).name;
 
-
-	const logsChannel = invite.guild.channels.cache.find(ch => ch.name === channel);
-	if(!logsChannel) {
-		await createChannel(client, invite.guild, channel, 'text', 500, 'logs', invite.guild.id, ['VIEW_CHANNEL', 'SEND_MESSAGES'])
-			.catch((error) => {
-				console.error(`[GUILD MEMBER ADD] ${error.stack}`);
-			});
-	}
-
-
-	const iEmbed = new MessageEmbed()
+	const embed = new MessageEmbed()
 		.setAuthor('New Invite', invite.guild.iconURL())
 		.setDescription(`**Code:** \`${code}\`\n**Author:** ${inviter.tag}\n\n**Channel:** \`#${channelName}\`\n**Expires:** ${maxAge}\n**Max. Uses:** ${maxUses}\n**Temporary:** ${temp}`)
 		.setFooter(`${invite.guild.name}`)
 		.setTimestamp()
 		.setColor(0xFFFFFA);
 
-	logsChannel.send(iEmbed);
-
+	let logChannel = await invite.guild.channels.cache.find(ch => ch.name === channel);
+	if(!logChannel) {
+		await createChannel(client, invite.guild, 'server-logs', 'text', 500, 'server-logs', invite.guild.id, ['VIEW_CHANNEL', 'SEND_MESSAGES'])
+			.then(() => {
+				logChannel = invite.guild.channels.cache.find(ch => ch.name === 'server-logs');
+				logChannel.send(embed);
+			})
+			.catch((error) => {
+				console.error(`[INVITE CREATE] ${error.stack}`);
+			});
+	}
+	else {
+		await logChannel.send(embed);
+	}
 
 	return SQLpool.execute(addInvite, [invite.code, invite.guild.id, invite.uses, invite.inviter.id, invite.uses])
 		.then(() => {

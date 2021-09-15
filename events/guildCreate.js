@@ -34,7 +34,8 @@ module.exports = async (client, guild) => {
 
 	try {
 		return client.channels.cache.get('780252080689774593').send(`[GUILD JOIN] ${guild.name} (${guild.id}) owned by ${guild.owner.user.tag} (${guild.owner.user.id}). Members: ${guild.members.cache.size}`);
-	} catch(error) {
+	}
+	catch(error) {
 		return console.error(`[GUILD CREATE] ${error.stack}`);
 	}
 };

@@ -4,20 +4,12 @@ const namer = require('color-namer');
 
 module.exports = async (client, oldRole, newRole) => {
 
-	const checkTracking = 'SELECT `roles`, `logChannel` FROM `logsettings` WHERE `guildID`=?;';
+	const checkTracking = 'SELECT `roles`, `serverLogs` FROM `logsettings` WHERE `guildID`=?;';
 
 	const SQLpool = client.conPool.promise();
 	const [logRows] = await SQLpool.query(checkTracking, [oldRole.guild.id]);
-	const [roles, channel] = [logRows[0].roles, logRows[0].logChannel];
-	if(roles === 0) return;
-
-	const logsChannel = await oldRole.guild.channels.cache.find(ch => ch.name === channel);
-	if(!logsChannel) {
-		await createChannel(client, oldRole.guild, channel, 'text', 500, 'logs', oldRole.guild.id, ['VIEW_CHANNEL', 'SEND_MESSAGES'])
-			.catch((error) => {
-				return console.error(`[GUILD MEMBER ADD] ${error.stack}`);
-			});
-	}
+	const [enabled, channel] = [logRows[0].roles, logRows[0].serverLogs];
+	if(enabled === 0) return;
 
 	const arrayEquals = (a, b) => {
 		const aProps = Object.getOwnPropertyNames(a);
@@ -93,14 +85,26 @@ module.exports = async (client, oldRole, newRole) => {
 		desc += `\n**Deleted Permissions:**\n${oldPerms.join('\n')}\n`;
 	}
 
-	const rEmbed = new MessageEmbed()
+	const embed = new MessageEmbed()
 		.setAuthor('Role Updated', newRole.guild.iconURL())
 		.setDescription(desc)
 		.setFooter(`ID: ${newRole.id}`)
 		.setTimestamp()
 		.setColor(newRole.hexColor);
 
-
-	return logsChannel.send(rEmbed);
+	let logChannel = await newRole.guild.channels.cache.find(ch => ch.name === channel);
+	if(!logChannel) {
+		return createChannel(client, newRole.guild, 'server-logs', 'text', 500, 'server-logs', newRole.guild.id, ['VIEW_CHANNEL', 'SEND_MESSAGES'])
+			.then(() => {
+				logChannel = newRole.guild.channels.cache.find(ch => ch.name === 'server-logs');
+				return logChannel.send(embed);
+			})
+			.catch((error) => {
+				console.error(`[ROLE UPDATE] ${error.stack}`);
+			});
+	}
+	else {
+		return logChannel.send(embed);
+	}
 
 };

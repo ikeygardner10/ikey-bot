@@ -6,7 +6,7 @@ module.exports = async (client, member) => {
 
 
 	const updateGuild = 'UPDATE `guilds` SET `members`=? WHERE `guildID`=?;';
-	const checkLogSettings = 'SELECT `members`, `logChannel` FROM `logsettings` WHERE `guildID`=?;';
+	const checkLogSettings = 'SELECT `members`, `userLogs` FROM `logsettings` WHERE `guildID`=?;';
 	const checkMarriages = 'SELECT * FROM `marriages` WHERE (`userID`=? OR `partnerID`=?) AND `guildID`=?;';
 	const deleteMarriage = 'SET SQL_SAFE_UPDATES=0; DELETE FROM `marriages` WHERE `familyID`=? AND `guildID`=?;';
 	const checkAdoptions = 'SELECT * FROM `adoptions` WHERE `familyID`=? AND `guildID`=?;';
@@ -23,13 +23,11 @@ module.exports = async (client, member) => {
 			console.error(`[GUILD MEMBER REMOVE] ${error.stack}`);
 		});
 
-
 	await wait(1500);
 
 	const [logRows] = await SQLpool.query(checkLogSettings, [member.guild.id]);
-	const [members, channel] = [logRows[0].members, logRows[0].logChannel];
-	if(members === 0) return;
-
+	const [enabled, channel] = [logRows[0].members, logRows[0].userLogs];
+	if(enabled === 0) return;
 
 	const checkBan = await member.guild.fetchBans()
 		.then(bans => {
@@ -42,16 +40,7 @@ module.exports = async (client, member) => {
 		});
 	if(checkBan) return;
 
-
-	const logsChannel = member.guild.channels.cache.find(ch => ch.name === channel);
-	if(!logsChannel) {
-		await createChannel(client, member.guild, channel, 'text', 500, 'logs', member.guild.id, [], ['VIEW_CHANNEL', 'SEND_MESSAGES'])
-			.catch((error) => {
-				console.error(`[GUILD MEMBER REMOVE] ${error.stack}`);
-			});
-	}
-
-	const iEmbed = new MessageEmbed()
+	const embed = new MessageEmbed()
 		.setAuthor('Member Leave', member.guild.iconURL())
 		.setThumbnail(member.user.avatarURL())
 		.setDescription(`**Username:** ${member.user.tag}`)
@@ -59,7 +48,20 @@ module.exports = async (client, member) => {
 		.setTimestamp()
 		.setColor(0xFFFFFA);
 
-	logsChannel.send(iEmbed);
+	let logChannel = await member.guild.channels.cache.find(ch => ch.name === channel);
+	if(!logChannel) {
+		await createChannel(client, member.guild, 'user-logs', 'text', 500, 'user-logs', member.guild.id, ['VIEW_CHANNEL', 'SEND_MESSAGES'])
+			.then(() => {
+				logChannel = member.guild.channels.cache.find(ch => ch.name === 'user-logs');
+				logChannel.send(embed);
+			})
+			.catch((error) => {
+				console.error(`[GUILD MEMBER REMOVE] ${error.stack}`);
+			});
+	}
+	else {
+		logChannel.send(embed);
+	}
 
 	const [marriedRows] = await SQLpool.query(checkMarriages, [member.id, member.id, member.guild.id]);
 	if(marriedRows[0]) {
@@ -93,4 +95,5 @@ module.exports = async (client, member) => {
 			});
 	}
 
+	return;
 };

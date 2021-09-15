@@ -3,20 +3,12 @@ const createChannel = require('../functions/createChannel');
 
 module.exports = async (client, oldMember, newMember) => {
 
-	const stmt = 'SELECT `roles`, `logChannel` FROM `logsettings` WHERE `guildID`=?;';
+	const stmt = 'SELECT `roles`, `activityLogs` FROM `logsettings` WHERE `guildID`=?;';
 
 	const SQLpool = client.conPool.promise();
 	const [rows] = await SQLpool.query(stmt, [newMember.guild.id]);
-	const [roles, channel] = [rows[0].roles, rows[0].logChannel];
-	if(roles === 0) return;
-
-	const logsChannel = newMember.guild.channels.cache.find(ch => ch.name === channel);
-	if(!logsChannel) {
-		await createChannel(client, newMember.guild, channel, 'text', 500, 'logs', newMember.guild.id, [], ['VIEW_CHANNEL', 'SEND_MESSAGES'])
-			.catch((error) => {
-				console.error(`[GUILD MEMBER ADD] ${error.stack}`);
-			});
-	}
+	const [enabled, channel] = [rows[0].roles, rows[0].activityLogs];
+	if(enabled === 0) return;
 
 	let difference = '';
 	let author;
@@ -45,6 +37,19 @@ module.exports = async (client, oldMember, newMember) => {
 		.setTimestamp()
 		.setColor(0xFFFFFA);
 
-	return logsChannel.send(embed);
+	let logChannel = await newMember.guild.channels.cache.find(ch => ch.name === channel);
+	if(!logChannel) {
+		await createChannel(client, newMember.guild, 'activity-logs', 'text', 500, 'activity-logs', newMember.guild.id, ['VIEW_CHANNEL', 'SEND_MESSAGES'])
+			.then(() => {
+				logChannel = newMember.guild.channels.cache.find(ch => ch.name === 'activity-logs');
+				return logChannel.send(embed);
+			})
+			.catch((error) => {
+				return console.error(`[GUILD MEMBER UPDATE] ${error.stack}`);
+			});
+	}
+	else {
+		return logChannel.send(embed);
+	}
 
 };

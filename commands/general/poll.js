@@ -12,7 +12,7 @@ module.exports = {
 		name: 'poll',
 		noalias: 'No Aliases',
 		aliases: [],
-		usage: '{poll title} (poll time)*(5s/4m/3h/2d/1w)* [poll options]*(up-to 20)*',
+		usage: '{poll title} [poll options]*(up-to 20)* (poll time)*(5s/4m/3h/2d/1w)*',
 		cooldown: 10,
 		category: 'general',
 		permissions: '',

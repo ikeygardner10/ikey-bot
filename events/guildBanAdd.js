@@ -3,23 +3,14 @@ const createChannel = require('../functions/createChannel');
 
 module.exports = async (client, guild, user) => {
 
-
-	const checkLogSettings = 'SELECT `members`, `logChannel` FROM `logsettings` WHERE `guildID`=?;';
+	const checkLogSettings = 'SELECT `members`, `userLogs` FROM `logsettings` WHERE `guildID`=?;';
 
 	const SQLpool = client.conPool.promise();
 	const [logRows] = await SQLpool.query(checkLogSettings, [guild.id]);
-	const [members, channel] = [logRows[0].members, logRows[0].logChannel];
-	if(members === 0) return;
+	const [enabled, channel] = [logRows[0].members, logRows[0].userLogs];
+	if(enabled === 0) return;
 
-	const logsChannel = guild.channels.cache.find(ch => ch.name === channel);
-	if(!logsChannel) {
-		await createChannel(client, guild, channel, 'text', 500, 'logs', guild.id, [], ['VIEW_CHANNEL', 'SEND_MESSAGES'])
-			.catch((error) => {
-				console.error(`[GUILD BAN ADD] ${error.stack}`);
-			});
-	}
-
-	const iEmbed = new MessageEmbed()
+	const embed = new MessageEmbed()
 		.setAuthor('Member Ban', guild.iconURL())
 		.setThumbnail(user.avatarURL())
 		.setDescription(`**Username:** ${user.tag}`)
@@ -27,5 +18,18 @@ module.exports = async (client, guild, user) => {
 		.setTimestamp()
 		.setColor(0xFFFFFA);
 
-	return logsChannel.send(iEmbed);
+	let logChannel = await guild.channels.cache.find(ch => ch.name === channel);
+	if(!logChannel) {
+		await createChannel(client, guild, 'user-logs', 'text', 500, 'user-logs', guild.id, ['VIEW_CHANNEL', 'SEND_MESSAGES'])
+			.then(() => {
+				logChannel = guild.channels.cache.find(ch => ch.name === 'user-logs');
+				return logChannel.send(embed);
+			})
+			.catch((error) => {
+				return console.error(`[GUILD BAN ADD] ${error.stack}`);
+			});
+	}
+	else {
+		return logChannel.send(embed);
+	}
 };

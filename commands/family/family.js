@@ -286,7 +286,7 @@ module.exports = {
 		});
 
 
-		if(pageCount === 1) return message.lineReply(pageOne);
+		if(pageCount === 1) return message.channel.send(pageOne);
 
 		return paginationEmbed(message, pages, ['⬅️', '➡️', '⏹️'], 60000);
 

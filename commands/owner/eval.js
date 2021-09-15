@@ -20,7 +20,7 @@ module.exports = {
 		try {
 
 			const code = args.join(' ');
-			let evaled = eval(code);
+			let evaled = await eval(code);
 			if (typeof evaled !== 'string') evaled = require('util').inspect(evaled);
 
 			return message.lineReply(clean(evaled), { code:'xl' });

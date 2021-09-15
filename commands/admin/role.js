@@ -39,11 +39,13 @@ module.exports = {
 			.setTimestamp()
 			.setColor(0xFFFFFA);
 
+		const authorrole = message.member.roles.highest; const botrole = message.guild.me.roles.highest;
 		if(message.author.id !== client.config.ownerID) {
-			const authorrole = message.member.roles.highest; const botrole = message.guild.me.roles.highest;
-			if(authorrole.position <= role.position) return message.lineReply('`Invalid (ROLE IS HIGHER/EQUAL TO YOURS)`');
-			if(role.position <= botrole.position) return message.lineReply('`Invalid (ROLE IS HIGHER/EQUAL THAN MINE)`');
+			if(authorrole.position === role.position) return message.lineReply('`Invalid (ROLE IS EQUAL TO YOURS)`');
+			if(role.position > authorrole.position) return message.lineReply('`Invalid (ROLE IS HIGHER THAN YOURS)`');
 		}
+		if(role.position === botrole.position) return message.lineReply('`Invalid (ROLE IS EQUAL TO MINE)`');
+		if(role.position > botrole.position) return message.lineReply('`Invalid (ROLE IS HIGHER THAN MINE)`');
 
 		if(member.roles.cache.has(role.id)) {
 			return member.roles.remove(role.id)

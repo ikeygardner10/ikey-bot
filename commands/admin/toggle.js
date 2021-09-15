@@ -6,7 +6,7 @@ const { booleanToEnable, booleanToDelete } = require('../../data/arrayData.json'
 module.exports = {
 	config: {
 		name: 'toggle',
-		aliases: ['tc'],
+		aliases: ['tc', 'disable'],
 		usage: '<command>/all/list',
 		cooldown: 5,
 		category: 'admin',
@@ -22,23 +22,14 @@ module.exports = {
 
 		const embed = new MessageEmbed();
 		const user = message.member.user;
-		let logChannel;
 		const command = args[0].toLowerCase();
 
-		let stmt = 'SELECT `commands`, `logChannel` FROM `logsettings` WHERE `guildID`=?;';
+		let stmt = 'SELECT `commands`, `serverLogs` FROM `logsettings` WHERE `guildID`=?;';
 		let [rows] = await SQLpool.query(stmt, [message.guild.id]);
 
-		const [enabled, channel] = [rows[0].commands, rows[0].logChannel];
+		const [enabled, channel] = [rows[0].commands, rows[0].serverLogs];
 
 		if(enabled === 1) {
-			logChannel = await message.guild.channels.cache.find(ch => ch.name === channel);
-			if(!logChannel) {
-				await createChannel(client, message.guild, channel, 'text', 500, 'logs', message.guild.id, ['VIEW_CHANNEL', 'SEND_MESSAGES'])
-					.catch((error) => {
-						return console.error(`[GUILD MEMBER ADD] ${error.stack}`);
-					});
-			}
-
 			embed.setFooter(`ID: ${user.id}`);
 			embed.setTimestamp();
 			embed.setColor(0xFFFFFA);
@@ -89,29 +80,66 @@ module.exports = {
 
 		if(client.commands.has(command) || client.aliases.has(command) || command === 'all') {
 
+			let commandName;
+			let category;
+			if(command !== 'all') {
+				commandName = await client.commands.get(command) ? await client.commands.get(command).config.name : await client.commands.get(await client.aliases.get(command)).config.name;
+				category = await client.commands.get(command) ? await client.commands.get(command).config.category : await client.commands.get(await client.aliases.get(command)).config.category;
+			}
+			else {
+				commandName = 'all';
+			}
+			if(category === 'owner') return;
+
 			stmt = 'SELECT * FROM `disabledcommands` WHERE `command`=? AND `guildID`=? AND `channelID`=?;';
-			[rows] = await SQLpool.execute(stmt, [command, message.guild.id, message.channel.id]);
+			[rows] = await SQLpool.execute(stmt, [commandName, message.guild.id, message.channel.id]);
 
 			if(!rows[0]) {
 
 				if(enabled === 1) {
 					embed.setAuthor('Command Disabled', user.avatarURL);
-					embed.setDescription(`**User:** ${user}\n**Command:** \`${command}\`\n**Channel:** \`#${message.channel.name}\``);
-					await logChannel.send(embed);
+					embed.setDescription(`**User:** ${user}\n**Command:** \`${commandName}\`\n**Channel:** \`#${message.channel.name}\``);
+					let logChannel = await message.guild.channels.cache.find(ch => ch.name === channel);
+					if(!logChannel) {
+						await createChannel(client, message.guild, 'server-logs', 'text', 500, 'server-logs', message.guild.id, ['VIEW_CHANNEL', 'SEND_MESSAGES'])
+							.then(() => {
+								logChannel = message.guild.channels.cache.find(ch => ch.name === 'server-logs');
+								logChannel.send(embed);
+							})
+							.catch((error) => {
+								console.error(`[VOICE STATE UPDATE] ${error.stack}`);
+							});
+					}
+					else {
+						await logChannel.send(embed);
+					}
 				}
 				stmt = 'INSERT INTO `disabledcommands` (`command`, `guildID`, `channelID`) VALUES (?, ?, ?);';
-				return updateFunc(stmt, 0, command);
+				return updateFunc(stmt, 0, commandName);
 
 			}
 			else {
 
 				if(enabled === 1) {
 					embed.setAuthor('Command Enabled', user.avatarURL);
-					embed.setDescription(`**User:** ${user}\n**Command:** \`${command}\`\n**Channel:** \`#${message.channel.name}\``);
-					await logChannel.send(embed);
+					embed.setDescription(`**User:** ${user}\n**Command:** \`${commandName}\`\n**Channel:** \`#${message.channel.name}\``);
+					let logChannel = await message.guild.channels.cache.find(ch => ch.name === channel);
+					if(!logChannel) {
+						await createChannel(client, message.guild, 'server-logs', 'text', 500, 'server-logs', message.guild.id, ['VIEW_CHANNEL', 'SEND_MESSAGES'])
+							.then(() => {
+								logChannel = message.guild.channels.cache.find(ch => ch.name === 'server-logs');
+								logChannel.send(embed);
+							})
+							.catch((error) => {
+								console.error(`[VOICE STATE UPDATE] ${error.stack}`);
+							});
+					}
+					else {
+						await logChannel.send(embed);
+					}
 				}
 				stmt = 'DELETE FROM `disabledcommands` WHERE `command`=? AND `guildID`=? AND `channelID`=?;';
-				return updateFunc(stmt, 1, command);
+				return updateFunc(stmt, 1, commandName);
 
 			}
 		}

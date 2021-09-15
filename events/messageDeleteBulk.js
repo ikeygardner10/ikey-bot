@@ -5,20 +5,12 @@ module.exports = async (client, messages) => {
 
 	const message = messages.get(await messages.firstKey());
 
-	const stmt = 'SELECT `messages`, `logChannel` FROM `logsettings` WHERE `guildID`=?;';
+	const stmt = 'SELECT `messages`, `activityLogs` FROM `logsettings` WHERE `guildID`=?;';
 	const SQLpool = client.conPool.promise();
 
 	const [rows] = await SQLpool.query(stmt, [message.guild.id]);
-	const [enabled, channel] = [rows[0].messages, rows[0].logChannel];
+	const [enabled, channel] = [rows[0].messages, rows[0].activityLogs];
 	if(enabled === 0) return;
-
-	const logChannel = await message.guild.channels.cache.find(ch => ch.name === channel);
-	if(!logChannel) {
-		await createChannel(client, message.guild, channel, 'text', 500, 'logs', message.guild.id, ['VIEW_CHANNEL', 'SEND_MESSAGES'])
-			.catch((error) => {
-				return console.error(`[GUILD MEMBER ADD] ${error.stack}`);
-			});
-	}
 
 	const embed = new MessageEmbed()
 		.setAuthor('Bulk Message Delete', message.guild.iconURL())
@@ -27,6 +19,19 @@ module.exports = async (client, messages) => {
 		.setTimestamp()
 		.setColor(0xFFFFFA);
 
-	return logChannel.send(embed);
+	let logChannel = await message.guild.channels.cache.find(ch => ch.name === channel);
+	if(!logChannel) {
+		return createChannel(client, message.guild, 'activity-logs', 'text', 500, 'activity-logs', message.guild.id, ['VIEW_CHANNEL', 'SEND_MESSAGES'])
+			.then(() => {
+				logChannel = message.guild.channels.cache.find(ch => ch.name === 'activity-logs');
+				return logChannel.send(embed);
+			})
+			.catch((error) => {
+				return console.error(`[MESSAGE DELETE BULK] ${error.stack}`);
+			});
+	}
+	else {
+		return logChannel.send(embed);
+	}
 
 };

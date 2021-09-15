@@ -44,10 +44,10 @@ module.exports = {
 			attachment = message.attachments.first().name;
 			const extension = attachment.substring(attachment.lastIndexOf('.'), attachment.length);
 			switch(extension) {
-			case '.png': case '.gif': case '.jpg': case '.jpeg': case '.mp4': case '.webm': case '.mp3': case '.wav':
+			case '.png': case '.gif': case '.jpg': case '.jpeg': case '.mp4': case '.webm': case '.mp3': case '.wav': case '.mov':
 				break;
 			default:
-				if(message.author.id !== client.config.ownerID) return message.lineReply('`Invalid (PNG/GIF/JPG/WEBM/MP4 ONLY)`');
+				if(message.author.id !== client.config.ownerID) return message.lineReply('`Invalid (PNG/GIF/JPG/WEBM/MP3/WAV/MP4/MOV ONLY)`');
 			}
 			fileName = `${shortid.generate()}${extension}`; URI = message.attachments.first().url;
 

@@ -103,7 +103,7 @@ module.exports = {
 		await (member.roles.add(muterole.id))
 			.then(() => {
 				mEmbed.setDescription(`**Result:** ${member} has been muted.\n\n**Muted By:** <@${message.author.id}>\n**Time:** ${ms(ms(mutetime))}\n**Reason:** ${reason || 'No reason provided.'}`);
-				return message.lineReply(mEmbed);
+				message.lineReply(mEmbed);
 			})
 			.catch((error) => {
 				console.error(`[MUTE CMD] ${error.stack}`);

@@ -27,7 +27,7 @@ module.exports = {
 		const checkSelf = 'SELECT `tag`, `guildID` FROM `tags` WHERE `userID`=?;';
 
 		// Define mentioned memeber, setup tagArray and format args
-		const member = await getMember(message, args);
+		const member = message.mentions.members.first();
 		const tagArray = []; let author; let ntn;
 
 		// Define SQLpool

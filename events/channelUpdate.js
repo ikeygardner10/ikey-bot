@@ -6,20 +6,12 @@ module.exports = async (client, oldChannel, newChannel) => {
 
 	if(newChannel.type === 'dm') return;
 
-	const stmt = 'SELECT `channels`, `logChannel` FROM `logsettings` WHERE `guildID`=?;';
+	const stmt = 'SELECT `channels`, `serverLogs` FROM `logsettings` WHERE `guildID`=?;';
 
 	const SQLpool = client.conPool.promise();
 	const [rows] = await SQLpool.query(stmt, [newChannel.guild.id]);
-	const [enabled, channel] = [rows[0].channels, rows[0].logChannel];
+	const [enabled, channel] = [rows[0].channels, rows[0].serverLogs];
 	if(enabled === 0) return;
-
-	const logChannel = await newChannel.guild.channels.cache.find(ch => ch.name === channel);
-	if(!logChannel) {
-		await createChannel(client, newChannel.guild, channel, 'text', 500, 'logs', newChannel.guild.id, ['VIEW_CHANNEL', 'SEND_MESSAGES'])
-			.catch((error) => {
-				return console.error(`[GUILD MEMBER ADD] ${error.stack}`);
-			});
-	}
 
 	const embed = new MessageEmbed()
 		.setAuthor('Channel Updated', newChannel.guild.iconURL())
@@ -72,6 +64,19 @@ module.exports = async (client, oldChannel, newChannel) => {
 	embed.setDescription(desc);
 	embed.setFooter(`Channel ID: ${newChannel.id}`);
 
-	return logChannel.send(embed);
+	let logChannel = await newChannel.guild.channels.cache.find(ch => ch.name === channel);
+	if(!logChannel) {
+		await createChannel(client, newChannel.guild, channel, 'text', 500, 'server-logs', newChannel.guild.id, ['VIEW_CHANNEL', 'SEND_MESSAGES'])
+			.then(() => {
+				logChannel = newChannel.guild.channels.cache.find(ch => ch.name === 'server-logs');
+				return logChannel.send(embed);
+			})
+			.catch((error) => {
+				return console.error(`[CHANNEL UPDATE] ${error.stack}`);
+			});
+	}
+	else {
+		return logChannel.send(embed);
+	}
 
 };

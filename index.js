@@ -24,6 +24,9 @@ client.conPool = mysql.createPool({
 	Promise: global.Promise,
 });
 
+const ytdl = require('ytdl-core');
+client.queue = new Enmap();
+
 const log = require('npmlog');
 
 const logger = require('./functions/logger.js')('./logs/logs.txt');

@@ -96,7 +96,7 @@ module.exports = {
 			embed.setAuthor(`${client.user.username} Global Stats`, client.user.avatarURL());
 			embed.setThumbnail(client.user.avatarURL({ format: 'png', dynamic: true, size: 512 }));
 			embed.setDescription(`**Top Commands:**\n${descOne}\n**Top Users:**\n${descTwo}`);
-			return message.lineReply(embed);
+			return message.channel.send(embed);
 		}
 
 		if(tables.includes(args[0]) && !member) {
@@ -147,7 +147,7 @@ module.exports = {
 			embed.setAuthor(`${client.user.username} Command Stats`, client.user.avatarURL());
 			embed.setThumbnail(client.user.avatarURL({ format: 'png', dynamic: true, size: 512 }));
 			embed.setDescription(`:floppy_disk: **Command:** \`${table.slice(0, table.length - 5)}\`\n\n**Top Users:**\n${desc}`);
-			return message.lineReply(embed);
+			return message.channel.send(embed);
 		}
 
 		if(member && !args[1]) {
@@ -187,7 +187,7 @@ module.exports = {
 			embed.setThumbnail(member.user.avatarURL({ format: 'png', dynamic: true, size: 512 }));
 			embed.setDescription(`**:bust_in_silhouette: User:** ${member.user.tag}\n\n${desc}`);
 			embed.setFooter(`ID: ${member.user.id} | Total Commands Used: ${userTotal}`);
-			return message.lineReply(embed);
+			return message.channel.send(embed);
 		}
 
 		if(tables.includes(args[1]) && member) {
@@ -239,7 +239,7 @@ module.exports = {
 			embed.setThumbnail(member.user.avatarURL({ format: 'png', dynamic: true, size: 512 }));
 			embed.setDescription(`**:bust_in_silhouette: User:** ${member.user.tag}\n:floppy_disk: **Command:** \`${table.slice(0, table.length - 5)}\`\n\n**Used On:**\n${desc}`);
 			embed.setFooter(`ID: ${member.user.id} | Total Commands Used: ${commandTotal}`);
-			return message.lineReply(embed);
+			return message.channel.send(embed);
 		}
 
 		if(tables.includes(args[0]) && member) {
@@ -291,7 +291,7 @@ module.exports = {
 			embed.setThumbnail(member.user.avatarURL({ format: 'png', dynamic: true, size: 512 }));
 			embed.setDescription(`**:bust_in_silhouette: User:** ${member.user.tag}\n:floppy_disk: **Command:** \`${table.slice(0, table.length - 5)}\`\n\n**Used By:**\n${desc}`);
 			embed.setFooter(`ID: ${member.user.id} | Total Commands Used: ${commandTotal}`);
-			return message.lineReply(embed);
+			return message.channel.send(embed);
 		}
 
 		return message.lineReply('`Usage:`\n`$top`\n`$top <@user>`\n`$top <command name + (page number optional)>`\n`$top <command name + @user + (page number optional)>`\n`$top <@user + command name + (page number optional)>`');

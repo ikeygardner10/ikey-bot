@@ -4,20 +4,12 @@ const { trueToEnable } = require('../data/arrayData.json');
 
 module.exports = async (client, oldState, newState) => {
 
-	const stmt = 'SELECT `voicechannels`, `logChannel` FROM `logsettings` WHERE `guildID`=?;';
+	const stmt = 'SELECT `voicechannels`, `activityLogs` FROM `logsettings` WHERE `guildID`=?;';
 
 	const SQLpool = client.conPool.promise();
 	const [rows] = await SQLpool.query(stmt, [newState.guild.id]);
-	const [enabled, channel] = [rows[0].voicechannels, rows[0].logChannel];
+	const [enabled, channel] = [rows[0].voicechannels, rows[0].activityLogs];
 	if(enabled === 0) return;
-
-	const logChannel = await newState.guild.channels.cache.find(ch => ch.name === channel);
-	if(!logChannel) {
-		await createChannel(client, newState.guild, channel, 'text', 500, 'logs', channel.guild.id, ['VIEW_CHANNEL', 'SEND_MESSAGES'])
-			.catch((error) => {
-				return console.error(`[GUILD MEMBER ADD] ${error.stack}`);
-			});
-	}
 
 	const differences = {};
 	Object.entries(newState).forEach(([key, value]) => {
@@ -67,6 +59,19 @@ module.exports = async (client, oldState, newState) => {
 	if(oldState.channel !== null && newState.channel !== null && oldState.channel !== newState.channel) embed.setAuthor('Voice Channel Moved', user.avatarURL());
 	if(oldState.channel !== null && newState.channel === null) embed.setAuthor('Voice Channel Left', user.avatarURL());
 
-	return logChannel.send(embed);
+	let logChannel = await newState.guild.channels.cache.find(ch => ch.name === channel);
+	if(!logChannel) {
+		await createChannel(client, newState.guild, 'activity-logs', 'text', 500, 'activity-logs', newState.guild.id, ['VIEW_CHANNEL', 'SEND_MESSAGES'])
+			.then(() => {
+				logChannel = newState.guild.channels.cache.find(ch => ch.name === 'activity-logs');
+				return logChannel.send(embed);
+			})
+			.catch((error) => {
+				return console.error(`[VOICE STATE UPDATE] ${error.stack}`);
+			});
+	}
+	else {
+		return logChannel.send(embed);
+	}
 
 };

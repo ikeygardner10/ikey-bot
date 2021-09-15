@@ -1,7 +1,7 @@
 module.exports = async (client, guild) => {
 
 	const updateGuild = 'UPDATE `guilds` SET `joined`=0 WHERE `guildID`= ?;';
-	const updateLogSettings = 'UPDATE `logsettings` SET `channels`=0, `commands`=0, `invites`=0, `members`=0, `messages`=0, `roles`=0, `server`=0, `voice`=0 WHERE `guildID`=?;';
+	const updateLogSettings = 'UPDATE `logsettings` SET `channels`=0, `commands`=0, `invites`=0, `members`=0, `messages`=0, `roles`=0, `server`=0, `voicechannels`=0 WHERE `guildID`=?;';
 
 	const SQLpool = client.conPool.promise();
 

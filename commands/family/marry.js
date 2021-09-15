@@ -24,7 +24,7 @@ module.exports = {
 		// check for existing marriage, existing partner marriage, existing adoption, exsting sibling,
 
 		const member = await getMember(message, args);
-		if(message.message.author.id === member.id) return message.lineReply('`Invalid (MENTION USER/USER ID - NOT YOURSELF)`');
+		if(message.author.id === member.id) return message.lineReply('`Invalid (MENTION USER/USER ID - NOT YOURSELF)`');
 
 		const cacheCheck = cache.has(member.id);
 		if(cacheCheck === true) {
