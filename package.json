@@ -28,7 +28,7 @@
     "@discordjs/opus": "^0.6.0",
     "@keyv/sqlite": "^2.0.2",
     "@vitalets/google-translate-api": "^7.0.0",
-    "axios": "^0.21.1",
+    "axios": "^0.21.2",
     "azlyrics-scraper": "^1.0.6",
     "better-sqlite3": "^7.1.0",
     "bluebird": "^3.7.2",
