@@ -37,7 +37,7 @@ module.exports = async (client, invite) => {
 
 	const embed = new MessageEmbed()
 		.setAuthor('New Invite', invite.guild.iconURL())
-		.setDescription(`**Code:** \`${code}\`\n**Author:** ${inviter.tag}\n\n**Channel:** \`#${channelName}\`\n**Expires:** ${maxAge}\n**Max. Uses:** ${maxUses}\n**Temporary:** ${temp}`)
+		.setDescription(`**Code:** \`${code}\`\n**Author:** ${inviter.tag} (ID: ${inviter.id})\n\n**Channel:** \`#${channelName}\`\n**Expires:** ${maxAge}\n**Max. Uses:** ${maxUses}\n**Temporary:** ${temp}`)
 		.setFooter(`${invite.guild.name}`)
 		.setTimestamp()
 		.setColor(0xFFFFFA);

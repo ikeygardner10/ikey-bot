@@ -37,8 +37,8 @@ module.exports = {
 		const parentOne = checkParentRows[0].userID; const parentTwo = checkParentRows[0].partnerID;
 
 		const responseFilter = response => {
-			return yes.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === author.id) ||
-			no.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === author.id);
+			return yes.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === message.author.id) ||
+			no.some(msg => msg.toLowerCase() === response.content.toLowerCase() && response.author.id === message.author.id);
 		};
 
 		let questionMessage = `${message.author}, you are about to disown your child ${member}...\n\n**Are you sure?**`;

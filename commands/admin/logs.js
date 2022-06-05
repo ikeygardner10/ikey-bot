@@ -79,8 +79,20 @@ module.exports = {
 			let stmt = `SELECT \`${option}\`, \`${column}\` FROM \`logsettings\` WHERE \`guildID\`=?;`;
 			const [rows] = await SQLpool.execute(stmt, [message.guild.id]);
 
-			if(rows[0].logChannel) channelName = rows[0].logChannel;
-			if(!channelName) channelName = channel;
+			if(!channelName) {
+				switch(option) {
+				case 'channels': case 'commands': case 'invites': case 'roles': case 'server':
+					channelName = rows[0].serverLogs;
+					break;
+				case 'members':
+					channelName = rows[0].userLogs;
+					break;
+				case 'messages': case 'voicechannels':
+					channelName = rows[0].activityLogs;
+					break;
+				}
+				if(!channelName) channelName = channel;
+			}
 
 			const logChannel = message.guild.channels.cache.find(ch => ch.name === channelName);
 			if(!logChannel) {

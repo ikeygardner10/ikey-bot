@@ -60,6 +60,7 @@ module.exports = {
 		console.info(`[ADOPT CMD] Querying database for adoption: ${message.author.id} in guild: ${message.guild.id}`);
 		if(rows.length > 0) {
 			familyIdTwo = rows[0].familyID;
+			console.info(`[ADOPT CMD] Entry found for adoption: ${message.author.id} in guild: ${message.guild.id}`);
 			[rows] = await SQLpool.query('SELECT * FROM `marriages` WHERE (`userID`=? OR `partnerID`=?) AND `familyID`=? AND `guildID`=?;', [member.id, member.id, familyIdTwo, message.guild.id]);
 			console.info(`[ADOPT CMD] Querying database for marriage: ${member.id} & ${familyIdTwo} in guild: ${message.guild.id}`);
 			if(rows.length > 0) {
@@ -72,6 +73,7 @@ module.exports = {
 		console.info(`[ADOPT CMD] Querying database for marriage: ${member.id} in guild: ${message.guild.id}`);
 		if(rows.length > 0) {
 			let partner = rows[0].userID === member.id ? rows[0].userID : rows[0].partnerID;
+			console.info(`[ADOPT CMD] Entry found for marriage: ${member.id} in guild: ${message.guild.id}`);
 			[rows] = await SQLpool.query('SELECT * FROM `adoptions` WHERE `childID`=? AND `familyID`=? AND `guildID`=?;', [partner, familyIdOne, message.guild.id]);
 			console.info(`[ADOPT CMD] Querying database for adoption: ${partner} & ${familyIdOne} in guild: ${message.guild.id}`);
 			if(rows.length > 0) {
@@ -103,29 +105,24 @@ module.exports = {
 						return SQLpool.execute('INSERT INTO `adoptions` (`childID`, `parentID`, `familyID`, `guildID`, `createdAt`) VALUES (?, ?, ?, ?, ?);', [member.id, message.author.id, familyIdOne, message.guild.id, createdAt])
 							.then(() => {
 								console.success(`[ADOPT CMD] ${member.id} accepted the adoption for familyID: ${familyIdOne}`);
-								msg.lineReply(`Congratulations to ${member}!\n**<@${userID}> & <@${partnerID}> welcome you to the family 👪**`);
-								return cache.del(member.id);
+								return msg.lineReply(`Congratulations to ${member}!\n**<@${userID}> & <@${partnerID}> welcome you to the family 👪**`).then(() => cache.del(member.id));
 							})
 							.catch((error) => {
 								console.error(`[ADOPT CMD] ${error.stack}`);
-								msg.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``);
-								return cache.del(member.id);
+								return msg.lineReply(`\`An error occured:\`\n\`\`\`${error}\`\`\``).then(() => cache.del(member.id));
 							});
 					}
 					else if(no.includes(collected.first().content.toLowerCase())) {
 						console.info(`[ADOPT CMD] ${member.id} declined the adoption`);
-						msg.lineReply(`${member} declined the adoption! :broken_heart:`);
-						return cache.del(member.id);
+						return msg.lineReply(`${member} declined the adoption! :broken_heart:`).then(() => cache.del(member.id));
 					}
 					else if(cancel.includes(collected.first().content.toLowerCase())) {
 						console.info(`[ADOPT CMD] ${message.author.id} cancelled the adoption`);
-						msg.lineReply(`${message.author} cancelled the adoption! :broken_heart:`);
-						return cache.del(member.id);
+						return msg.lineReply(`${message.author} cancelled the adoption! :broken_heart:`).then(() => cache.del(member.id));
 					}
 				}).catch((timeout) => {
 					console.info(`[ADOPT CMD] Timed out for user: ${message.author.id} in guild: ${message.guild.id}`);
-					msg.lineReply(`${message.author}, no response! :sob:`);
-					return cache.del(member.id);
+					return msg.lineReply(`${message.author}, no response! :sob:`).then(() => cache.del(member.id));
 				});
 		});
 

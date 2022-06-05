@@ -1,5 +1,7 @@
 module.exports = async (client, guild) => {
 
+	if(guild.name === undefined) return;
+
 	const updateGuild = 'UPDATE `guilds` SET `joined`=0 WHERE `guildID`= ?;';
 	const updateLogSettings = 'UPDATE `logsettings` SET `channels`=0, `commands`=0, `invites`=0, `members`=0, `messages`=0, `roles`=0, `server`=0, `voicechannels`=0 WHERE `guildID`=?;';
 
@@ -20,7 +22,7 @@ module.exports = async (client, guild) => {
 		});
 
 	try {
-		return client.channels.cache.get('780252080689774593').send(`[GUILD DELETE] ${guild.name} (${guild.id}) owned by ${guild.owner.user.tag} (${guild.owner.user.id}).`);
+		return client.channels.cache.get('780252080689774593').send(`[GUILD DELETE] ${guild.name} (${guild.id}) owned by ${guild.owner.user.tag || ''} (${guild.owner.user.id || ''}).`);
 	}
 	catch(error) {
 		return console.error(`[GUILD DELETE] ${error.stack}`);

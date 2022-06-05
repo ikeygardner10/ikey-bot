@@ -8,7 +8,7 @@ module.exports = {
 	config: {
 		name: 'mute',
 		aliases: ['m', 'stfu'],
-		usage: '<@user> <time h/m/s> <reason (optional)>/list',
+		usage: '<@user> <24d/24h/24m/24s (24 days max, no space)> <reason (optional)> / $mute list',
 		cooldown: 5,
 		category: 'admin',
 		permissions: 'Mute Members',
@@ -71,6 +71,8 @@ module.exports = {
 		// If no mutetime specified, return
 		if(!mutetime) return message.lineReply('`Invalid (NO MUTE TIME)`');
 		if(typeof ms(mutetime) !== 'number') return message.lineReply('`Invalid (NOT A VALID TIME)`');
+		if(ms(mutetime) > 2147483647) return message.lineReply('`Invalid (24 DAYS MAXIMUM TIME)`');
+		if(ms(mutetime) < 1000) return message.lineReply('`Invalid (1 SECOND MINIMUM TIME)`');
 
 		// Create basic embed
 		const mEmbed = new MessageEmbed()

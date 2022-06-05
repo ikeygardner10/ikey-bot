@@ -30,12 +30,25 @@ module.exports = async (client, oldMember, newMember) => {
 
 	if(difference.length === 0) return;
 
+	const fetchedLogs = await oldMember.guild.fetchAuditLogs({
+		limit: 1,
+		type: 'GUILD_MEMBER_UPDATE',
+	});
+	const firstLog = fetchedLogs.entries.first();
+	const { executor, target } = firstLog;
+
 	const embed = new MessageEmbed()
 		.setAuthor(`${author}`, newMember.user.avatarURL())
-		.setDescription(`**User:** ${newMember.user}\n**Role:** ${difference}`)
 		.setFooter(`ID: ${newMember.user.id}`)
 		.setTimestamp()
 		.setColor(0xFFFFFA);
+
+	if(oldMember.id === target.id) {
+		embed.setDescription(`**User:** ${newMember.user}\n**Role:** ${difference}\n**Changed By:** ${executor}`);
+	}
+	else {
+		embed.setDescription(`**User:** ${newMember.user}\n**Role:** ${difference}`);
+	}
 
 	let logChannel = await newMember.guild.channels.cache.find(ch => ch.name === channel);
 	if(!logChannel) {

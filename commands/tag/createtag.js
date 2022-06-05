@@ -23,8 +23,8 @@ module.exports = {
 		if(tag.length > 30) return message.lineReply('`Invalid (MAX. 30 CHAR TAG NAME)`');
 		if(content.length > 1950) return message.lineReply('`Invalid (MAX. 1950 CHAR CONTENT)`');
 
-		const ntn = txtFormatter(tag);
-		const ntc = txtFormatter(content);
+		const ntn = await txtFormatter(tag);
+		const ntc = await txtFormatter(content);
 		let fileName;
 		const filePath = 'D:/images/tags/';
 		let URI;

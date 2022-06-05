@@ -56,7 +56,7 @@ module.exports = async (client, member) => {
 	const embed = new MessageEmbed()
 		.setAuthor('Member Join', member.guild.iconURL())
 		.setThumbnail(member.user.avatarURL())
-		.setDescription(`**Username:** ${member.user.tag}\n**Acc Age:** ${ms(accAge, { long: true })}\n\n**Invite:** \`discord.gg/${invite[0].code}\`\n**By:** ${inviter.tag}`)
+		.setDescription(`**Username:** ${member.user.tag} (ID: ${member.user.id})\n**Acc Age:** ${ms(accAge, { long: true })}\n\n**Invite:** \`discord.gg/${invite[0].code}\`\n**By:** ${inviter.tag}`)
 		.setFooter(`ID: ${member.user.id}`)
 		.setTimestamp()
 		.setColor(0xFFFFFA);

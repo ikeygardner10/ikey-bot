@@ -95,6 +95,8 @@ module.exports = {
 			const data = await response.json();
 			const bannerID = data.banner;
 
+			console.warn(JSON.stringify(data));
+
 			if(bannerID !== null) {
 
 				url = `https://cdn.discordapp.com/banners/${member.user.id}/${bannerID}.gif`;

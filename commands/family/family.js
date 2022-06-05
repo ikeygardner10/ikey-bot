@@ -20,6 +20,8 @@ module.exports = {
 	},
 	execute: async (client, message, args) => {
 
+		let time = 0;
+
 		const member = await getMember(message, args);
 
 		const SQLpool = client.conPool.promise();
@@ -49,7 +51,7 @@ module.exports = {
 				name = name.displayName;
 			}
 			catch {
-				name = `<@${id}>`;
+				name = 'left server';
 			}
 			return name;
 		};
@@ -65,6 +67,7 @@ module.exports = {
 			if(member.id === partnerID) partnerID = marriedRow[0].partnerID;
 			formattedDate = await dateCleaner(marriedRow[0].createdAt.toString());
 			displayNameOne = await grabMember(partnerID);
+			time = time + 1;
 			descOne += `**:couple: Partner:** ${displayNameOne}\n**:calendar: Married:** ${formattedDate}\n`;
 
 			// Check for adoptions, format date, grab member, append descOne
@@ -72,10 +75,14 @@ module.exports = {
 			const [childrenRows] = await SQLpool.query(stmt, [nuclearFamilyID, message.guild.id]);
 			console.info(`[FAMILY CMD] Querying database for adoptions: ${nuclearFamilyID} in guild: ${message.guild.id}`);
 			if(childrenRows[0]) {
+				time = time + childrenRows.length;
 				await childrenRows.forEach(async row => {
+					stmt = 'SELECT * FROM `marriages` WHERE (`userID`=? OR `partnerID`=?) AND `guildID`=?;';
+					const [childPartnerRows] = await SQLpool.query(stmt, [row.childID, row.childID, message.guild.id]);
 					formattedDate = await dateCleaner(row.createdAt.toString());
 					displayNameOne = await grabMember(row.childID);
-					descOne += `\n**:child: Child:** ${displayNameOne}\n**:calendar: Adopted:** ${formattedDate}`;
+					if(displayNameOne === 'left server') return;
+					descOne += `\n**:child: Child:** ${displayNameOne}\n${childPartnerRows[0] ? `**:couple: Partner:** ${childPartnerRows[0].userID === row.childID ? await grabMember(childPartnerRows[0].partnerID) : await grabMember(childPartnerRows[0].userID)}\n` : ''}**:calendar: Adopted:** ${formattedDate}`;
 				});
 			}
 			else {
@@ -100,12 +107,14 @@ module.exports = {
 				parentTwoID = parentsRow[0].partnerID;
 				displayNameOne = await grabMember(parentOneID);
 				displayNameTwo = await grabMember(parentTwoID);
+				time = time + 1;
 				descOne += `\n\n**:people_holding_hands: Parents:** ${displayNameOne} & ${displayNameTwo}\n`;
 
 				stmt = 'SELECT `childID` FROM `adoptions` WHERE `familyID`=? AND `guildID`=?;';
 				const [siblingRows] = await SQLpool.query(stmt, [closeFamilyID, message.guild.id]);
 				console.info(`[FAMILY CMD] Querying database for adoptions: ${closeFamilyID} in guild: ${message.guild.id}`);
 				if(siblingRows[0]) {
+					time = time + siblingRows.length;
 					await siblingRows.forEach(async row => {
 						if(member.id === row.childID) return;
 						displayNameOne = await grabMember(row.childID);
@@ -136,12 +145,14 @@ module.exports = {
 				if(grandParentsOneRow[0]) {
 					displayNameOne = await grabMember(grandParentsOneRow[0].userID);
 					displayNameTwo = await grabMember(grandParentsOneRow[0].partnerID);
+					time = time + 1;
 					descTwo += `**:older_adult: Grandparents:** ${displayNameOne} & ${displayNameTwo}\n`;
 
 					stmt = 'SELECT `childID` FROM `adoptions` WHERE `familyID`=? AND `guildID`=?;';
 					const [extendFamilyOneRows] = await SQLpool.query(stmt, [parentOneFamilyID, message.guild.id]);
 					console.info(`[FAMILY CMD] Querying database for adoptions: ${parentOneFamilyID} in guild: ${message.guild.id}`);
 					if(extendFamilyOneRows[0]) {
+						time = time + extendFamilyOneRows.length;
 						await extendFamilyOneRows.forEach(async row => {
 							if(parentOneID === row.childID || parentTwoID === row.childID) return;
 							displayNameOne = await grabMember(row.childID);
@@ -172,12 +183,14 @@ module.exports = {
 				if(grandParentsTwoRow[0]) {
 					displayNameOne = await grabMember(grandParentsTwoRow[0].userID);
 					displayNameTwo = await grabMember(grandParentsTwoRow[0].partnerID);
+					time = time + 1;
 					descTwo += `\n\n**:older_adult: Grandparents:** ${displayNameOne} & ${displayNameTwo}\n`;
 
 					stmt = 'SELECT `childID` FROM `adoptions` WHERE `familyID`=? AND `guildID`=?;';
 					const [extendFamilyTwoRows] = await SQLpool.query(stmt, [parentTwoFamilyID, message.guild.id]);
 					console.info(`[FAMILY CMD] Querying database for adoptions: ${parentTwoFamilyID} in guild: ${message.guild.id}`);
 					if(extendFamilyTwoRows[0]) {
+						time = time + extendFamilyTwoRows.length;
 						await extendFamilyTwoRows.forEach(async row => {
 							if(parentOneID === row.childID || parentTwoID === row.childID) return;
 							displayNameOne = await grabMember(row.childID);
@@ -210,12 +223,14 @@ module.exports = {
 				if(partnerParentsRow[0]) {
 					displayNameOne = await grabMember(partnerParentsRow[0].userID);
 					displayNameTwo = await grabMember(partnerParentsRow[0].partnerID);
+					time = time + 1;
 					descThree += `**:people_holding_hands: Parents In-Law:** ${displayNameOne} & ${displayNameTwo}\n`;
 
 					stmt = 'SELECT `childID` FROM `adoptions` WHERE `familyID`=? AND `guildID`=?;';
 					const [partnerSiblingsRows] = await SQLpool.query(stmt, [inLawFamilyID, message.guild.id]);
 					console.info(`[FAMILY CMD] Querying database for adoptions: ${inLawFamilyID} in guild: ${message.guild.id}`);
 					if(partnerSiblingsRows[0]) {
+						time = time + partnerSiblingsRows.length;
 						await partnerSiblingsRows.forEach(async row => {
 							if(row.childID === partnerID) return;
 							displayNameOne = await grabMember(row.childID);
@@ -254,9 +269,10 @@ module.exports = {
 
 		let pageCount = 0;
 		let pages = [];
+		time = time / 4;
 
 		await message.channel.send('`Building family tree...`').then(async msg => {
-			await wait(3000);
+			await wait(time * 1000);
 
 			pageCount++;
 			pageOne.setDescription(descOne);
