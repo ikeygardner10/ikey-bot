@@ -25,7 +25,7 @@
   },
   "homepage": "https://github.com/ikeygardner10/ikey-bot#readme",
   "dependencies": {
-    "@discordjs/opus": "^0.6.0",
+    "@discordjs/opus": "^0.8.0",
     "@keyv/sqlite": "^2.0.2",
     "@vitalets/google-translate-api": "^7.0.0",
     "axios": "^0.21.1",
